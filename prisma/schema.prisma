@@ -1,0 +1,153 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client"
+  output = "../prisma/generated"
+}
+
+datasource db {
+  provider = "postgres"
+}
+
+// -------------------- ENUMS --------------------
+
+enum TaskTier {
+  S // Critical (Project, Exam Prep) - High XP
+  A // Important (Coding, DSA)
+  B // Maintenance (Assignment, Class)
+  C // Chores (Laundry, Email)
+}
+
+enum Category {
+  DEV
+  ACADEMICS
+  HEALTH
+  LIFE
+}
+
+// -------------------- MODELS --------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  
+  // --- Gamification Stats ---
+  xp           Int       @default(0)
+  level        Int       @default(1)
+  coins        Int       @default(0)   // Currency to buy "cheats"
+  honestyScore Int       @default(100) // 0 to 100 anti-cheat metric
+  
+  // --- Streak Logic ---
+  streakDays   Int       @default(0)
+  multiplier   Float     @default(1.0)
+  lastTaskDate DateTime?
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  tasks        Task[]
+  dayLogs      DayLog[]
+  inventory    InventoryItem[] 
+  accounts     Account[]
+  sessions     Session[]
+}
+
+model Task {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title        String
+  description  String?
+  
+  // Difficulty & Type
+  tier         TaskTier @default(C)
+  category     Category @default(LIFE)
+  
+  // Time Management
+  plannedDate      DateTime 
+  plannedStartTime DateTime? 
+  plannedEndTime   DateTime?
+  
+  // Completion Status
+  isCompleted      Boolean   @default(false)
+  completedAt      DateTime?
+  
+  // Rewards Calculation (Stored to prevent changing history)
+  basePoints       Int       @default(10) 
+  timeBonus        Int       @default(0)  
+  finalPoints      Int       @default(0)  
+  
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model DayLog {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  date         DateTime @db.Date // Stores just the date YYYY-MM-DD
+  
+  totalXP      Int      @default(0)
+  tasksDone    Int      @default(0)
+  
+  // Anti-Cheat Metrics (Diminishing returns counters)
+  cTierCount   Int      @default(0) 
+  sTierCount   Int      @default(0)
+  
+  streakAtEnd  Int      @default(0)
+
+  @@unique([userId, date])
+}
+
+model InventoryItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  itemName  String   // e.g., "Streak Freeze"
+  quantity  Int      @default(1)
+  
+  updatedAt DateTime @updatedAt
+}
+
+// --- NextAuth Models (Required for Login) ---
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? 
+  access_token       String? 
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? 
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
