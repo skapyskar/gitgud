@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { tierBaseXP } from "@/lib/gamification"; // ✅ ADD THIS IMPORT
+import { tierBaseXP } from "@/lib/gamification";
 
 export async function createTask(formData: FormData) {
   try {
@@ -23,6 +23,15 @@ export async function createTask(formData: FormData) {
       throw new Error("Title and planned date are required");
     }
 
+    // ✅ ADD LENGTH VALIDATION
+    if (title.trim().length > 100) {
+      throw new Error("Task title must be 100 characters or less");
+    }
+
+    if (title.trim().length < 3) {
+      throw new Error("Task title must be at least 3 characters");
+    }
+
     const plannedDate = new Date(plannedDateStr);
 
     // Validate date
@@ -38,7 +47,6 @@ export async function createTask(formData: FormData) {
       throw new Error("User not found");
     }
 
-    // ✅ USE GAMIFICATION FUNCTION instead of inline map
     const basePoints = tierBaseXP(tier);
 
     await prisma.task.create({
@@ -52,7 +60,6 @@ export async function createTask(formData: FormData) {
       },
     });
 
-    // Revalidate the dashboard to show new task
     revalidatePath("/dashboard");
 
     return { success: true };
