@@ -35,7 +35,7 @@ export default async function DashboardPage() {
       where: { 
         userId: user.id, 
         provider: "github" 
-      }
+      },
     });
     const isGitHubLinked = !!githubAccount;
 

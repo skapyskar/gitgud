@@ -43,7 +43,7 @@ export default function AuthGate() {
           <button
             onClick={() => handleLogin("google")}
             disabled={!!isLoading}
-            className="w-full group relative px-6 py-3 bg-white text-black font-bold uppercase tracking-widest hover:bg-gray-200 transition-all duration-300"
+            className="w-full group relative px-6 py-3 bg-white text-black font-bold uppercase tracking-widest hover:bg-gray-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
              <div className="flex items-center justify-center gap-3">
                {/* Simple Google 'G' Icon */}
@@ -61,7 +61,7 @@ export default function AuthGate() {
           <button
             onClick={() => handleLogin("github")}
             disabled={!!isLoading}
-            className="w-full group relative px-6 py-3 bg-green-900/20 border border-green-600 text-green-400 font-bold uppercase tracking-widest hover:bg-green-500 hover:text-black transition-all duration-300"
+            className="w-full group relative px-6 py-3 bg-green-900/20 border border-green-600 text-green-400 font-bold uppercase tracking-widest hover:bg-green-500 hover:text-black transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
              <div className="flex items-center justify-center gap-3">
                <span>github.exe</span>
@@ -75,7 +75,8 @@ export default function AuthGate() {
           <p className="text-[10px] text-gray-500 mb-2">WRONG_CREDENTIALS?</p>
           <button
             onClick={() => handleLogin("google", true)}
-            className="text-xs text-red-400 hover:text-red-500 hover:underline uppercase tracking-widest"
+            disabled={!!isLoading}
+            className="text-xs text-red-400 hover:text-red-500 hover:underline uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
           >
             [ Force_Switch_Google_Account ]
           </button>
