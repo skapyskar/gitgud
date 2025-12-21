@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { tierBaseXP } from "@/lib/gamification"; // ✅ ADD THIS IMPORT
 
 export async function createTask(formData: FormData) {
   try {
@@ -13,7 +14,7 @@ export async function createTask(formData: FormData) {
     }
 
     const title = formData.get("title") as string;
-    const tier = (formData.get("tier") as "S" | "A" | "B" | "C") || "C";
+    const tier = (formData.get("tier") as any) || "C";
     const category = (formData.get("category") as any) || "DEV";
     const plannedDateStr = formData.get("plannedDate") as string;
 
@@ -37,13 +38,8 @@ export async function createTask(formData: FormData) {
       throw new Error("User not found");
     }
 
-    // Calculate base points based on tier
-    const basePoints = {
-      S: 50,
-      A: 30,
-      B: 20,
-      C: 10,
-    }[tier] || 10;
+    // ✅ USE GAMIFICATION FUNCTION instead of inline map
+    const basePoints = tierBaseXP(tier);
 
     await prisma.task.create({
       data: {

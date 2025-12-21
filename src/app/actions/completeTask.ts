@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { tierBaseXP, diminishingReturns, streakMultiplier } from "@/lib/gamification";
+import { calculateFinalXP } from "@/lib/gamification"; // ✅ USE THE HELPER FUNCTION
 
 export async function completeTask(taskId: string) {
   try {
@@ -52,14 +52,13 @@ export async function completeTask(taskId: string) {
       },
     });
 
+    // Get tier count for diminishing returns calculation
     const tierCount =
       task.tier === "C" ? dayLog.cTierCount :
       task.tier === "S" ? dayLog.sTierCount : 0;
 
-    const baseXP = tierBaseXP(task.tier);
-    const diminished = baseXP * diminishingReturns(task.tier, tierCount);
-    const streakMul = streakMultiplier(user.streakDays);
-    const finalXP = Math.round(diminished * streakMul);
+    // ✅ USE THE UNIFIED CALCULATION FUNCTION
+    const finalXP = calculateFinalXP(task.tier, tierCount, user.streakDays);
 
     // Calculate new streak
     const lastTaskDate = user.lastTaskDate ? new Date(user.lastTaskDate) : null;
@@ -89,7 +88,6 @@ export async function completeTask(taskId: string) {
         data: {
           isCompleted: true,
           completedAt: new Date(),
-          basePoints: baseXP,
           finalPoints: finalXP,
         },
       }),
