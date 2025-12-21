@@ -1,26 +1,88 @@
 @import "tailwindcss";
 
+/* 1. THEME CONFIGURATION (Tailwind v4 Style) */
+/* stylelint-disable-next-line at-rule-no-unknown */
+/* @theme is a Tailwind CSS v4 at-rule */
+/* stylelint-disable-next-line at-rule-no-unknown */
+@theme {
+  /* This makes 'font-mono' use these fonts automatically */
+  --font-mono: "Courier Prime", "Courier New", Courier, monospace;
+
+  /* Custom Colors - usage: text-neon-green, bg-panel-bg */
+  --color-neon-green: #00ff41;
+  --color-neon-purple: #b026ff;
+  --color-bg-dark: #050505;
+  --color-panel-bg: #111111;
+  
+  /* Custom Animations */
+  --animate-glitch: glitch 1s linear infinite;
+}
+
+/* 2. BASE STYLES */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: var(--color-bg-dark);
+  --foreground: #e0e0e0;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-mono);
+  overflow-x: hidden; /* Prevent horizontal scroll from effects */
+  min-height: 100vh;
+}
+
+/* 3. CYBERPUNK VISUAL EFFECTS */
+
+/* The Scanline Overlay */
+body::before {
+  content: " ";
+  display: block;
+  position: fixed; /* Fixed ensures it stays when scrolling */
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: 
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  z-index: 50; /* Top layer */
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none; /* Click through it */
+}
+
+/* Hacker Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #000;
+  border-left: 1px solid #111;
+}
+::-webkit-scrollbar-thumb {
+  background: #111;
+  border: 1px solid var(--color-neon-green);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neon-green);
+  box-shadow: 0 0 10px var(--color-neon-green);
+}
+
+/* 4. UTILITY CLASSES */
+
+/* Text Glitch Effect */
+@layer utilities {
+  .glitch-text {
+    position: relative;
+    text-shadow: 2px 0 #b026ff, -2px 0 #00ff41;
+    animation: text-flicker 3s infinite alternate;
+  }
+}
+
+/* Animation Keyframes */
+@keyframes text-flicker {
+  0% { opacity: 1; text-shadow: 2px 0 #b026ff, -2px 0 #00ff41; }
+  5% { opacity: 0.8; text-shadow: 3px 0 #b026ff, -3px 0 #00ff41; }
+  10% { opacity: 1; text-shadow: 2px 0 #b026ff, -2px 0 #00ff41; }
+  100% { opacity: 1; text-shadow: 2px 0 #b026ff, -2px 0 #00ff41; }
 }

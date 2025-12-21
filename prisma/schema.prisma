@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgres"
+  provider = "postgresql"
 }
 
 // -------------------- ENUMS --------------------
@@ -30,15 +30,15 @@ enum Category {
 model User {
   id            String    @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String    @unique
   emailVerified DateTime?
   image         String?
   
   // --- Gamification Stats ---
   xp           Int       @default(0)
   level        Int       @default(1)
-  coins        Int       @default(0)   // Currency to buy "cheats"
-  honestyScore Int       @default(100) // 0 to 100 anti-cheat metric
+  coins        Int       @default(0)
+  honestyScore Int       @default(100)
   
   // --- Streak Logic ---
   streakDays   Int       @default(0)
@@ -48,11 +48,14 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
+  // Relations
   tasks        Task[]
   dayLogs      DayLog[]
-  inventory    InventoryItem[] 
+  inventory    InventoryItem[]
   accounts     Account[]
   sessions     Session[]
+
+  @@index([email])
 }
 
 model Task {
@@ -68,21 +71,24 @@ model Task {
   category     Category @default(LIFE)
   
   // Time Management
-  plannedDate      DateTime 
-  plannedStartTime DateTime? 
+  plannedDate      DateTime
+  plannedStartTime DateTime?
   plannedEndTime   DateTime?
   
   // Completion Status
   isCompleted      Boolean   @default(false)
   completedAt      DateTime?
   
-  // Rewards Calculation (Stored to prevent changing history)
-  basePoints       Int       @default(10) 
-  timeBonus        Int       @default(0)  
-  finalPoints      Int       @default(0)  
+  // Rewards Calculation
+  basePoints       Int       @default(10)
+  timeBonus        Int       @default(0)
+  finalPoints      Int       @default(0)
   
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+
+  @@index([userId, isCompleted])
+  @@index([plannedDate])
 }
 
 model DayLog {
@@ -90,18 +96,19 @@ model DayLog {
   userId       String
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  date         DateTime @db.Date // Stores just the date YYYY-MM-DD
+  date         DateTime @db.Date
   
   totalXP      Int      @default(0)
   tasksDone    Int      @default(0)
   
-  // Anti-Cheat Metrics (Diminishing returns counters)
-  cTierCount   Int      @default(0) 
+  // Anti-Cheat Metrics
+  cTierCount   Int      @default(0)
   sTierCount   Int      @default(0)
   
   streakAtEnd  Int      @default(0)
 
   @@unique([userId, date])
+  @@index([userId, date])
 }
 
 model InventoryItem {
@@ -109,13 +116,15 @@ model InventoryItem {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  itemName  String   // e.g., "Streak Freeze"
+  itemName  String
   quantity  Int      @default(1)
   
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
-// --- NextAuth Models (Required for Login) ---
+// --- NextAuth Models (Required) ---
 
 model Account {
   id                 String  @id @default(cuid())
@@ -123,17 +132,18 @@ model Account {
   type               String
   provider           String
   providerAccountId  String
-  refresh_token      String? 
-  access_token       String? 
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
   expires_at         Int?
   token_type         String?
   scope              String?
-  id_token           String? 
+  id_token           String? @db.Text
   session_state      String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -142,6 +152,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model VerificationToken {
