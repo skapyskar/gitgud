@@ -16,6 +16,8 @@
   
   /* Custom Animations */
   --animate-glitch: glitch 1s linear infinite;
+  --animate-scan: scan 8s linear infinite;
+  --animate-loading: loading 2s ease-in-out infinite;
 }
 
 /* 2. BASE STYLES */
@@ -77,6 +79,14 @@ body::before {
     text-shadow: 2px 0 #b026ff, -2px 0 #00ff41;
     animation: text-flicker 3s infinite alternate;
   }
+
+  .animate-scan {
+    animation: scan 8s linear infinite;
+  }
+
+  .animate-loading {
+    animation: loading 2s ease-in-out infinite;
+  }
 }
 
 /* Animation Keyframes */
@@ -85,4 +95,15 @@ body::before {
   5% { opacity: 0.8; text-shadow: 3px 0 #b026ff, -3px 0 #00ff41; }
   10% { opacity: 1; text-shadow: 2px 0 #b026ff, -2px 0 #00ff41; }
   100% { opacity: 1; text-shadow: 2px 0 #b026ff, -2px 0 #00ff41; }
+}
+
+@keyframes scan {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes loading {
+  0% { width: 0%; }
+  50% { width: 100%; }
+  100% { width: 0%; }
 }

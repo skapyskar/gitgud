@@ -23,13 +23,13 @@ export default function RootLoading() {
         {/* Loading Dots */}
         <div className="flex gap-3 justify-center">
           <div className="w-3 h-3 bg-green-500 rounded-full animate-bounce"></div>
-          <div className="w-3 h-3 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-          <div className="w-3 h-3 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+          <div className="w-3 h-3 bg-green-500 rounded-full animate-bounce [animation-delay:100ms]"></div>
+          <div className="w-3 h-3 bg-green-500 rounded-full animate-bounce [animation-delay:200ms]"></div>
         </div>
 
         {/* Progress Bar */}
         <div className="w-64 h-1 bg-green-900/30 mx-auto overflow-hidden">
-          <div className="h-full bg-green-500 animate-[loading_2s_ease-in-out_infinite] shadow-[0_0_10px_rgba(0,255,0,0.5)]"></div>
+          <div className="h-full bg-green-500 animate-loading shadow-[0_0_10px_rgba(0,255,0,0.5)]"></div>
         </div>
       </div>
 

@@ -61,8 +61,8 @@ export default function DashboardLoading() {
             </div>
             <div className="flex gap-2">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></div>
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce [animation-delay:100ms]"></div>
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce [animation-delay:200ms]"></div>
             </div>
             <p className="text-gray-600 text-xs font-mono mt-4">
               INITIALIZING_PROTOCOLS...
