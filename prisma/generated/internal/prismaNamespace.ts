@@ -992,14 +992,20 @@ export const TaskScalarFieldEnum = {
   userId: 'userId',
   title: 'title',
   description: 'description',
+  type: 'type',
   tier: 'tier',
   category: 'category',
   plannedDate: 'plannedDate',
   plannedStartTime: 'plannedStartTime',
   plannedEndTime: 'plannedEndTime',
+  deadline: 'deadline',
+  scheduledDate: 'scheduledDate',
+  repeatDays: 'repeatDays',
   isCompleted: 'isCompleted',
   completedAt: 'completedAt',
   basePoints: 'basePoints',
+  xpWorth: 'xpWorth',
+  isBonus: 'isBonus',
   timeBonus: 'timeBonus',
   finalPoints: 'finalPoints',
   createdAt: 'createdAt',
@@ -1154,6 +1160,20 @@ export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
  * Reference to a field of type 'Float[]'
  */
 export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
+ * Reference to a field of type 'TaskType'
+ */
+export type EnumTaskTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TaskType'>
+    
+
+
+/**
+ * Reference to a field of type 'TaskType[]'
+ */
+export type ListEnumTaskTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TaskType[]'>
     
 
 

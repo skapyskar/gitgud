@@ -28,12 +28,14 @@ export type AggregateTask = {
 
 export type TaskAvgAggregateOutputType = {
   basePoints: number | null
+  xpWorth: number | null
   timeBonus: number | null
   finalPoints: number | null
 }
 
 export type TaskSumAggregateOutputType = {
   basePoints: number | null
+  xpWorth: number | null
   timeBonus: number | null
   finalPoints: number | null
 }
@@ -43,14 +45,20 @@ export type TaskMinAggregateOutputType = {
   userId: string | null
   title: string | null
   description: string | null
+  type: $Enums.TaskType | null
   tier: $Enums.TaskTier | null
   category: $Enums.Category | null
   plannedDate: Date | null
   plannedStartTime: Date | null
   plannedEndTime: Date | null
+  deadline: Date | null
+  scheduledDate: Date | null
+  repeatDays: string | null
   isCompleted: boolean | null
   completedAt: Date | null
   basePoints: number | null
+  xpWorth: number | null
+  isBonus: boolean | null
   timeBonus: number | null
   finalPoints: number | null
   createdAt: Date | null
@@ -62,14 +70,20 @@ export type TaskMaxAggregateOutputType = {
   userId: string | null
   title: string | null
   description: string | null
+  type: $Enums.TaskType | null
   tier: $Enums.TaskTier | null
   category: $Enums.Category | null
   plannedDate: Date | null
   plannedStartTime: Date | null
   plannedEndTime: Date | null
+  deadline: Date | null
+  scheduledDate: Date | null
+  repeatDays: string | null
   isCompleted: boolean | null
   completedAt: Date | null
   basePoints: number | null
+  xpWorth: number | null
+  isBonus: boolean | null
   timeBonus: number | null
   finalPoints: number | null
   createdAt: Date | null
@@ -81,14 +95,20 @@ export type TaskCountAggregateOutputType = {
   userId: number
   title: number
   description: number
+  type: number
   tier: number
   category: number
   plannedDate: number
   plannedStartTime: number
   plannedEndTime: number
+  deadline: number
+  scheduledDate: number
+  repeatDays: number
   isCompleted: number
   completedAt: number
   basePoints: number
+  xpWorth: number
+  isBonus: number
   timeBonus: number
   finalPoints: number
   createdAt: number
@@ -99,12 +119,14 @@ export type TaskCountAggregateOutputType = {
 
 export type TaskAvgAggregateInputType = {
   basePoints?: true
+  xpWorth?: true
   timeBonus?: true
   finalPoints?: true
 }
 
 export type TaskSumAggregateInputType = {
   basePoints?: true
+  xpWorth?: true
   timeBonus?: true
   finalPoints?: true
 }
@@ -114,14 +136,20 @@ export type TaskMinAggregateInputType = {
   userId?: true
   title?: true
   description?: true
+  type?: true
   tier?: true
   category?: true
   plannedDate?: true
   plannedStartTime?: true
   plannedEndTime?: true
+  deadline?: true
+  scheduledDate?: true
+  repeatDays?: true
   isCompleted?: true
   completedAt?: true
   basePoints?: true
+  xpWorth?: true
+  isBonus?: true
   timeBonus?: true
   finalPoints?: true
   createdAt?: true
@@ -133,14 +161,20 @@ export type TaskMaxAggregateInputType = {
   userId?: true
   title?: true
   description?: true
+  type?: true
   tier?: true
   category?: true
   plannedDate?: true
   plannedStartTime?: true
   plannedEndTime?: true
+  deadline?: true
+  scheduledDate?: true
+  repeatDays?: true
   isCompleted?: true
   completedAt?: true
   basePoints?: true
+  xpWorth?: true
+  isBonus?: true
   timeBonus?: true
   finalPoints?: true
   createdAt?: true
@@ -152,14 +186,20 @@ export type TaskCountAggregateInputType = {
   userId?: true
   title?: true
   description?: true
+  type?: true
   tier?: true
   category?: true
   plannedDate?: true
   plannedStartTime?: true
   plannedEndTime?: true
+  deadline?: true
+  scheduledDate?: true
+  repeatDays?: true
   isCompleted?: true
   completedAt?: true
   basePoints?: true
+  xpWorth?: true
+  isBonus?: true
   timeBonus?: true
   finalPoints?: true
   createdAt?: true
@@ -258,14 +298,20 @@ export type TaskGroupByOutputType = {
   userId: string
   title: string
   description: string | null
+  type: $Enums.TaskType
   tier: $Enums.TaskTier
   category: $Enums.Category
   plannedDate: Date
   plannedStartTime: Date | null
   plannedEndTime: Date | null
+  deadline: Date | null
+  scheduledDate: Date | null
+  repeatDays: string | null
   isCompleted: boolean
   completedAt: Date | null
   basePoints: number
+  xpWorth: number
+  isBonus: boolean
   timeBonus: number
   finalPoints: number
   createdAt: Date
@@ -300,14 +346,20 @@ export type TaskWhereInput = {
   userId?: Prisma.StringFilter<"Task"> | string
   title?: Prisma.StringFilter<"Task"> | string
   description?: Prisma.StringNullableFilter<"Task"> | string | null
+  type?: Prisma.EnumTaskTypeFilter<"Task"> | $Enums.TaskType
   tier?: Prisma.EnumTaskTierFilter<"Task"> | $Enums.TaskTier
   category?: Prisma.EnumCategoryFilter<"Task"> | $Enums.Category
   plannedDate?: Prisma.DateTimeFilter<"Task"> | Date | string
   plannedStartTime?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   plannedEndTime?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  deadline?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  scheduledDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  repeatDays?: Prisma.StringNullableFilter<"Task"> | string | null
   isCompleted?: Prisma.BoolFilter<"Task"> | boolean
   completedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   basePoints?: Prisma.IntFilter<"Task"> | number
+  xpWorth?: Prisma.IntFilter<"Task"> | number
+  isBonus?: Prisma.BoolFilter<"Task"> | boolean
   timeBonus?: Prisma.IntFilter<"Task"> | number
   finalPoints?: Prisma.IntFilter<"Task"> | number
   createdAt?: Prisma.DateTimeFilter<"Task"> | Date | string
@@ -320,14 +372,20 @@ export type TaskOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  type?: Prisma.SortOrder
   tier?: Prisma.SortOrder
   category?: Prisma.SortOrder
   plannedDate?: Prisma.SortOrder
   plannedStartTime?: Prisma.SortOrderInput | Prisma.SortOrder
   plannedEndTime?: Prisma.SortOrderInput | Prisma.SortOrder
+  deadline?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduledDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  repeatDays?: Prisma.SortOrderInput | Prisma.SortOrder
   isCompleted?: Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   basePoints?: Prisma.SortOrder
+  xpWorth?: Prisma.SortOrder
+  isBonus?: Prisma.SortOrder
   timeBonus?: Prisma.SortOrder
   finalPoints?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -343,14 +401,20 @@ export type TaskWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.StringFilter<"Task"> | string
   title?: Prisma.StringFilter<"Task"> | string
   description?: Prisma.StringNullableFilter<"Task"> | string | null
+  type?: Prisma.EnumTaskTypeFilter<"Task"> | $Enums.TaskType
   tier?: Prisma.EnumTaskTierFilter<"Task"> | $Enums.TaskTier
   category?: Prisma.EnumCategoryFilter<"Task"> | $Enums.Category
   plannedDate?: Prisma.DateTimeFilter<"Task"> | Date | string
   plannedStartTime?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   plannedEndTime?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  deadline?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  scheduledDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  repeatDays?: Prisma.StringNullableFilter<"Task"> | string | null
   isCompleted?: Prisma.BoolFilter<"Task"> | boolean
   completedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   basePoints?: Prisma.IntFilter<"Task"> | number
+  xpWorth?: Prisma.IntFilter<"Task"> | number
+  isBonus?: Prisma.BoolFilter<"Task"> | boolean
   timeBonus?: Prisma.IntFilter<"Task"> | number
   finalPoints?: Prisma.IntFilter<"Task"> | number
   createdAt?: Prisma.DateTimeFilter<"Task"> | Date | string
@@ -363,14 +427,20 @@ export type TaskOrderByWithAggregationInput = {
   userId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  type?: Prisma.SortOrder
   tier?: Prisma.SortOrder
   category?: Prisma.SortOrder
   plannedDate?: Prisma.SortOrder
   plannedStartTime?: Prisma.SortOrderInput | Prisma.SortOrder
   plannedEndTime?: Prisma.SortOrderInput | Prisma.SortOrder
+  deadline?: Prisma.SortOrderInput | Prisma.SortOrder
+  scheduledDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  repeatDays?: Prisma.SortOrderInput | Prisma.SortOrder
   isCompleted?: Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   basePoints?: Prisma.SortOrder
+  xpWorth?: Prisma.SortOrder
+  isBonus?: Prisma.SortOrder
   timeBonus?: Prisma.SortOrder
   finalPoints?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -390,14 +460,20 @@ export type TaskScalarWhereWithAggregatesInput = {
   userId?: Prisma.StringWithAggregatesFilter<"Task"> | string
   title?: Prisma.StringWithAggregatesFilter<"Task"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
+  type?: Prisma.EnumTaskTypeWithAggregatesFilter<"Task"> | $Enums.TaskType
   tier?: Prisma.EnumTaskTierWithAggregatesFilter<"Task"> | $Enums.TaskTier
   category?: Prisma.EnumCategoryWithAggregatesFilter<"Task"> | $Enums.Category
   plannedDate?: Prisma.DateTimeWithAggregatesFilter<"Task"> | Date | string
   plannedStartTime?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
   plannedEndTime?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
+  deadline?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
+  scheduledDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
+  repeatDays?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
   isCompleted?: Prisma.BoolWithAggregatesFilter<"Task"> | boolean
   completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
   basePoints?: Prisma.IntWithAggregatesFilter<"Task"> | number
+  xpWorth?: Prisma.IntWithAggregatesFilter<"Task"> | number
+  isBonus?: Prisma.BoolWithAggregatesFilter<"Task"> | boolean
   timeBonus?: Prisma.IntWithAggregatesFilter<"Task"> | number
   finalPoints?: Prisma.IntWithAggregatesFilter<"Task"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Task"> | Date | string
@@ -408,14 +484,20 @@ export type TaskCreateInput = {
   id?: string
   title: string
   description?: string | null
+  type?: $Enums.TaskType
   tier?: $Enums.TaskTier
   category?: $Enums.Category
   plannedDate: Date | string
   plannedStartTime?: Date | string | null
   plannedEndTime?: Date | string | null
+  deadline?: Date | string | null
+  scheduledDate?: Date | string | null
+  repeatDays?: string | null
   isCompleted?: boolean
   completedAt?: Date | string | null
   basePoints?: number
+  xpWorth?: number
+  isBonus?: boolean
   timeBonus?: number
   finalPoints?: number
   createdAt?: Date | string
@@ -428,14 +510,20 @@ export type TaskUncheckedCreateInput = {
   userId: string
   title: string
   description?: string | null
+  type?: $Enums.TaskType
   tier?: $Enums.TaskTier
   category?: $Enums.Category
   plannedDate: Date | string
   plannedStartTime?: Date | string | null
   plannedEndTime?: Date | string | null
+  deadline?: Date | string | null
+  scheduledDate?: Date | string | null
+  repeatDays?: string | null
   isCompleted?: boolean
   completedAt?: Date | string | null
   basePoints?: number
+  xpWorth?: number
+  isBonus?: boolean
   timeBonus?: number
   finalPoints?: number
   createdAt?: Date | string
@@ -446,14 +534,20 @@ export type TaskUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumTaskTypeFieldUpdateOperationsInput | $Enums.TaskType
   tier?: Prisma.EnumTaskTierFieldUpdateOperationsInput | $Enums.TaskTier
   category?: Prisma.EnumCategoryFieldUpdateOperationsInput | $Enums.Category
   plannedDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   plannedStartTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   plannedEndTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  repeatDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   basePoints?: Prisma.IntFieldUpdateOperationsInput | number
+  xpWorth?: Prisma.IntFieldUpdateOperationsInput | number
+  isBonus?: Prisma.BoolFieldUpdateOperationsInput | boolean
   timeBonus?: Prisma.IntFieldUpdateOperationsInput | number
   finalPoints?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -466,14 +560,20 @@ export type TaskUncheckedUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumTaskTypeFieldUpdateOperationsInput | $Enums.TaskType
   tier?: Prisma.EnumTaskTierFieldUpdateOperationsInput | $Enums.TaskTier
   category?: Prisma.EnumCategoryFieldUpdateOperationsInput | $Enums.Category
   plannedDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   plannedStartTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   plannedEndTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  repeatDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   basePoints?: Prisma.IntFieldUpdateOperationsInput | number
+  xpWorth?: Prisma.IntFieldUpdateOperationsInput | number
+  isBonus?: Prisma.BoolFieldUpdateOperationsInput | boolean
   timeBonus?: Prisma.IntFieldUpdateOperationsInput | number
   finalPoints?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -485,14 +585,20 @@ export type TaskCreateManyInput = {
   userId: string
   title: string
   description?: string | null
+  type?: $Enums.TaskType
   tier?: $Enums.TaskTier
   category?: $Enums.Category
   plannedDate: Date | string
   plannedStartTime?: Date | string | null
   plannedEndTime?: Date | string | null
+  deadline?: Date | string | null
+  scheduledDate?: Date | string | null
+  repeatDays?: string | null
   isCompleted?: boolean
   completedAt?: Date | string | null
   basePoints?: number
+  xpWorth?: number
+  isBonus?: boolean
   timeBonus?: number
   finalPoints?: number
   createdAt?: Date | string
@@ -503,14 +609,20 @@ export type TaskUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumTaskTypeFieldUpdateOperationsInput | $Enums.TaskType
   tier?: Prisma.EnumTaskTierFieldUpdateOperationsInput | $Enums.TaskTier
   category?: Prisma.EnumCategoryFieldUpdateOperationsInput | $Enums.Category
   plannedDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   plannedStartTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   plannedEndTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  repeatDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   basePoints?: Prisma.IntFieldUpdateOperationsInput | number
+  xpWorth?: Prisma.IntFieldUpdateOperationsInput | number
+  isBonus?: Prisma.BoolFieldUpdateOperationsInput | boolean
   timeBonus?: Prisma.IntFieldUpdateOperationsInput | number
   finalPoints?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -522,14 +634,20 @@ export type TaskUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumTaskTypeFieldUpdateOperationsInput | $Enums.TaskType
   tier?: Prisma.EnumTaskTierFieldUpdateOperationsInput | $Enums.TaskTier
   category?: Prisma.EnumCategoryFieldUpdateOperationsInput | $Enums.Category
   plannedDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   plannedStartTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   plannedEndTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  repeatDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   basePoints?: Prisma.IntFieldUpdateOperationsInput | number
+  xpWorth?: Prisma.IntFieldUpdateOperationsInput | number
+  isBonus?: Prisma.BoolFieldUpdateOperationsInput | boolean
   timeBonus?: Prisma.IntFieldUpdateOperationsInput | number
   finalPoints?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -551,14 +669,20 @@ export type TaskCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   tier?: Prisma.SortOrder
   category?: Prisma.SortOrder
   plannedDate?: Prisma.SortOrder
   plannedStartTime?: Prisma.SortOrder
   plannedEndTime?: Prisma.SortOrder
+  deadline?: Prisma.SortOrder
+  scheduledDate?: Prisma.SortOrder
+  repeatDays?: Prisma.SortOrder
   isCompleted?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
   basePoints?: Prisma.SortOrder
+  xpWorth?: Prisma.SortOrder
+  isBonus?: Prisma.SortOrder
   timeBonus?: Prisma.SortOrder
   finalPoints?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -567,6 +691,7 @@ export type TaskCountOrderByAggregateInput = {
 
 export type TaskAvgOrderByAggregateInput = {
   basePoints?: Prisma.SortOrder
+  xpWorth?: Prisma.SortOrder
   timeBonus?: Prisma.SortOrder
   finalPoints?: Prisma.SortOrder
 }
@@ -576,14 +701,20 @@ export type TaskMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   tier?: Prisma.SortOrder
   category?: Prisma.SortOrder
   plannedDate?: Prisma.SortOrder
   plannedStartTime?: Prisma.SortOrder
   plannedEndTime?: Prisma.SortOrder
+  deadline?: Prisma.SortOrder
+  scheduledDate?: Prisma.SortOrder
+  repeatDays?: Prisma.SortOrder
   isCompleted?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
   basePoints?: Prisma.SortOrder
+  xpWorth?: Prisma.SortOrder
+  isBonus?: Prisma.SortOrder
   timeBonus?: Prisma.SortOrder
   finalPoints?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -595,14 +726,20 @@ export type TaskMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   tier?: Prisma.SortOrder
   category?: Prisma.SortOrder
   plannedDate?: Prisma.SortOrder
   plannedStartTime?: Prisma.SortOrder
   plannedEndTime?: Prisma.SortOrder
+  deadline?: Prisma.SortOrder
+  scheduledDate?: Prisma.SortOrder
+  repeatDays?: Prisma.SortOrder
   isCompleted?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
   basePoints?: Prisma.SortOrder
+  xpWorth?: Prisma.SortOrder
+  isBonus?: Prisma.SortOrder
   timeBonus?: Prisma.SortOrder
   finalPoints?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -611,6 +748,7 @@ export type TaskMinOrderByAggregateInput = {
 
 export type TaskSumOrderByAggregateInput = {
   basePoints?: Prisma.SortOrder
+  xpWorth?: Prisma.SortOrder
   timeBonus?: Prisma.SortOrder
   finalPoints?: Prisma.SortOrder
 }
@@ -657,6 +795,10 @@ export type TaskUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
 }
 
+export type EnumTaskTypeFieldUpdateOperationsInput = {
+  set?: $Enums.TaskType
+}
+
 export type EnumTaskTierFieldUpdateOperationsInput = {
   set?: $Enums.TaskTier
 }
@@ -673,14 +815,20 @@ export type TaskCreateWithoutUserInput = {
   id?: string
   title: string
   description?: string | null
+  type?: $Enums.TaskType
   tier?: $Enums.TaskTier
   category?: $Enums.Category
   plannedDate: Date | string
   plannedStartTime?: Date | string | null
   plannedEndTime?: Date | string | null
+  deadline?: Date | string | null
+  scheduledDate?: Date | string | null
+  repeatDays?: string | null
   isCompleted?: boolean
   completedAt?: Date | string | null
   basePoints?: number
+  xpWorth?: number
+  isBonus?: boolean
   timeBonus?: number
   finalPoints?: number
   createdAt?: Date | string
@@ -691,14 +839,20 @@ export type TaskUncheckedCreateWithoutUserInput = {
   id?: string
   title: string
   description?: string | null
+  type?: $Enums.TaskType
   tier?: $Enums.TaskTier
   category?: $Enums.Category
   plannedDate: Date | string
   plannedStartTime?: Date | string | null
   plannedEndTime?: Date | string | null
+  deadline?: Date | string | null
+  scheduledDate?: Date | string | null
+  repeatDays?: string | null
   isCompleted?: boolean
   completedAt?: Date | string | null
   basePoints?: number
+  xpWorth?: number
+  isBonus?: boolean
   timeBonus?: number
   finalPoints?: number
   createdAt?: Date | string
@@ -739,14 +893,20 @@ export type TaskScalarWhereInput = {
   userId?: Prisma.StringFilter<"Task"> | string
   title?: Prisma.StringFilter<"Task"> | string
   description?: Prisma.StringNullableFilter<"Task"> | string | null
+  type?: Prisma.EnumTaskTypeFilter<"Task"> | $Enums.TaskType
   tier?: Prisma.EnumTaskTierFilter<"Task"> | $Enums.TaskTier
   category?: Prisma.EnumCategoryFilter<"Task"> | $Enums.Category
   plannedDate?: Prisma.DateTimeFilter<"Task"> | Date | string
   plannedStartTime?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   plannedEndTime?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  deadline?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  scheduledDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
+  repeatDays?: Prisma.StringNullableFilter<"Task"> | string | null
   isCompleted?: Prisma.BoolFilter<"Task"> | boolean
   completedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   basePoints?: Prisma.IntFilter<"Task"> | number
+  xpWorth?: Prisma.IntFilter<"Task"> | number
+  isBonus?: Prisma.BoolFilter<"Task"> | boolean
   timeBonus?: Prisma.IntFilter<"Task"> | number
   finalPoints?: Prisma.IntFilter<"Task"> | number
   createdAt?: Prisma.DateTimeFilter<"Task"> | Date | string
@@ -757,14 +917,20 @@ export type TaskCreateManyUserInput = {
   id?: string
   title: string
   description?: string | null
+  type?: $Enums.TaskType
   tier?: $Enums.TaskTier
   category?: $Enums.Category
   plannedDate: Date | string
   plannedStartTime?: Date | string | null
   plannedEndTime?: Date | string | null
+  deadline?: Date | string | null
+  scheduledDate?: Date | string | null
+  repeatDays?: string | null
   isCompleted?: boolean
   completedAt?: Date | string | null
   basePoints?: number
+  xpWorth?: number
+  isBonus?: boolean
   timeBonus?: number
   finalPoints?: number
   createdAt?: Date | string
@@ -775,14 +941,20 @@ export type TaskUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumTaskTypeFieldUpdateOperationsInput | $Enums.TaskType
   tier?: Prisma.EnumTaskTierFieldUpdateOperationsInput | $Enums.TaskTier
   category?: Prisma.EnumCategoryFieldUpdateOperationsInput | $Enums.Category
   plannedDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   plannedStartTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   plannedEndTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  repeatDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   basePoints?: Prisma.IntFieldUpdateOperationsInput | number
+  xpWorth?: Prisma.IntFieldUpdateOperationsInput | number
+  isBonus?: Prisma.BoolFieldUpdateOperationsInput | boolean
   timeBonus?: Prisma.IntFieldUpdateOperationsInput | number
   finalPoints?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -793,14 +965,20 @@ export type TaskUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumTaskTypeFieldUpdateOperationsInput | $Enums.TaskType
   tier?: Prisma.EnumTaskTierFieldUpdateOperationsInput | $Enums.TaskTier
   category?: Prisma.EnumCategoryFieldUpdateOperationsInput | $Enums.Category
   plannedDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   plannedStartTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   plannedEndTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  repeatDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   basePoints?: Prisma.IntFieldUpdateOperationsInput | number
+  xpWorth?: Prisma.IntFieldUpdateOperationsInput | number
+  isBonus?: Prisma.BoolFieldUpdateOperationsInput | boolean
   timeBonus?: Prisma.IntFieldUpdateOperationsInput | number
   finalPoints?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -811,14 +989,20 @@ export type TaskUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumTaskTypeFieldUpdateOperationsInput | $Enums.TaskType
   tier?: Prisma.EnumTaskTierFieldUpdateOperationsInput | $Enums.TaskTier
   category?: Prisma.EnumCategoryFieldUpdateOperationsInput | $Enums.Category
   plannedDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   plannedStartTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   plannedEndTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  repeatDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   basePoints?: Prisma.IntFieldUpdateOperationsInput | number
+  xpWorth?: Prisma.IntFieldUpdateOperationsInput | number
+  isBonus?: Prisma.BoolFieldUpdateOperationsInput | boolean
   timeBonus?: Prisma.IntFieldUpdateOperationsInput | number
   finalPoints?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -832,14 +1016,20 @@ export type TaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   userId?: boolean
   title?: boolean
   description?: boolean
+  type?: boolean
   tier?: boolean
   category?: boolean
   plannedDate?: boolean
   plannedStartTime?: boolean
   plannedEndTime?: boolean
+  deadline?: boolean
+  scheduledDate?: boolean
+  repeatDays?: boolean
   isCompleted?: boolean
   completedAt?: boolean
   basePoints?: boolean
+  xpWorth?: boolean
+  isBonus?: boolean
   timeBonus?: boolean
   finalPoints?: boolean
   createdAt?: boolean
@@ -852,14 +1042,20 @@ export type TaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   userId?: boolean
   title?: boolean
   description?: boolean
+  type?: boolean
   tier?: boolean
   category?: boolean
   plannedDate?: boolean
   plannedStartTime?: boolean
   plannedEndTime?: boolean
+  deadline?: boolean
+  scheduledDate?: boolean
+  repeatDays?: boolean
   isCompleted?: boolean
   completedAt?: boolean
   basePoints?: boolean
+  xpWorth?: boolean
+  isBonus?: boolean
   timeBonus?: boolean
   finalPoints?: boolean
   createdAt?: boolean
@@ -872,14 +1068,20 @@ export type TaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   userId?: boolean
   title?: boolean
   description?: boolean
+  type?: boolean
   tier?: boolean
   category?: boolean
   plannedDate?: boolean
   plannedStartTime?: boolean
   plannedEndTime?: boolean
+  deadline?: boolean
+  scheduledDate?: boolean
+  repeatDays?: boolean
   isCompleted?: boolean
   completedAt?: boolean
   basePoints?: boolean
+  xpWorth?: boolean
+  isBonus?: boolean
   timeBonus?: boolean
   finalPoints?: boolean
   createdAt?: boolean
@@ -892,21 +1094,27 @@ export type TaskSelectScalar = {
   userId?: boolean
   title?: boolean
   description?: boolean
+  type?: boolean
   tier?: boolean
   category?: boolean
   plannedDate?: boolean
   plannedStartTime?: boolean
   plannedEndTime?: boolean
+  deadline?: boolean
+  scheduledDate?: boolean
+  repeatDays?: boolean
   isCompleted?: boolean
   completedAt?: boolean
   basePoints?: boolean
+  xpWorth?: boolean
+  isBonus?: boolean
   timeBonus?: boolean
   finalPoints?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "title" | "description" | "tier" | "category" | "plannedDate" | "plannedStartTime" | "plannedEndTime" | "isCompleted" | "completedAt" | "basePoints" | "timeBonus" | "finalPoints" | "createdAt" | "updatedAt", ExtArgs["result"]["task"]>
+export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "title" | "description" | "type" | "tier" | "category" | "plannedDate" | "plannedStartTime" | "plannedEndTime" | "deadline" | "scheduledDate" | "repeatDays" | "isCompleted" | "completedAt" | "basePoints" | "xpWorth" | "isBonus" | "timeBonus" | "finalPoints" | "createdAt" | "updatedAt", ExtArgs["result"]["task"]>
 export type TaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -927,14 +1135,20 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     userId: string
     title: string
     description: string | null
+    type: $Enums.TaskType
     tier: $Enums.TaskTier
     category: $Enums.Category
     plannedDate: Date
     plannedStartTime: Date | null
     plannedEndTime: Date | null
+    deadline: Date | null
+    scheduledDate: Date | null
+    repeatDays: string | null
     isCompleted: boolean
     completedAt: Date | null
     basePoints: number
+    xpWorth: number
+    isBonus: boolean
     timeBonus: number
     finalPoints: number
     createdAt: Date
@@ -1367,14 +1581,20 @@ export interface TaskFieldRefs {
   readonly userId: Prisma.FieldRef<"Task", 'String'>
   readonly title: Prisma.FieldRef<"Task", 'String'>
   readonly description: Prisma.FieldRef<"Task", 'String'>
+  readonly type: Prisma.FieldRef<"Task", 'TaskType'>
   readonly tier: Prisma.FieldRef<"Task", 'TaskTier'>
   readonly category: Prisma.FieldRef<"Task", 'Category'>
   readonly plannedDate: Prisma.FieldRef<"Task", 'DateTime'>
   readonly plannedStartTime: Prisma.FieldRef<"Task", 'DateTime'>
   readonly plannedEndTime: Prisma.FieldRef<"Task", 'DateTime'>
+  readonly deadline: Prisma.FieldRef<"Task", 'DateTime'>
+  readonly scheduledDate: Prisma.FieldRef<"Task", 'DateTime'>
+  readonly repeatDays: Prisma.FieldRef<"Task", 'String'>
   readonly isCompleted: Prisma.FieldRef<"Task", 'Boolean'>
   readonly completedAt: Prisma.FieldRef<"Task", 'DateTime'>
   readonly basePoints: Prisma.FieldRef<"Task", 'Int'>
+  readonly xpWorth: Prisma.FieldRef<"Task", 'Int'>
+  readonly isBonus: Prisma.FieldRef<"Task", 'Boolean'>
   readonly timeBonus: Prisma.FieldRef<"Task", 'Int'>
   readonly finalPoints: Prisma.FieldRef<"Task", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Task", 'DateTime'>

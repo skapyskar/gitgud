@@ -25,6 +25,12 @@ enum Category {
   LIFE
 }
 
+enum TaskType {
+  DAILY    // Created for today specifically
+  WEEKLY   // A template that repeats (e.g., Gym)
+  BACKLOG  // The "Dump" area
+}
+
 // -------------------- MODELS --------------------
 
 model User {
@@ -66,6 +72,9 @@ model Task {
   title        String
   description  String?
   
+  // Type of mission
+  type         TaskType @default(DAILY)
+  
   // Difficulty & Type
   tier         TaskTier @default(C)
   category     Category @default(LIFE)
@@ -74,6 +83,11 @@ model Task {
   plannedDate      DateTime
   plannedStartTime DateTime?
   plannedEndTime   DateTime?
+  deadline         DateTime? // For BACKLOG items
+  scheduledDate    DateTime? // For DAILY items (Which specific day is this for?)
+  
+  // Weekly Logic (For Templates)
+  repeatDays       String?   // Stores "0,2,4" (Sun, Tue, Thu) for Weekly templates
   
   // Completion Status
   isCompleted      Boolean   @default(false)
@@ -81,6 +95,8 @@ model Task {
   
   // Rewards Calculation
   basePoints       Int       @default(10)
+  xpWorth          Int       @default(10)
+  isBonus          Boolean   @default(false) // If true, gives +10 XP (for Weekly tasks done on time)
   timeBonus        Int       @default(0)
   finalPoints      Int       @default(0)
   

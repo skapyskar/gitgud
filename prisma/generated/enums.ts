@@ -27,3 +27,12 @@ export const Category = {
 } as const
 
 export type Category = (typeof Category)[keyof typeof Category]
+
+
+export const TaskType = {
+  DAILY: 'DAILY',
+  WEEKLY: 'WEEKLY',
+  BACKLOG: 'BACKLOG'
+} as const
+
+export type TaskType = (typeof TaskType)[keyof typeof TaskType]
