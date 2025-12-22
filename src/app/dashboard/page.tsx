@@ -9,6 +9,8 @@ import WeeklyPlanner from "./components/WeeklyPlanner";
 import DailyBoard from "./components/DailyBoard";
 import BacklogPanel from "./components/BacklogPanel";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
   try {
     const session = await getServerSession(authOptions);
