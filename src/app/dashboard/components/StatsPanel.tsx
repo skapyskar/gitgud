@@ -75,10 +75,10 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-[0.8vw] mb-[3vh]">
         
         {/* MODULE 1: OPERATOR STATUS (Level & XP) */}
-        <div className="lg:col-span-1 bg-black/40 backdrop-blur-sm border border-green-500/30 p-5 relative overflow-hidden group">
+        <div className="lg:col-span-1 bg-black/40 backdrop-blur-sm border border-green-500/30 p-[0.4vw] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-2 opacity-20">
             <Trophy className="w-16 h-16 text-green-500" />
           </div>
@@ -88,20 +88,20 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
             OPERATOR_LEVEL
           </h3>
 
-          <div className="flex items-end gap-2 mb-2">
-            <span className="text-5xl font-bold text-white font-mono tracking-tighter">
+          <div className="flex items-end gap-[0.3vw] mb-[0.3vh]">
+            <span className="text-[clamp(1.5rem,3.5vw,3rem)] font-bold text-white font-mono tracking-tighter">
               {user.level}
             </span>
-            <span className="text-sm text-green-500 font-mono mb-2">LVL</span>
+            <span className="text-[clamp(0.625rem,0.9vw,0.875rem)] text-green-500 font-mono mb-[0.3vh]">LVL</span>
           </div>
 
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs font-mono text-gray-500">
+          <div className="space-y-[0.2vh]">
+            <div className="flex justify-between text-[clamp(0.5rem,0.7vw,0.75rem)] font-mono text-gray-500">
               <span>PROGRESS</span>
               <span>{Math.floor(currentLevelProgress)} / 500 XP</span>
             </div>
             {/* Cyberpunk Progress Bar */}
-            <div className="h-2 w-full bg-gray-900 border border-green-900/50 relative">
+            <div className="h-[0.5vh] min-h-[0.3vh] w-full bg-gray-900 border border-green-900/50 relative">
               <div 
                 className="h-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)] transition-all duration-500"
                 style={{ width: `${(currentLevelProgress / 500) * 100}%` }}
@@ -127,36 +127,36 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
               COMBAT_METRICS
             </h3>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-[0.8vw]">
               {/* Streak */}
               <div>
-                <span className="text-[10px] text-gray-500 font-mono block mb-1">STREAK</span>
+                <span className="text-[clamp(0.5rem,0.7vw,0.625rem)] text-gray-500 font-mono block mb-1">STREAK</span>
                 <div className="flex items-center gap-2 text-yellow-400">
-                  <Zap className="w-4 h-4 fill-yellow-400" />
-                  <span className="text-2xl font-bold font-mono">{user.streakDays}</span>
+                  <Zap className="w-[1.2vw] h-[1.2vh] min-w-[12px] min-h-[12px] fill-yellow-400" />
+                  <span className="text-[clamp(0.875rem,1.8vw,1.5rem)] font-bold font-mono">{user.streakDays}</span>
                 </div>
               </div>
 
               {/* Multiplier */}
               <div className="text-right">
-                <span className="text-[10px] text-gray-500 font-mono block mb-1">MULTIPLIER</span>
-                <div className="text-2xl font-bold text-purple-400 font-mono">
+                <span className="text-[clamp(0.5rem,0.7vw,0.625rem)] text-gray-500 font-mono block mb-[0.5vh]">MULTIPLIER</span>
+                <div className="text-[clamp(0.875rem,1.8vw,1.5rem)] font-bold text-purple-400 font-mono">
                   x{user.multiplier.toFixed(2)}
                 </div>
               </div>
 
               {/* Highest XP This Week */}
               <div>
-                <span className="text-[10px] text-gray-500 font-mono block mb-1">WEEK_HIGH</span>
-                <div className="text-xl font-bold text-cyan-400 font-mono">
+                <span className="text-[clamp(0.5rem,0.7vw,0.625rem)] text-gray-500 font-mono block mb-[0.5vh]">WEEK_HIGH</span>
+                <div className="text-[clamp(0.75rem,1.3vw,1.25rem)] font-bold text-cyan-400 font-mono">
                   {highestXPThisWeek}
                 </div>
               </div>
 
               {/* Highest XP Ever */}
               <div className="text-right">
-                <span className="text-[10px] text-gray-500 font-mono block mb-1">ALL_TIME_HIGH</span>
-                <div className="text-xl font-bold text-orange-400 font-mono">
+                <span className="text-[clamp(0.5rem,0.7vw,0.625rem)] text-gray-500 font-mono block mb-[0.5vh]">ALL_TIME_HIGH</span>
+                <div className="text-[clamp(0.75rem,1.3vw,1.25rem)] font-bold text-orange-400 font-mono">
                   {highestXPEver}
                 </div>
               </div>
@@ -164,12 +164,12 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
           </div>
 
           {/* Bottom: Currency */}
-          <div className="p-4 bg-green-900/5 border-t border-green-500/30 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Coins className="w-4 h-4 text-yellow-600" />
-              <span className="text-xs text-green-600 font-mono">CREDITS_BALANCE</span>
+          <div className="p-[1vw] bg-green-900/5 border-t border-green-500/30 flex items-center justify-between">
+            <div className="flex items-center gap-[0.5vw]">
+              <Coins className="w-[1.5vw] h-[1.5vh] min-w-[12px] min-h-[12px] text-yellow-500" />
+              <span className="text-[clamp(0.625rem,0.8vw,0.75rem)] text-green-600 font-mono">CREDITS_BALANCE</span>
             </div>
-            <span className="text-xl font-bold text-yellow-500 font-mono tabular-nums">
+            <span className="text-[clamp(0.875rem,1.5vw,1.25rem)] font-bold text-yellow-500 font-mono tabular-nums">
               {user.coins?.toLocaleString() || 0}
             </span>
           </div>
@@ -259,7 +259,7 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
         </div>
 
         {/* MODULE 4: SYSTEM LOGS */}
-        <div className="lg:col-span-1 bg-black/40 backdrop-blur-sm border border-green-500/30 p-4">
+        <div className="lg:col-span-1 bg-black/40 backdrop-blur-sm border border-green-500/30 p-[1vw]">
           <h3 className="text-xs font-mono text-green-600 mb-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-green-500 rounded-sm"></span>
             SYSTEM_STATUS

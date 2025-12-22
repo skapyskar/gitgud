@@ -117,7 +117,7 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
   };
 
   return (
-    <div className="border border-green-900/30 p-[1vw] bg-black/50 flex flex-col h-[calc(100vh-25vh)] min-h-[500px] max-h-[70vh] relative">
+    <div className="border border-green-900/30 p-[0.3vw] bg-black/50 flex flex-col h-[calc(100vh-45vh)] min-h-[14vh] max-h-[40vh] lg:h-[calc(100vh-35vh)] lg:max-h-[60vh] relative">
       {isLoading && (
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="text-green-400 font-mono text-sm animate-pulse">LOADING...</div>
@@ -126,17 +126,17 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
 
       {/* Move to Daily Modal */}
       {movingTaskId && (
-        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-black border-2 border-green-500 p-6 max-w-md w-full">
-            <h3 className="text-lg text-green-400 font-mono mb-4 uppercase">Schedule for Today</h3>
+        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
+          <div className="bg-black border-2 border-green-500 p-[1vw] max-w-md w-full">
+            <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] text-green-400 font-mono mb-[0.5vh] uppercase">Schedule for Today</h3>
             
-            <div className="space-y-4">
+            <div className="space-y-[0.5vh]">
               <div>
-                <label className="text-xs text-gray-500 mb-2 block font-mono uppercase">Task Tier</label>
+                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.3vh] block font-mono uppercase">Task Tier</label>
                 <select
                   value={moveTaskTier}
                   onChange={(e) => setMoveTaskTier(e.target.value as TaskTier)}
-                  className="w-full bg-black/70 border border-green-900/50 px-3 py-2 text-sm text-green-400 focus:outline-none focus:border-green-500 font-mono"
+                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
                 >
                   <option value="S">S - Critical (High XP)</option>
                   <option value="A">A - Important</option>
@@ -146,11 +146,11 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
               </div>
 
               <div>
-                <label className="text-xs text-gray-500 mb-2 block font-mono uppercase">Category</label>
+                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.3vh] block font-mono uppercase">Category</label>
                 <select
                   value={moveTaskCategory}
                   onChange={(e) => setMoveTaskCategory(e.target.value as Category)}
-                  className="w-full bg-black/70 border border-green-900/50 px-3 py-2 text-sm text-green-400 focus:outline-none focus:border-green-500 font-mono"
+                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
                 >
                   <option value="DEV">DEV</option>
                   <option value="ACADEMICS">ACADEMICS</option>
@@ -159,10 +159,10 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
                 </select>
               </div>
 
-              <div className="flex gap-2 pt-2">
+              <div className="flex gap-[0.5vw] pt-[0.3vh]">
                 <button
                   onClick={() => handleMoveToDaily(movingTaskId)}
-                  className="flex-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-3 py-2 text-xs text-green-400 uppercase tracking-wider font-mono"
+                  className="flex-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 uppercase tracking-wider font-mono"
                 >
                   → Move to Today
                 </button>
@@ -172,7 +172,7 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
                     setMoveTaskTier("C");
                     setMoveTaskCategory("LIFE");
                   }}
-                  className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-3 py-2 text-xs text-red-400 uppercase font-mono"
+                  className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-400 uppercase font-mono"
                 >
                   Cancel
                 </button>
@@ -182,24 +182,24 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
         </div>
       )}
 
-      <div className="flex items-center gap-2 mb-4">
-        <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
-        <h3 className="text-xl font-bold text-green-500 uppercase tracking-wider">
+      <div className="flex items-center gap-[0.5vw] mb-[0.5vh]">
+        <span className="w-[0.4vw] h-[0.4vh] min-w-[6px] min-h-[6px] bg-yellow-500 rounded-full animate-pulse"></span>
+        <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] font-bold text-green-500 uppercase tracking-wider">
           &gt;&gt; The_Dump
         </h3>
       </div>
       
-      <p className="text-xs text-gray-500 mb-4 font-mono">
+      <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.5vh] font-mono">
         Schedule when ready
       </p>
 
-      <form onSubmit={handleAddTask} className="mb-4 space-y-2">
+      <form onSubmit={handleAddTask} className="mb-[0.5vh] space-y-[0.3vh]">
         <input
           type="text"
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
           placeholder="New task..."
-          className="w-full bg-black/70 border border-green-900/50 px-3 py-2 text-sm text-green-400 placeholder-gray-600 focus:outline-none focus:border-green-500 font-mono"
+          className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 placeholder-gray-600 focus:outline-none focus:border-green-500 font-mono"
           disabled={isAdding}
         />
         <input
@@ -207,7 +207,7 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
           value={deadline}
           onChange={(e) => setDeadline(e.target.value)}
           min={new Date().toISOString().split('T')[0]}
-          className="w-full bg-black/70 border border-green-900/50 px-3 py-2 text-sm text-green-400 focus:outline-none focus:border-green-500 font-mono"
+          className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
           disabled={isAdding}
         />
         <button

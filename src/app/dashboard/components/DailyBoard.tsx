@@ -136,16 +136,16 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   };
 
   return (
-    <div className="border border-green-900/30 p-[1vw] bg-black/50 flex flex-col h-[calc(100vh-25vh)] min-h-[500px] max-h-[70vh] relative">
+    <div className="border border-green-900/30 p-[0.3vw] bg-black/50 flex flex-col h-[calc(100vh-45vh)] min-h-[14vh] max-h-[40vh] lg:h-[calc(100vh-35vh)] lg:max-h-[60vh] relative">
       {isLoading && (
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="text-green-400 font-mono text-sm animate-pulse">LOADING...</div>
         </div>
       )}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
-          <h3 className="text-xl font-bold text-green-500 uppercase tracking-wider">
+      <div className="flex items-center justify-between mb-[0.5vh]">
+        <div className="flex items-center gap-[0.5vw]">
+          <span className="w-[0.4vw] h-[0.4vh] min-w-[6px] min-h-[6px] bg-green-500 rounded-full animate-ping"></span>
+          <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] font-bold text-green-500 uppercase tracking-wider">
             &gt;&gt; Today&apos;s_Missions
           </h3>
         </div>
@@ -153,36 +153,36 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
         {!isCreating && (
           <button
             onClick={() => setIsCreating(true)}
-            className="text-xs bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-3 py-1 text-green-400 uppercase tracking-wider font-mono"
+            className="text-[clamp(0.5rem,0.7vw,0.75rem)] bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-[0.5vw] py-[0.3vh] text-green-400 uppercase tracking-wider font-mono"
           >
             + Task
           </button>
         )}
       </div>
 
-      <p className="text-xs text-gray-500 mb-4 font-mono">
+      <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.5vh] font-mono">
         {today.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
       </p>
 
       {/* Create Daily Task Form */}
       {isCreating && (
-        <form onSubmit={handleCreateDailyTask} className="mb-4 p-3 bg-green-900/10 border border-green-700/30">
+        <form onSubmit={handleCreateDailyTask} className="mb-[0.5vh] p-[0.5vw] bg-green-900/10 border border-green-700/30">
           <input
             type="text"
             value={newTask.title}
             onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
             placeholder="Task title..."
-            className="w-full bg-black/70 border border-green-900/50 px-3 py-2 text-sm text-green-400 placeholder-gray-600 focus:outline-none focus:border-green-500 font-mono mb-3"
+            className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 placeholder-gray-600 focus:outline-none focus:border-green-500 font-mono mb-[0.5vh]"
             autoFocus
           />
 
-          <div className="grid grid-cols-2 gap-3 mb-3">
+          <div className="grid grid-cols-2 gap-[0.5vw] mb-[0.5vh]">
             <div>
-              <label className="text-xs text-gray-500 mb-1 block font-mono">Tier</label>
+              <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Tier</label>
               <select
                 value={newTask.tier}
                 onChange={(e) => setNewTask({ ...newTask, tier: e.target.value as TaskTier })}
-                className="w-full bg-black/70 border border-green-900/50 px-3 py-2 text-sm text-green-400 focus:outline-none focus:border-green-500 font-mono"
+                className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
               >
                 <option value="S">S - Critical</option>
                 <option value="A">A - Important</option>
@@ -192,11 +192,11 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
             </div>
 
             <div>
-              <label className="text-xs text-gray-500 mb-1 block font-mono">Category</label>
+              <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Category</label>
               <select
                 value={newTask.category}
                 onChange={(e) => setNewTask({ ...newTask, category: e.target.value as Category })}
-                className="w-full bg-black/70 border border-green-900/50 px-3 py-2 text-sm text-green-400 focus:outline-none focus:border-green-500 font-mono"
+                className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
               >
                 <option value="DEV">DEV</option>
                 <option value="ACADEMICS">ACADEMICS</option>
@@ -206,11 +206,11 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-[0.5vw]">
             <button
               type="submit"
               disabled={isSubmitting || !newTask.title.trim()}
-              className="flex-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-3 py-2 text-xs text-green-400 uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed font-mono"
+              className="flex-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed font-mono"
             >
               {isSubmitting ? "Creating..." : "Add Task"}
             </button>
@@ -220,7 +220,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                 setIsCreating(false);
                 setNewTask({ title: "", tier: "C", category: "LIFE" });
               }}
-              className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-3 py-2 text-xs text-red-400 uppercase font-mono"
+              className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-400 uppercase font-mono"
             >
               Cancel
             </button>
@@ -232,32 +232,32 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
       <div className="flex-1 overflow-y-auto pr-2">
         {/* Weekly Tasks Section */}
         {incompleteWeeklyTasks.length > 0 && (
-          <div className="mb-4">
-            <h4 className="text-xs text-purple-500 uppercase tracking-wider mb-2 font-mono">
+          <div className="mb-[0.5vh]">
+            <h4 className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-purple-500 uppercase tracking-wider mb-[0.3vh] font-mono">
               Weekly Templates (Today)
             </h4>
-            <div className="space-y-2">
+            <div className="space-y-[0.3vh]">
               {incompleteWeeklyTasks.map((task) => (
                 <div
                   key={task.id}
-                  className={`p-3 border transition-colors group ${TIER_COLORS[task.tier]}`}
+                  className={`p-[0.5vw] border transition-colors group ${TIER_COLORS[task.tier]}`}
                 >
                   <div className="flex justify-between items-start">
-                    <div className="flex items-start gap-3 flex-1">
+                    <div className="flex items-start gap-[0.5vw] flex-1">
                       <button
                         onClick={() => handleCompleteTask(task.id, true)}
-                        className="w-5 h-5 border-2 border-purple-500 rounded hover:bg-purple-500/30 transition-colors flex-shrink-0 mt-0.5"
+                        className="w-[1vw] h-[1vh] min-w-[16px] min-h-[16px] border-2 border-purple-500 rounded hover:bg-purple-500/30 transition-colors flex-shrink-0 mt-0.5"
                       />
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-xs px-2 py-0.5 border font-mono ${TIER_COLORS[task.tier]}`}>
+                        <div className="flex items-center gap-[0.3vw] mb-[0.2vh]">
+                          <span className={`text-[clamp(0.5rem,0.7vw,0.75rem)] px-[0.3vw] py-[0.1vh] border font-mono ${TIER_COLORS[task.tier]}`}>
                             {task.tier}
                           </span>
-                          <span className="text-xs text-gray-500 font-mono">{task.category}</span>
-                          <span className="text-xs text-purple-400 font-mono">🔁 WEEKLY</span>
+                          <span className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 font-mono">{task.category}</span>
+                          <span className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-purple-400 font-mono">🔁 WEEKLY</span>
                         </div>
-                        <h5 className="text-sm text-green-400 font-mono">{task.title}</h5>
-                        <p className="text-xs text-purple-400 mt-1 font-mono">
+                        <h5 className="text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 font-mono">{task.title}</h5>
+                        <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-purple-400 mt-[0.2vh] font-mono">
                           ⭐ +10 Bonus XP for completing on time
                         </p>
                       </div>
@@ -265,7 +265,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                     
                     <button
                       onClick={() => handleDeleteTask(task.id)}
-                      className="text-xs text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono ml-2"
+                      className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono ml-[0.3vw]"
                     >
                       ✕
                     </button>
@@ -278,44 +278,44 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
 
         {/* Daily Tasks Section */}
         <div>
-          <h4 className="text-xs text-green-500 uppercase tracking-wider mb-2 font-mono">
+          <h4 className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-500 uppercase tracking-wider mb-[0.3vh] font-mono">
             Today&apos;s Specific Tasks
           </h4>
-          <div className="space-y-2">
+          <div className="space-y-[0.3vh]">
           {incompleteTasks.length === 0 ? (
-            <div className="text-center text-gray-600 text-sm py-12 font-mono flex flex-col items-center justify-center">
-              <div className="text-lg mb-2">[NO_TASKS_TODAY]</div>
-              <div className="text-xs">Add tasks for today or move from backlog</div>
+            <div className="text-center text-gray-600 text-[clamp(0.6rem,0.85vw,0.875rem)] py-[2vh] font-mono flex flex-col items-center justify-center">
+              <div className="text-[clamp(0.8rem,1.3vw,1.25rem)] mb-[0.3vh]">[NO_TASKS_TODAY]</div>
+              <div className="text-[clamp(0.5rem,0.7vw,0.75rem)]">Add tasks for today or move from backlog</div>
             </div>
           ) : (
             incompleteTasks.map((task) => (
               <div
                 key={task.id}
-                className={`p-3 border transition-colors group ${TIER_COLORS[task.tier]}`}
+                className={`p-[0.5vw] border transition-colors group ${TIER_COLORS[task.tier]}`}
               >
                 <div className="flex justify-between items-start">
-                  <div className="flex items-start gap-3 flex-1">
+                  <div className="flex items-start gap-[0.5vw] flex-1">
                     <button
                       onClick={() => handleCompleteTask(task.id, false)}
-                      className={`w-5 h-5 border-2 rounded hover:bg-green-500/30 transition-colors flex-shrink-0 mt-0.5 border-green-500`}
+                      className={`w-[1vw] h-[1vh] min-w-[16px] min-h-[16px] border-2 rounded hover:bg-green-500/30 transition-colors flex-shrink-0 mt-0.5 border-green-500`}
                     />
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`text-xs px-2 py-0.5 border font-mono ${TIER_COLORS[task.tier]}`}>
+                      <div className="flex items-center gap-[0.3vw] mb-[0.2vh]">
+                        <span className={`text-[clamp(0.5rem,0.7vw,0.75rem)] px-[0.3vw] py-[0.1vh] border font-mono ${TIER_COLORS[task.tier]}`}>
                           {task.tier}
                         </span>
-                        <span className="text-xs text-gray-500 font-mono">{task.category}</span>
+                        <span className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 font-mono">{task.category}</span>
                       </div>
-                      <h5 className="text-sm text-green-400 font-mono">{task.title}</h5>
+                      <h5 className="text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 font-mono">{task.title}</h5>
                       {task.description && (
-                        <p className="text-xs text-gray-500 mt-1 font-mono">{task.description}</p>
+                        <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mt-[0.2vh] font-mono">{task.description}</p>
                       )}
                     </div>
                   </div>
                   
                   <button
                     onClick={() => handleDeleteTask(task.id)}
-                    className="text-xs text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono ml-2"
+                    className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono ml-[0.3vw]"
                   >
                     ✕
                   </button>
@@ -327,10 +327,10 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
 
         {/* Completed Tasks Section */}
         {allCompletedTasks.length > 0 && (
-          <div className="mt-4">
+          <div className="mt-[0.5vh]">
             <button
               onClick={() => setShowCompleted(!showCompleted)}
-              className="w-full flex items-center justify-between text-xs text-gray-500 uppercase tracking-wider mb-2 font-mono hover:text-green-500 transition-colors"
+              className="w-full flex items-center justify-between text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 uppercase tracking-wider mb-[0.3vh] font-mono hover:text-gray-400 transition-colors"
             >
               <span>✓ Completed ({allCompletedTasks.length})</span>
               <span>{showCompleted ? "▼" : "▶"}</span>

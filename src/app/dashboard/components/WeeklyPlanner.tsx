@@ -81,53 +81,53 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
   };
 
   return (
-    <div className="border border-green-900/30 p-[1vw] bg-black/50 flex flex-col h-[calc(100vh-25vh)] min-h-[500px] max-h-[70vh] relative">
+    <div className="border border-green-900/30 p-[0.3vw] bg-black/50 flex flex-col h-[calc(100vh-45vh)] min-h-[14vh] max-h-[40vh] lg:h-[calc(100vh-35vh)] lg:max-h-[60vh] relative">
       {isLoading && (
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="text-green-400 font-mono text-sm animate-pulse">LOADING...</div>
         </div>
       )}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-[0.5vh]">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
-          <h3 className="text-xl font-bold text-green-500 uppercase tracking-wider">
-            &gt;&gt; Weekly_Templates
+          <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] font-bold text-green-500 uppercase tracking-wider">
+            &gt;&gt; Weekly_Tasks
           </h3>
         </div>
         
         {!isCreating && (
           <button
             onClick={() => setIsCreating(true)}
-            className="text-xs bg-purple-900/30 hover:bg-purple-900/50 border border-purple-700 px-3 py-1 text-purple-400 uppercase tracking-wider font-mono"
+            className="text-[clamp(0.5rem,0.7vw,0.75rem)] bg-purple-900/30 hover:bg-purple-900/50 border border-purple-700 px-3 py-1 text-purple-400 uppercase tracking-wider font-mono"
           >
             + New Template
           </button>
         )}
       </div>
 
-      <p className="text-xs text-gray-500 mb-4 font-mono">
+      <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-4 font-mono">
         Preplanned Tasks
       </p>
 
       {/* Create New Template Form */}
       {isCreating && (
-        <form onSubmit={handleCreateTemplate} className="mb-4 p-3 bg-purple-900/10 border border-purple-700/30">
+        <form onSubmit={handleCreateTemplate} className="mb-[0.5vh] p-[0.5vw] bg-purple-900/10 border border-purple-700/30">
           <input
             type="text"
             value={newTaskTitle}
             onChange={(e) => setNewTaskTitle(e.target.value)}
             placeholder="Weekly task name..."
-            className="w-full bg-black/70 border border-purple-900/50 px-3 py-2 text-sm text-green-400 placeholder-gray-600 focus:outline-none focus:border-purple-500 font-mono mb-3"
+            className="w-full bg-black/70 border border-purple-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 placeholder-gray-600 focus:outline-none focus:border-purple-500 font-mono mb-[0.5vh]"
             autoFocus
           />
 
-          <div className="grid grid-cols-2 gap-3 mb-3">
+          <div className="grid grid-cols-2 gap-[0.5vw] mb-[0.5vh]">
             <div>
-              <label className="text-xs text-gray-500 mb-1 block font-mono">Tier</label>
+              <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Tier</label>
               <select
                 value={tier}
                 onChange={(e) => setTier(e.target.value as TaskTier)}
-                className="w-full bg-black/70 border border-purple-900/50 px-3 py-2 text-sm text-green-400 focus:outline-none focus:border-purple-500 font-mono"
+                className="w-full bg-black/70 border border-purple-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-purple-500 font-mono"
               >
                 <option value="S">S - Critical</option>
                 <option value="A">A - Important</option>
@@ -137,11 +137,11 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
             </div>
 
             <div>
-              <label className="text-xs text-gray-500 mb-1 block font-mono">Category</label>
+              <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Category</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as Category)}
-                className="w-full bg-black/70 border border-purple-900/50 px-3 py-2 text-sm text-green-400 focus:outline-none focus:border-purple-500 font-mono"
+                className="w-full bg-black/70 border border-purple-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-purple-500 font-mono"
               >
                 <option value="DEV">DEV</option>
                 <option value="ACADEMICS">ACADEMICS</option>
@@ -151,15 +151,15 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
             </div>
           </div>
 
-          <div className="mb-3">
-            <p className="text-xs text-gray-500 mb-2 font-mono">Select Days:</p>
-            <div className="flex gap-2 flex-wrap">
+          <div className="mb-[0.5vh]">
+            <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.3vh] font-mono">Select Days:</p>
+            <div className="flex gap-[0.3vw] flex-wrap">
               {DAYS.map((day, index) => (
                 <button
                   key={index}
                   type="button"
                   onClick={() => toggleDay(index)}
-                  className={`px-3 py-1 text-xs font-mono border transition-colors ${
+                  className={`px-[0.5vw] py-[0.2vh] text-[clamp(0.5rem,0.7vw,0.75rem)] font-mono border transition-colors ${
                     selectedDays.includes(index)
                       ? "bg-purple-600/50 border-purple-400 text-purple-200"
                       : "bg-black/50 border-purple-900/30 text-gray-500 hover:border-purple-700"
@@ -171,11 +171,11 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-[0.5vw]">
             <button
               type="submit"
               disabled={isSubmitting || !newTaskTitle.trim() || selectedDays.length === 0}
-              className="flex-1 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-700 px-3 py-2 text-xs text-purple-400 uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed font-mono"
+              className="flex-1 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-purple-400 uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed font-mono"
             >
               {isSubmitting ? "Creating..." : "Create Template"}
             </button>
@@ -188,7 +188,7 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
                 setTier("C");
                 setCategory("LIFE");
               }}
-              className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-3 py-2 text-xs text-red-400 uppercase font-mono"
+              className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-400 uppercase font-mono"
             >
               Cancel
             </button>
@@ -197,7 +197,7 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
       )}
 
       {/* Existing Templates */}
-      <div className="space-y-2 flex-1 overflow-y-auto pr-2">
+      <div className="space-y-[0.3vh] flex-1 overflow-y-auto pr-2">
         {templates.length === 0 ? (
           <div className="text-center text-gray-600 text-xs py-8 font-mono">
             [NO_WEEKLY_TEMPLATES]
