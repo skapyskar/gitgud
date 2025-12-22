@@ -67,7 +67,7 @@ export default async function DashboardPage() {
         {/* CHANGE 1: CONTAINER WIDTH 
             Changed max-w-7xl to max-w-[1920px] (or w-full) to use the screen edges.
         */}
-        <div className="w-full max-w-[1920px] mx-auto space-y-6 relative z-10">
+        <div className="w-full max-w-[1920px] mx-auto space-y-3 relative z-10">
           
           {/* Header */}
           <header className="border-b border-green-800 pb-4 flex justify-between items-center">
