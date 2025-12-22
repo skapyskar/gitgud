@@ -70,16 +70,20 @@ export default async function DashboardPage() {
         <div className="w-full max-w-[1920px] mx-auto space-y-3 relative z-10">
           
           {/* Header */}
-          <header className="border-b border-green-800 pb-4 flex justify-between items-center">
+          <header className="border-b border-green-800 pb-4 grid grid-cols-3 items-center">
             <div>
               <h1 className="text-4xl font-bold text-green-400 font-mono uppercase tracking-wider">
                 Git_Gud_Dashboard
               </h1>
-              <p className="text-gray-500 text-sm mt-1">
-                Welcome back, <span className="text-green-500">{user.name || user.email}</span>
+            </div>
+            <div className="text-center">
+              <p className="text-gray-400 text-2xl">
+                Welcome back, <span className="text-green-400 font-semibold">{user.name || user.email}</span>
               </p>
             </div>
-            <LogoutButton />
+            <div className="flex justify-end">
+              <LogoutButton />
+            </div>
           </header>
 
           {/* Stats Panel - Full Width */}
