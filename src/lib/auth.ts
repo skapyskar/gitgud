@@ -4,10 +4,9 @@ import GoogleProvider from "next-auth/providers/google";
 import type { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/db";
-import type { PrismaClient as StandardPrismaClient } from "@prisma/client";
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma as unknown as StandardPrismaClient),
+  adapter: PrismaAdapter(prisma as any),
   
   providers: [
     GitHub({
