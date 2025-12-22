@@ -29,6 +29,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(false);
 
   const today = new Date();
   const todayDayIndex = today.getDay();
@@ -38,6 +39,17 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
     const days = template.repeatDays?.split(",").map(Number) || [];
     return days.includes(todayDayIndex);
   });
+
+  // Separate incomplete and complete weekly tasks for today
+  const incompleteWeeklyTasks = todaysWeeklyTasks.filter(task => !task.isCompleted);
+  const completedWeeklyTasks = todaysWeeklyTasks.filter(task => task.isCompleted);
+
+  // Separate completed and incomplete daily tasks
+  const incompleteTasks = dailyTasks.filter(task => !task.isCompleted);
+  const completedTasks = dailyTasks.filter(task => task.isCompleted);
+
+  // Combined completed tasks (both daily and weekly)
+  const allCompletedTasks = [...completedTasks, ...completedWeeklyTasks];
 
   const handleCreateDailyTask = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,8 +119,24 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
     }
   };
 
+  const handleUncompleteTask = async (taskId: string) => {
+    setIsLoading(true);
+    try {
+      await fetch("/api/tasks/uncomplete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId }),
+      });
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to uncomplete task:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="border border-green-900/30 p-4 bg-black/50 flex flex-col h-[calc(100vh-350px)] max-h-[665px] relative">
+    <div className="border border-green-900/30 p-[1vw] bg-black/50 flex flex-col h-[calc(100vh-25vh)] min-h-[500px] max-h-[70vh] relative">
       {isLoading && (
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="text-green-400 font-mono text-sm animate-pulse">LOADING...</div>
@@ -200,51 +228,67 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
         </form>
       )}
 
-      {/* Weekly Tasks Section */}
-      {todaysWeeklyTasks.length > 0 && (
-        <div className="mb-4">
-          <h4 className="text-xs text-purple-500 uppercase tracking-wider mb-2 font-mono">
-            Weekly Templates (Today)
-          </h4>
-          <div className="space-y-2">
-            {todaysWeeklyTasks.map((task) => (
-              <div
-                key={task.id}
-                className="bg-purple-900/10 border border-purple-700/30 p-3 hover:border-purple-500/50 transition-colors group"
-              >
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-3 flex-1">
-                    <button
-                      onClick={() => handleCompleteTask(task.id, true)}
-                      className="w-5 h-5 border-2 border-purple-500 rounded hover:bg-purple-500/30 transition-colors flex-shrink-0"
-                    />
-                    <div>
-                      <h5 className="text-sm text-green-400 font-mono">{task.title}</h5>
-                      <p className="text-xs text-purple-400 mt-1 font-mono">
-                        ⭐ +10 Bonus XP for completing on time
-                      </p>
+      {/* Scrollable Content Area */}
+      <div className="flex-1 overflow-y-auto pr-2">
+        {/* Weekly Tasks Section */}
+        {incompleteWeeklyTasks.length > 0 && (
+          <div className="mb-4">
+            <h4 className="text-xs text-purple-500 uppercase tracking-wider mb-2 font-mono">
+              Weekly Templates (Today)
+            </h4>
+            <div className="space-y-2">
+              {incompleteWeeklyTasks.map((task) => (
+                <div
+                  key={task.id}
+                  className={`p-3 border transition-colors group ${TIER_COLORS[task.tier]}`}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-start gap-3 flex-1">
+                      <button
+                        onClick={() => handleCompleteTask(task.id, true)}
+                        className="w-5 h-5 border-2 border-purple-500 rounded hover:bg-purple-500/30 transition-colors flex-shrink-0 mt-0.5"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-xs px-2 py-0.5 border font-mono ${TIER_COLORS[task.tier]}`}>
+                            {task.tier}
+                          </span>
+                          <span className="text-xs text-gray-500 font-mono">{task.category}</span>
+                          <span className="text-xs text-purple-400 font-mono">🔁 WEEKLY</span>
+                        </div>
+                        <h5 className="text-sm text-green-400 font-mono">{task.title}</h5>
+                        <p className="text-xs text-purple-400 mt-1 font-mono">
+                          ⭐ +10 Bonus XP for completing on time
+                        </p>
+                      </div>
                     </div>
+                    
+                    <button
+                      onClick={() => handleDeleteTask(task.id)}
+                      className="text-xs text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono ml-2"
+                    >
+                      ✕
+                    </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Daily Tasks Section */}
-      <div>
-        <h4 className="text-xs text-green-500 uppercase tracking-wider mb-2 font-mono">
-          Today&apos;s Specific Tasks
-        </h4>
-        <div className="space-y-2">
-          {dailyTasks.length === 0 ? (
+        {/* Daily Tasks Section */}
+        <div>
+          <h4 className="text-xs text-green-500 uppercase tracking-wider mb-2 font-mono">
+            Today&apos;s Specific Tasks
+          </h4>
+          <div className="space-y-2">
+          {incompleteTasks.length === 0 ? (
             <div className="text-center text-gray-600 text-sm py-12 font-mono flex flex-col items-center justify-center">
               <div className="text-lg mb-2">[NO_TASKS_TODAY]</div>
               <div className="text-xs">Add tasks for today or move from backlog</div>
             </div>
           ) : (
-            dailyTasks.map((task) => (
+            incompleteTasks.map((task) => (
               <div
                 key={task.id}
                 className={`p-3 border transition-colors group ${TIER_COLORS[task.tier]}`}
@@ -253,9 +297,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                   <div className="flex items-start gap-3 flex-1">
                     <button
                       onClick={() => handleCompleteTask(task.id, false)}
-                      className={`w-5 h-5 border-2 rounded hover:bg-green-500/30 transition-colors flex-shrink-0 mt-0.5 ${
-                        task.isCompleted ? "bg-green-500 border-green-500" : "border-green-500"
-                      }`}
+                      className={`w-5 h-5 border-2 rounded hover:bg-green-500/30 transition-colors flex-shrink-0 mt-0.5 border-green-500`}
                     />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
@@ -282,6 +324,66 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
             ))
           )}
         </div>
+
+        {/* Completed Tasks Section */}
+        {allCompletedTasks.length > 0 && (
+          <div className="mt-4">
+            <button
+              onClick={() => setShowCompleted(!showCompleted)}
+              className="w-full flex items-center justify-between text-xs text-gray-500 uppercase tracking-wider mb-2 font-mono hover:text-green-500 transition-colors"
+            >
+              <span>✓ Completed ({allCompletedTasks.length})</span>
+              <span>{showCompleted ? "▼" : "▶"}</span>
+            </button>
+            
+            {showCompleted && (
+              <div className="space-y-2">
+                {allCompletedTasks.map((task) => {
+                  const isWeeklyTask = task.type === "WEEKLY";
+                  
+                  return (
+                    <div
+                      key={task.id}
+                      className="p-3 border border-gray-800 bg-gray-900/30 transition-colors group opacity-60"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-start gap-3 flex-1">
+                          <button
+                            onClick={() => handleUncompleteTask(task.id)}
+                            className="w-5 h-5 border-2 rounded bg-green-500 border-green-500 hover:bg-green-500/50 transition-colors flex-shrink-0 mt-0.5"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs px-2 py-0.5 border border-gray-700 text-gray-500 font-mono">
+                                {task.tier}
+                              </span>
+                              <span className="text-xs text-gray-600 font-mono">{task.category}</span>
+                              {isWeeklyTask && (
+                                <span className="text-xs text-purple-600 font-mono">🔁 WEEKLY</span>
+                              )}
+                            </div>
+                            <h5 className="text-sm text-gray-500 font-mono line-through">{task.title}</h5>
+                            {task.finalPoints && (
+                              <p className="text-xs text-green-600 mt-1 font-mono">+{task.finalPoints} XP</p>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <button
+                          onClick={() => handleDeleteTask(task.id)}
+                          className="text-xs text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono ml-2"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
       </div>
     </div>
   );

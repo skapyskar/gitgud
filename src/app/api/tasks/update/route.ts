@@ -12,7 +12,7 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const { taskId, type, scheduledDate, deadline } = body;
+    const { taskId, type, scheduledDate, deadline, tier, category } = body;
 
     if (!taskId) {
       return NextResponse.json({ error: "Task ID required" }, { status: 400 });
@@ -22,6 +22,8 @@ export async function PATCH(request: Request) {
     const updateData: any = {};
     
     if (type) updateData.type = type;
+    if (tier) updateData.tier = tier;
+    if (category) updateData.category = category;
     if (scheduledDate !== undefined) {
       updateData.scheduledDate = scheduledDate ? new Date(scheduledDate) : null;
       updateData.plannedDate = scheduledDate ? new Date(scheduledDate) : new Date();

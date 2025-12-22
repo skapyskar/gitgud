@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Task } from "../../../../prisma/generated/client";
+import { Task, TaskTier, Category } from "../../../../prisma/generated/client";
 
 interface BacklogPanelProps {
   tasks: Task[];
@@ -15,6 +15,16 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
   const [deadline, setDeadline] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showCompleted, setShowCompleted] = useState(false);
+  
+  // Move to daily modal state
+  const [movingTaskId, setMovingTaskId] = useState<string | null>(null);
+  const [moveTaskTier, setMoveTaskTier] = useState<TaskTier>("C");
+  const [moveTaskCategory, setMoveTaskCategory] = useState<Category>("LIFE");
+
+  // Separate completed and incomplete tasks
+  const incompleteTasks = tasks.filter(task => !task.isCompleted);
+  const completedTasks = tasks.filter(task => task.isCompleted);
 
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,8 +69,13 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
           taskId,
           type: "DAILY",
           scheduledDate: today.toISOString(),
+          tier: moveTaskTier,
+          category: moveTaskCategory,
         }),
       });
+      setMovingTaskId(null);
+      setMoveTaskTier("C");
+      setMoveTaskCategory("LIFE");
       router.refresh();
     } catch (error) {
       console.error("Failed to move task:", error);
@@ -85,13 +100,88 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
     }
   };
 
+  const handleUncompleteTask = async (taskId: string) => {
+    setIsLoading(true);
+    try {
+      await fetch("/api/tasks/uncomplete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId }),
+      });
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to uncomplete task:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="border border-green-900/30 p-4 bg-black/50 flex flex-col h-[calc(100vh-350px)] max-h-[665px] relative">
+    <div className="border border-green-900/30 p-[1vw] bg-black/50 flex flex-col h-[calc(100vh-25vh)] min-h-[500px] max-h-[70vh] relative">
       {isLoading && (
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="text-green-400 font-mono text-sm animate-pulse">LOADING...</div>
         </div>
       )}
+
+      {/* Move to Daily Modal */}
+      {movingTaskId && (
+        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-black border-2 border-green-500 p-6 max-w-md w-full">
+            <h3 className="text-lg text-green-400 font-mono mb-4 uppercase">Schedule for Today</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs text-gray-500 mb-2 block font-mono uppercase">Task Tier</label>
+                <select
+                  value={moveTaskTier}
+                  onChange={(e) => setMoveTaskTier(e.target.value as TaskTier)}
+                  className="w-full bg-black/70 border border-green-900/50 px-3 py-2 text-sm text-green-400 focus:outline-none focus:border-green-500 font-mono"
+                >
+                  <option value="S">S - Critical (High XP)</option>
+                  <option value="A">A - Important</option>
+                  <option value="B">B - Maintenance</option>
+                  <option value="C">C - Chores</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs text-gray-500 mb-2 block font-mono uppercase">Category</label>
+                <select
+                  value={moveTaskCategory}
+                  onChange={(e) => setMoveTaskCategory(e.target.value as Category)}
+                  className="w-full bg-black/70 border border-green-900/50 px-3 py-2 text-sm text-green-400 focus:outline-none focus:border-green-500 font-mono"
+                >
+                  <option value="DEV">DEV</option>
+                  <option value="ACADEMICS">ACADEMICS</option>
+                  <option value="HEALTH">HEALTH</option>
+                  <option value="LIFE">LIFE</option>
+                </select>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => handleMoveToDaily(movingTaskId)}
+                  className="flex-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-3 py-2 text-xs text-green-400 uppercase tracking-wider font-mono"
+                >
+                  → Move to Today
+                </button>
+                <button
+                  onClick={() => {
+                    setMovingTaskId(null);
+                    setMoveTaskTier("C");
+                    setMoveTaskCategory("LIFE");
+                  }}
+                  className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-3 py-2 text-xs text-red-400 uppercase font-mono"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center gap-2 mb-4">
         <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
         <h3 className="text-xl font-bold text-green-500 uppercase tracking-wider">
@@ -131,14 +221,14 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
 
       {/* Task List */}
       <div className="space-y-2 flex-1 overflow-y-auto pr-2">
-        {tasks.length === 0 ? (
+        {incompleteTasks.length === 0 ? (
           <div className="text-center text-gray-600 text-xs py-8 font-mono">
             [EMPTY_BACKLOG]
             <br />
             No pending tasks
           </div>
         ) : (
-          tasks.map((task) => (
+          incompleteTasks.map((task) => (
             <div
               key={task.id}
               className="bg-black/70 border border-yellow-700/30 p-3 hover:border-yellow-500/50 transition-colors group"
@@ -155,7 +245,7 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
 
               <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
-                  onClick={() => handleMoveToDaily(task.id)}
+                  onClick={() => setMovingTaskId(task.id)}
                   className="text-xs bg-blue-900/30 hover:bg-blue-900/50 border border-blue-700/50 px-2 py-1 text-blue-400 font-mono"
                 >
                   → Today
@@ -169,6 +259,55 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
               </div>
             </div>
           ))
+        )}
+
+        {/* Completed Tasks Section */}
+        {completedTasks.length > 0 && (
+          <div className="mt-4">
+            <button
+              onClick={() => setShowCompleted(!showCompleted)}
+              className="w-full flex items-center justify-between text-xs text-gray-500 uppercase tracking-wider mb-2 font-mono hover:text-green-500 transition-colors"
+            >
+              <span>✓ Completed ({completedTasks.length})</span>
+              <span>{showCompleted ? "▼" : "▶"}</span>
+            </button>
+            
+            {showCompleted && (
+              <div className="space-y-2">
+                {completedTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className="bg-black/70 border border-gray-800 p-3 hover:border-gray-700 transition-colors group opacity-60"
+                  >
+                    <div className="flex justify-between items-start gap-2 mb-2">
+                      <h4 className="text-sm text-gray-500 font-mono line-through">{task.title}</h4>
+                    </div>
+                    
+                    {task.finalPoints && (
+                      <div className="text-xs text-green-600 mb-2 font-mono">
+                        +{task.finalPoints} XP
+                      </div>
+                    )}
+
+                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={() => handleUncompleteTask(task.id)}
+                        className="text-xs bg-yellow-900/30 hover:bg-yellow-900/50 border border-yellow-700/50 px-2 py-1 text-yellow-400 font-mono"
+                      >
+                        ↺ Uncomplete
+                      </button>
+                      <button
+                        onClick={() => handleDelete(task.id)}
+                        className="text-xs bg-red-900/30 hover:bg-red-900/50 border border-red-700/50 px-2 py-1 text-red-400 font-mono"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>

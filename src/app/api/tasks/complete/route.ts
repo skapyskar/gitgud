@@ -35,6 +35,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
     }
 
+    // Prevent XP farming: Check if task is already completed
+    if (task.isCompleted) {
+      return NextResponse.json({ 
+        error: "Task already completed",
+        alreadyCompleted: true 
+      }, { status: 400 });
+    }
+
     // Calculate XP reward using gamification system
     const baseXP = tierBaseXP(task.tier);
     const streakBonus = streakMultiplier(user.streakDays);

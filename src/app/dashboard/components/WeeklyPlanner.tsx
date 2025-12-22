@@ -81,7 +81,7 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
   };
 
   return (
-    <div className="border border-green-900/30 p-4 bg-black/50 flex flex-col h-[calc(100vh-350px)] max-h-[665px] relative">
+    <div className="border border-green-900/30 p-[1vw] bg-black/50 flex flex-col h-[calc(100vh-25vh)] min-h-[500px] max-h-[70vh] relative">
       {isLoading && (
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="text-green-400 font-mono text-sm animate-pulse">LOADING...</div>
