@@ -5,6 +5,7 @@ import MiniPerformanceGraph from "./MiniPerformanceGraph";
 import MiniWeeklyGrowthGraph from "./MiniWeeklyGrowthGraph";
 import MiniEfficiencyGraph from "./MiniEfficiencyGraph";
 import FullPerformanceGraph from "./FullPerformanceGraph";
+import ConnectGitHubButton from "./ConnectGitHubButton";
 import { Sparkles, Zap, Trophy, TrendingUp, Coins, BarChart3, Target, Activity } from "lucide-react";
 
 interface DayLog {
@@ -25,9 +26,10 @@ interface StatsPanelProps {
     name?: string | null;
     dayLogs?: DayLog[];
   } | null;
+  isGitHubLinked: boolean;
 }
 
-export default function StatsPanel({ user }: StatsPanelProps) {
+export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
   const [showFullGraph, setShowFullGraph] = useState(false);
   const [selectedGraph, setSelectedGraph] = useState<GraphType>('daily');
 
@@ -39,10 +41,10 @@ export default function StatsPanel({ user }: StatsPanelProps) {
     );
   }
 
-  // Calculate XP Progress (assuming level * 100 for next level, adjust formula as needed)
-  const xpForNextLevel = 100; 
-  const currentLevelProgress = user.xp % 100;
-  const xpRemaining = 100 - currentLevelProgress;
+  // Calculate XP Progress (assuming level * 500 for next level, adjust formula as needed)
+  const xpForNextLevel = 500; 
+  const currentLevelProgress = user.xp % 500;
+  const xpRemaining = 500 - currentLevelProgress;
 
   // Calculate XP earned today
   const today = new Date().toISOString().split('T')[0];
@@ -73,7 +75,7 @@ export default function StatsPanel({ user }: StatsPanelProps) {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
         
         {/* MODULE 1: OPERATOR STATUS (Level & XP) */}
         <div className="lg:col-span-1 bg-black/40 backdrop-blur-sm border border-green-500/30 p-5 relative overflow-hidden group">
@@ -96,13 +98,13 @@ export default function StatsPanel({ user }: StatsPanelProps) {
           <div className="space-y-1">
             <div className="flex justify-between text-xs font-mono text-gray-500">
               <span>PROGRESS</span>
-              <span>{Math.floor(currentLevelProgress)} / 100 XP</span>
+              <span>{Math.floor(currentLevelProgress)} / 500 XP</span>
             </div>
             {/* Cyberpunk Progress Bar */}
             <div className="h-2 w-full bg-gray-900 border border-green-900/50 relative">
               <div 
                 className="h-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)] transition-all duration-500"
-                style={{ width: `${currentLevelProgress}%` }}
+                style={{ width: `${(currentLevelProgress / 500) * 100}%` }}
               />
             </div>
             <p className="text-[10px] text-gray-600 font-mono mt-1 text-right">
@@ -175,7 +177,7 @@ export default function StatsPanel({ user }: StatsPanelProps) {
 
         {/* MODULE 3: PERFORMANCE LOG (The Graph) */}
         {/* Spans 2 columns on large screens to give the graph breathing room */}
-        <div className="md:col-span-2 bg-black/40 backdrop-blur-sm border border-green-500/30 flex flex-col relative">
+        <div className="md:col-span-2 lg:col-span-2 bg-black/40 backdrop-blur-sm border border-green-500/30 flex flex-col relative">
            <div className="absolute top-2 right-2 flex gap-1">
              <div className="w-1 h-1 bg-green-500 rounded-full animate-ping"></div>
            </div>
@@ -183,7 +185,7 @@ export default function StatsPanel({ user }: StatsPanelProps) {
            <div className="p-3 border-b border-green-500/30 flex justify-between items-center bg-green-500/5">
              <div className="flex items-center gap-2">
                <h3 className="text-xs font-mono text-green-500">
-                 // RECENT_ACTIVITY_LOG
+                 RECENT_ACTIVITY_LOG
                </h3>
                
                {/* Graph Type Selector */}
@@ -232,7 +234,7 @@ export default function StatsPanel({ user }: StatsPanelProps) {
              </button>
            </div>
            
-           <div className="flex-1 p-4 min-h-[120px] flex flex-col justify-end">
+           <div className="flex-1 p-4 min-h-[80px] flex flex-col justify-end">
              <div className="w-full h-full">
                 {selectedGraph === 'daily' && (
                   <MiniPerformanceGraph 
@@ -254,6 +256,42 @@ export default function StatsPanel({ user }: StatsPanelProps) {
                 )}
              </div>
            </div>
+        </div>
+
+        {/* MODULE 4: SYSTEM LOGS */}
+        <div className="lg:col-span-1 bg-black/40 backdrop-blur-sm border border-green-500/30 p-4">
+          <h3 className="text-xs font-mono text-green-600 mb-3 flex items-center gap-2">
+            <span className="w-2 h-2 bg-green-500 rounded-sm"></span>
+            SYSTEM_STATUS
+          </h3>
+          
+          <div className="space-y-3 text-xs font-mono">
+            {/* System Status - Always show */}
+            <div className="flex flex-col items-center justify-center py-6">
+              <div className="flex items-center gap-2 mb-3">
+                <span className={`w-3 h-3 rounded-full animate-pulse ${!isGitHubLinked ? 'bg-yellow-500' : 'bg-green-500'}`}></span>
+              </div>
+              <span className={`text-sm font-semibold text-center ${!isGitHubLinked ? 'text-yellow-500' : 'text-green-500'}`}>
+                {!isGitHubLinked ? 'System Issues Detected' : 'All Systems Operational'}
+              </span>
+            </div>
+
+            {/* If issues exist, show them */}
+            {!isGitHubLinked && (
+              <div className="pt-2 border-t border-green-900/30">
+                <div className="text-yellow-600 text-[10px] mb-2">[ISSUES]</div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1 text-yellow-500 text-[10px]">
+                    <span>⚠️</span>
+                    <span>GitHub not connected</span>
+                  </div>
+                  <div className="mt-1">
+                    <ConnectGitHubButton />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
       </div>

@@ -69,18 +69,6 @@ export default function AuthGate() {
              </div>
           </button>
         </div>
-
-        {/* SWITCH ACCOUNT LOGIC */}
-        <div className="pt-6 border-t border-green-900/50">
-          <p className="text-[10px] text-gray-500 mb-2">WRONG_CREDENTIALS?</p>
-          <button
-            onClick={() => handleLogin("google", true)}
-            disabled={!!isLoading}
-            className="text-xs text-red-400 hover:text-red-500 hover:underline uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            [ Force_Switch_Google_Account ]
-          </button>
-        </div>
       </div>
     </div>
   );

@@ -26,17 +26,8 @@ export default function MiniPerformanceGraph({ dayLogs, onExpand }: MiniPerforma
 
   return (
     <div className="border-l border-green-900/30 pl-6">
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-xs text-gray-500 font-mono uppercase tracking-wider">
-          Performance_Log
-        </div>
-        <button
-          onClick={onExpand}
-          className="text-xs text-green-500 hover:text-green-400 font-mono border border-green-900/50 px-2 py-1 hover:border-green-700 transition-colors"
-          title="View full graph"
-        >
-          [EXPAND]
-        </button>
+      <div className="text-xs text-gray-500 font-mono uppercase tracking-wider mb-2">
+        Performance_Log
       </div>
       
       <div className="flex items-end gap-3 h-24">

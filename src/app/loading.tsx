@@ -9,28 +9,28 @@ export default function RootLoading() {
       {/* Glowing Orb Effect */}
       <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
 
-      <div className="relative z-10 text-center space-y-8">
-        {/* Logo Animation */}
-        <div className="space-y-4 animate-pulse">
-          <h1 className="text-6xl md:text-8xl font-bold text-green-400 tracking-tighter uppercase font-mono">
+      <div className="relative z-10 text-center space-y-8 p-8">
+        {/* System Initializing Animation */}
+        <div className="space-y-4">
+          <h1 className="text-6xl font-bold text-green-400 font-mono uppercase tracking-wider animate-pulse">
             Git_Gud<span className="animate-pulse">_</span>
           </h1>
-          <p className="text-green-600 text-sm md:text-base font-mono tracking-widest">
-            {'>'} SYSTEM.INITIALIZING...
+          <p className="text-green-600 text-sm font-mono tracking-widest">
+            {'>'} SYSTEM.INITIALIZING
           </p>
         </div>
 
-        {/* Loading Dots */}
-        <div className="flex gap-3 justify-center">
-          <div className="w-3 h-3 bg-green-500 rounded-full animate-bounce"></div>
-          <div className="w-3 h-3 bg-green-500 rounded-full animate-bounce [animation-delay:100ms]"></div>
-          <div className="w-3 h-3 bg-green-500 rounded-full animate-bounce [animation-delay:200ms]"></div>
+        {/* Progress Bar */}
+        <div className="pt-8 space-y-4">
+          <div className="w-80 h-2 bg-green-900/20 mx-auto overflow-hidden">
+            <div className="h-full bg-green-500 animate-pulse" style={{ width: '60%' }}></div>
+          </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="w-64 h-1 bg-green-900/30 mx-auto overflow-hidden">
-          <div className="h-full bg-green-500 animate-loading shadow-[0_0_10px_rgba(0,255,0,0.5)]"></div>
-        </div>
+        {/* Loading Text */}
+        <p className="text-green-500 text-xs font-mono mt-8">
+          LOADING_PROTOCOL<span className="animate-pulse">...</span>
+        </p>
       </div>
 
       {/* Scanline Effect */}

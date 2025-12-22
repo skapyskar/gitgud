@@ -3,7 +3,7 @@ import Providers from "./providers";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Git_Gud - Productivity Protocol",
+  title: "Git_Gud",
   description: "Gamified task management system with XP, streaks, and anti-cheat mechanics",
   keywords: ["productivity", "task management", "gamification", "XP", "streaks"],
 };

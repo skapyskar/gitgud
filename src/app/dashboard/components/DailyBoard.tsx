@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Task, TaskTier, Category } from "../../../../prisma/generated/client";
 
 type WeeklyTask = Task & { repeatDays?: string | null };
@@ -19,6 +20,7 @@ const TIER_COLORS = {
 };
 
 export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: DailyBoardProps) {
+  const router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
   const [newTask, setNewTask] = useState({
     title: "",
@@ -26,6 +28,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
     category: "LIFE" as Category,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const today = new Date();
   const todayDayIndex = today.getDay();
@@ -60,7 +63,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
       if (res.ok) {
         setNewTask({ title: "", tier: "C", category: "LIFE" });
         setIsCreating(false);
-        window.location.reload();
+        router.refresh();
       }
     } catch (error) {
       console.error("Failed to create daily task:", error);
@@ -70,6 +73,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   };
 
   const handleCompleteTask = async (taskId: string, isWeeklyTask: boolean) => {
+    setIsLoading(true);
     try {
       await fetch("/api/tasks/complete", {
         method: "POST",
@@ -79,27 +83,37 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
           isWeeklyBonus: isWeeklyTask,
         }),
       });
-      window.location.reload();
+      router.refresh();
     } catch (error) {
       console.error("Failed to complete task:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleDeleteTask = async (taskId: string) => {
+    setIsLoading(true);
     try {
       await fetch("/api/tasks/delete", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ taskId }),
       });
-      window.location.reload();
+      router.refresh();
     } catch (error) {
       console.error("Failed to delete task:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="border border-green-900/30 p-4 bg-black/50 flex flex-col h-[calc(100vh-350px)] max-h-[665px]">
+    <div className="border border-green-900/30 p-4 bg-black/50 flex flex-col h-[calc(100vh-350px)] max-h-[665px] relative">
+      {isLoading && (
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="text-green-400 font-mono text-sm animate-pulse">LOADING...</div>
+        </div>
+      )}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
@@ -113,7 +127,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
             onClick={() => setIsCreating(true)}
             className="text-xs bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-3 py-1 text-green-400 uppercase tracking-wider font-mono"
           >
-            + Quick Task
+            + Task
           </button>
         )}
       </div>
@@ -190,7 +204,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
       {todaysWeeklyTasks.length > 0 && (
         <div className="mb-4">
           <h4 className="text-xs text-purple-500 uppercase tracking-wider mb-2 font-mono">
-            // Weekly Templates (Today)
+            Weekly Templates (Today)
           </h4>
           <div className="space-y-2">
             {todaysWeeklyTasks.map((task) => (
@@ -221,14 +235,13 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
       {/* Daily Tasks Section */}
       <div>
         <h4 className="text-xs text-green-500 uppercase tracking-wider mb-2 font-mono">
-          // Today&apos;s Specific Tasks
+          Today&apos;s Specific Tasks
         </h4>
         <div className="space-y-2">
           {dailyTasks.length === 0 ? (
-            <div className="text-center text-gray-600 text-xs py-8 font-mono">
-              [NO_TASKS_TODAY]
-              <br />
-              Add tasks for today or move from backlog
+            <div className="text-center text-gray-600 text-sm py-12 font-mono flex flex-col items-center justify-center">
+              <div className="text-lg mb-2">[NO_TASKS_TODAY]</div>
+              <div className="text-xs">Add tasks for today or move from backlog</div>
             </div>
           ) : (
             dailyTasks.map((task) => (

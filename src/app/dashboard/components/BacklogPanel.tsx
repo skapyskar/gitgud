@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Task } from "../../../../prisma/generated/client";
 
 interface BacklogPanelProps {
@@ -9,15 +10,18 @@ interface BacklogPanelProps {
 }
 
 export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
+  const router = useRouter();
   const [newTask, setNewTask] = useState("");
   const [deadline, setDeadline] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTask.trim()) return;
 
     setIsAdding(true);
+    setIsLoading(true);
     try {
       const res = await fetch("/api/tasks/create", {
         method: "POST",
@@ -32,16 +36,18 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
       if (res.ok) {
         setNewTask("");
         setDeadline("");
-        window.location.reload(); // Temporary - use revalidation in production
+        router.refresh();
       }
     } catch (error) {
       console.error("Failed to create backlog task:", error);
     } finally {
+      setIsLoading(false);
       setIsAdding(false);
     }
   };
 
   const handleMoveToDaily = async (taskId: string) => {
+    setIsLoading(true);
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -55,27 +61,37 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
           scheduledDate: today.toISOString(),
         }),
       });
-      window.location.reload();
+      router.refresh();
     } catch (error) {
       console.error("Failed to move task:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleDelete = async (taskId: string) => {
+    setIsLoading(true);
     try {
       await fetch("/api/tasks/delete", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ taskId }),
       });
-      window.location.reload();
+      router.refresh();
     } catch (error) {
       console.error("Failed to delete task:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="border border-green-900/30 p-4 bg-black/50 flex flex-col h-[calc(100vh-350px)] max-h-[665px]">
+    <div className="border border-green-900/30 p-4 bg-black/50 flex flex-col h-[calc(100vh-350px)] max-h-[665px] relative">
+      {isLoading && (
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="text-green-400 font-mono text-sm animate-pulse">LOADING...</div>
+        </div>
+      )}
       <div className="flex items-center gap-2 mb-4">
         <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
         <h3 className="text-xl font-bold text-green-500 uppercase tracking-wider">
@@ -84,16 +100,15 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
       </div>
       
       <p className="text-xs text-gray-500 mb-4 font-mono">
-        // Backlog tasks - Schedule when ready
+        Schedule when ready
       </p>
 
-      {/* Add New Backlog Task */}
       <form onSubmit={handleAddTask} className="mb-4 space-y-2">
         <input
           type="text"
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
-          placeholder="New backlog task..."
+          placeholder="New task..."
           className="w-full bg-black/70 border border-green-900/50 px-3 py-2 text-sm text-green-400 placeholder-gray-600 focus:outline-none focus:border-green-500 font-mono"
           disabled={isAdding}
         />

@@ -87,7 +87,7 @@ export default async function DashboardPage() {
           </header>
 
           {/* Stats Panel - Full Width */}
-          <StatsPanel user={user} />
+          <StatsPanel user={user} isGitHubLinked={isGitHubLinked} />
 
           {/* MAIN BATTLEFIELD GRID */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -112,58 +112,6 @@ export default async function DashboardPage() {
             */}
             <div className="lg:col-span-4 space-y-6">
               <WeeklyPlanner templates={weeklyTemplates} userId={user.id} />
-            </div>
-          </div>
-
-          {/* SYSTEM LOGS */}
-          <div className="border border-green-900/30 p-4 bg-black/50">
-            <h3 className="text-xl font-bold mb-4 text-green-500 uppercase tracking-wider">
-              &gt;&gt; System_Logs
-            </h3>
-            <div className="text-xs text-gray-500 space-y-2 font-mono">
-              
-              {/* GitHub Connection Status */}
-              <div className="mb-4 pb-4 border-b border-green-900/30">
-                <div className="text-green-600 mb-2">[GITHUB_INTEGRATION]</div>
-                {!isGitHubLinked ? (
-                  <div className="pl-4 space-y-2">
-                    <div className="flex items-center gap-2 text-yellow-500">
-                      <span>⚠️</span>
-                      <span>GitHub not connected</span>
-                    </div>
-                    <div className="text-yellow-700 text-xs">
-                      Commit tracking disabled
-                    </div>
-                    <div className="mt-2">
-                      <ConnectGitHubButton />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="pl-4">
-                    <div className="flex items-center gap-2 text-green-500">
-                      <span>✓</span>
-                      <span>GitHub connected - Tracking active</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="text-green-600">[PENDING_MODULE_INSTALLATION]</div>
-              <div className="pl-4">
-                - Calendar_Heatmap<br/>
-                - GitHub_Commit_Graph<br/>
-                - Achievement_Tracker<br/>
-                - XP_History_Chart
-              </div>
-              <div className="mt-4 pt-4 border-t border-green-900/30">
-                <div className="text-green-600">[SYSTEM_STATUS]</div>
-                <div className="pl-4 mt-2">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                    <span>All Systems Operational</span>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>

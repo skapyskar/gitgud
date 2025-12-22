@@ -85,7 +85,7 @@ export async function POST(request: Request) {
         data: {
           xp: { increment: totalXP },
           level: { 
-            set: Math.floor(1 + Math.sqrt((user.xp + totalXP) / 100))
+            set: Math.floor(1 + Math.sqrt((user.xp + totalXP) / 500))
           },
           streakDays: newStreakDays,
           lastTaskDate: today,

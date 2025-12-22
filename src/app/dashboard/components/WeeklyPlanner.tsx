@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Task, TaskTier, Category } from "../../../../prisma/generated/client";
 
 type WeeklyTask = Task & { repeatDays?: string | null };
@@ -13,12 +14,14 @@ interface WeeklyPlannerProps {
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps) {
+  const router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [tier, setTier] = useState<TaskTier>("C");
   const [category, setCategory] = useState<Category>("LIFE");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const toggleDay = (dayIndex: number) => {
     setSelectedDays(prev =>
@@ -52,7 +55,7 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
         setTier("C");
         setCategory("LIFE");
         setIsCreating(false);
-        window.location.reload();
+        router.refresh();
       }
     } catch (error) {
       console.error("Failed to create weekly task:", error);
@@ -62,20 +65,28 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
   };
 
   const handleDeleteTemplate = async (taskId: string) => {
+    setIsLoading(true);
     try {
       await fetch("/api/tasks/delete", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ taskId }),
       });
-      window.location.reload();
+      router.refresh();
     } catch (error) {
       console.error("Failed to delete template:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="border border-green-900/30 p-4 bg-black/50 flex flex-col h-[calc(100vh-350px)] max-h-[665px]">
+    <div className="border border-green-900/30 p-4 bg-black/50 flex flex-col h-[calc(100vh-350px)] max-h-[665px] relative">
+      {isLoading && (
+        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="text-green-400 font-mono text-sm animate-pulse">LOADING...</div>
+        </div>
+      )}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
@@ -95,7 +106,7 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
       </div>
 
       <p className="text-xs text-gray-500 mb-4 font-mono">
-        // Repeating tasks - Auto-generate on selected days
+        Preplanned Tasks
       </p>
 
       {/* Create New Template Form */}
@@ -203,7 +214,18 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
                 className="bg-black/70 border border-purple-700/30 p-3 hover:border-purple-500/50 transition-colors group"
               >
                 <div className="flex justify-between items-start gap-2 mb-2">
-                  <h4 className="text-sm text-green-400 font-mono">{template.title}</h4>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`text-xs px-1.5 py-0.5 font-bold border font-mono ${
+                        template.tier === 'S' ? 'bg-red-900/30 border-red-500 text-red-400' :
+                        template.tier === 'A' ? 'bg-orange-900/30 border-orange-500 text-orange-400' :
+                        template.tier === 'B' ? 'bg-blue-900/30 border-blue-500 text-blue-400' :
+                        'bg-gray-900/30 border-gray-500 text-gray-400'
+                      }`}>{template.tier}</span>
+                      <span className="text-[10px] text-gray-500 font-mono">[{template.category}]</span>
+                    </div>
+                    <h4 className="text-sm text-green-400 font-mono">{template.title}</h4>
+                  </div>
                   <button
                     onClick={() => handleDeleteTemplate(template.id)}
                     className="text-xs text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono"
@@ -212,7 +234,7 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
                   </button>
                 </div>
 
-                <div className="flex gap-1 flex-wrap">
+                <div className="flex gap-1 flex-wrap mt-2">
                   {DAYS.map((day, index) => (
                     <span
                       key={index}
