@@ -21,6 +21,10 @@ export default async function DashboardPage() {
       where: { email: session.user.email },
       include: {
         tasks: true,
+        dayLogs: {
+          orderBy: { date: 'desc' },
+          take: 30, // Last 30 days for full graph
+        },
       },
     });
 
