@@ -2,14 +2,18 @@
 
 import { useState } from "react";
 import MiniPerformanceGraph from "./MiniPerformanceGraph";
+import MiniWeeklyGrowthGraph from "./MiniWeeklyGrowthGraph";
+import MiniEfficiencyGraph from "./MiniEfficiencyGraph";
 import FullPerformanceGraph from "./FullPerformanceGraph";
-import { Sparkles, Zap, Trophy, TrendingUp, Coins } from "lucide-react";
+import { Sparkles, Zap, Trophy, TrendingUp, Coins, BarChart3, Target, Activity } from "lucide-react";
 
 interface DayLog {
   date: Date;
   totalXP: number;
   tasksDone: number;
 }
+
+type GraphType = 'daily' | 'weekly' | 'efficiency';
 
 interface StatsPanelProps {
   user: {
@@ -25,6 +29,7 @@ interface StatsPanelProps {
 
 export default function StatsPanel({ user }: StatsPanelProps) {
   const [showFullGraph, setShowFullGraph] = useState(false);
+  const [selectedGraph, setSelectedGraph] = useState<GraphType>('daily');
 
   if (!user) {
     return (
@@ -176,9 +181,49 @@ export default function StatsPanel({ user }: StatsPanelProps) {
            </div>
            
            <div className="p-3 border-b border-green-500/30 flex justify-between items-center bg-green-500/5">
-             <h3 className="text-xs font-mono text-green-500">
-               // RECENT_ACTIVITY_LOG
-             </h3>
+             <div className="flex items-center gap-2">
+               <h3 className="text-xs font-mono text-green-500">
+                 // RECENT_ACTIVITY_LOG
+               </h3>
+               
+               {/* Graph Type Selector */}
+               <div className="flex gap-1">
+                 <button
+                   onClick={() => setSelectedGraph('daily')}
+                   className={`p-1 transition-colors ${
+                     selectedGraph === 'daily' 
+                       ? 'text-green-400 bg-green-500/20' 
+                       : 'text-gray-600 hover:text-green-400'
+                   }`}
+                   title="Daily XP"
+                 >
+                   <Activity className="w-3 h-3" />
+                 </button>
+                 <button
+                   onClick={() => setSelectedGraph('weekly')}
+                   className={`p-1 transition-colors ${
+                     selectedGraph === 'weekly' 
+                       ? 'text-green-400 bg-green-500/20' 
+                       : 'text-gray-600 hover:text-green-400'
+                   }`}
+                   title="Weekly Growth"
+                 >
+                   <BarChart3 className="w-3 h-3" />
+                 </button>
+                 <button
+                   onClick={() => setSelectedGraph('efficiency')}
+                   className={`p-1 transition-colors ${
+                     selectedGraph === 'efficiency' 
+                       ? 'text-green-400 bg-green-500/20' 
+                       : 'text-gray-600 hover:text-green-400'
+                   }`}
+                   title="Efficiency Rate"
+                 >
+                   <Target className="w-3 h-3" />
+                 </button>
+               </div>
+             </div>
+             
              <button 
                 onClick={() => setShowFullGraph(true)}
                 className="text-[10px] hover:bg-green-500/20 text-green-400 px-2 py-0.5 border border-green-500/30 transition-colors"
@@ -188,13 +233,25 @@ export default function StatsPanel({ user }: StatsPanelProps) {
            </div>
            
            <div className="flex-1 p-4 min-h-[120px] flex flex-col justify-end">
-             {/* Pass a height/width to your graph component if needed, 
-                 or ensure MiniPerformanceGraph fills the parent */}
              <div className="w-full h-full">
-                <MiniPerformanceGraph 
-                  dayLogs={user.dayLogs || []} 
-                  onExpand={() => setShowFullGraph(true)}
-                />
+                {selectedGraph === 'daily' && (
+                  <MiniPerformanceGraph 
+                    dayLogs={user.dayLogs || []} 
+                    onExpand={() => setShowFullGraph(true)}
+                  />
+                )}
+                {selectedGraph === 'weekly' && (
+                  <MiniWeeklyGrowthGraph 
+                    dayLogs={user.dayLogs || []} 
+                    onExpand={() => setShowFullGraph(true)}
+                  />
+                )}
+                {selectedGraph === 'efficiency' && (
+                  <MiniEfficiencyGraph 
+                    dayLogs={user.dayLogs || []} 
+                    onExpand={() => setShowFullGraph(true)}
+                  />
+                )}
              </div>
            </div>
         </div>
@@ -206,6 +263,7 @@ export default function StatsPanel({ user }: StatsPanelProps) {
         <FullPerformanceGraph 
           dayLogs={user.dayLogs || []} 
           onClose={() => setShowFullGraph(false)}
+          initialGraph={selectedGraph}
         />
       )}
     </>
