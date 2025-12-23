@@ -136,7 +136,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   };
 
   return (
-    <div className="border border-green-900/30 p-[0.3vw] bg-black/50 flex flex-col h-[calc(100vh-45vh)] min-h-[14vh] max-h-[40vh] lg:h-[calc(100vh-35vh)] lg:max-h-[60vh] relative">
+    <div className="border border-green-900/30 p-[0.15vw] bg-black/50 flex flex-col h-[calc(100vh-45vh)] min-h-[14vh] max-h-[40vh] lg:h-[calc(100vh-35vh)] lg:max-h-[60vh] relative">
       {isLoading && (
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="text-green-400 font-mono text-sm animate-pulse">LOADING...</div>

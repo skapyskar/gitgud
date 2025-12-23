@@ -77,7 +77,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // Update task and user in a transaction
+    // Update task, user, and upsert DayLog in a transaction
     await prisma.$transaction([
       prisma.task.update({
         where: { id: taskId },
@@ -97,6 +97,27 @@ export async function POST(request: Request) {
           },
           streakDays: newStreakDays,
           lastTaskDate: today,
+        },
+      }),
+      prisma.dayLog.upsert({
+        where: {
+          userId_date: {
+            userId: user.id,
+            date: today,
+          },
+        },
+        update: {
+          totalXP: { increment: totalXP },
+          tasksDone: { increment: 1 },
+        },
+        create: {
+          userId: user.id,
+          date: today,
+          totalXP: totalXP,
+          tasksDone: 1,
+          cTierCount: task.tier === 'C' ? 1 : 0,
+          sTierCount: task.tier === 'S' ? 1 : 0,
+          streakAtEnd: newStreakDays,
         },
       }),
     ]);

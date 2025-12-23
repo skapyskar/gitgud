@@ -57,7 +57,7 @@ export default async function DashboardPage() {
     );
 
     return (
-      <main className="min-h-screen p-[0.2vw] lg:p-[0.8vw] bg-gradient-to-b from-black via-gray-900 to-black relative overflow-hidden">
+      <main className="min-h-screen p-[0.2vw] lg:p-[0.4vw] bg-gradient-to-b from-black via-gray-900 to-black relative overflow-hidden">
         {/* Cyberpunk Grid Background */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,65,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,65,0.1)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
@@ -69,7 +69,7 @@ export default async function DashboardPage() {
         {/* CHANGE 1: CONTAINER WIDTH 
             Changed max-w-7xl to max-w-[1920px] (or w-full) to use the screen edges.
         */}
-        <div className="w-full max-w-[1920px] mx-auto relative z-10">
+        <div className="w-full max-w-[1920px] mx-auto relative z-10 px-0 lg:px-[0.5vw]">
           
           {/* LEVEL 1: Header */}
           <header className="border-b border-green-800 pb-[0.2vh] grid grid-cols-3 items-center gap-[1vw] mb-[0.3vh]">

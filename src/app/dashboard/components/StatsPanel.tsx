@@ -75,10 +75,10 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-[0.8vw] mb-[3vh]">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-[0.5vw] mb-[2vh]">
         
         {/* MODULE 1: OPERATOR STATUS (Level & XP) */}
-        <div className="lg:col-span-1 bg-black/40 backdrop-blur-sm border border-green-500/30 p-[0.4vw] relative overflow-hidden group">
+        <div className="lg:col-span-1 bg-black/40 backdrop-blur-sm border border-green-500/30 p-[0.2vw] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-2 opacity-20">
             <Trophy className="w-16 h-16 text-green-500" />
           </div>
@@ -259,7 +259,7 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
         </div>
 
         {/* MODULE 4: SYSTEM LOGS */}
-        <div className="lg:col-span-1 bg-black/40 backdrop-blur-sm border border-green-500/30 p-[1vw]">
+        <div className="lg:col-span-1 bg-black/40 backdrop-blur-sm border border-green-500/30 p-[0.5vw]">
           <h3 className="text-xs font-mono text-green-600 mb-3 flex items-center gap-2">
             <span className="w-2 h-2 bg-green-500 rounded-sm"></span>
             SYSTEM_STATUS
