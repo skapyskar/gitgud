@@ -34,22 +34,17 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   const today = new Date();
   const todayDayIndex = today.getDay();
 
-  // Filter weekly templates that should appear today
+  // Combine all tasks for today (daily + weekly templates for today)
   const todaysWeeklyTasks = weeklyTemplates.filter((template) => {
     const days = template.repeatDays?.split(",").map(Number) || [];
     return days.includes(todayDayIndex);
   });
-
-  // Separate incomplete and complete weekly tasks for today
-  const incompleteWeeklyTasks = todaysWeeklyTasks.filter(task => !task.isCompleted);
-  const completedWeeklyTasks = todaysWeeklyTasks.filter(task => task.isCompleted);
-
-  // Separate completed and incomplete daily tasks
-  const incompleteTasks = dailyTasks.filter(task => !task.isCompleted);
-  const completedTasks = dailyTasks.filter(task => task.isCompleted);
-
-  // Combined completed tasks (both daily and weekly)
-  const allCompletedTasks = [...completedTasks, ...completedWeeklyTasks];
+  const allTodayTasks = [
+    ...dailyTasks,
+    ...todaysWeeklyTasks
+  ];
+  const pendingTasks = allTodayTasks.filter(task => !task.isCompleted);
+  const completedTasks = allTodayTasks.filter(task => task.isCompleted);
 
   const handleCreateDailyTask = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,8 +52,9 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
 
     setIsSubmitting(true);
     try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      // Always use UTC midnight for scheduledDate
+      const now = new Date();
+      const utcMidnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
       const res = await fetch("/api/tasks/create", {
         method: "POST",
@@ -68,7 +64,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
           type: "DAILY",
           tier: newTask.tier,
           category: newTask.category,
-          scheduledDate: today.toISOString(),
+          scheduledDate: utcMidnight.toISOString(),
         }),
       });
 
@@ -230,14 +226,16 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
 
       {/* Scrollable Content Area */}
       <div className="flex-1 overflow-y-auto pr-2">
-        {/* Weekly Tasks Section */}
-        {incompleteWeeklyTasks.length > 0 && (
-          <div className="mb-[0.5vh]">
-            <h4 className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-purple-500 uppercase tracking-wider mb-[0.3vh] font-mono">
-              Weekly Templates (Today)
-            </h4>
-            <div className="space-y-[0.3vh]">
-              {incompleteWeeklyTasks.map((task) => (
+        {/* Pending Tasks Section */}
+        <div>
+          <div className="space-y-[0.3vh]">
+            {pendingTasks.length === 0 ? (
+              <div className="text-center text-gray-600 text-[clamp(0.6rem,0.85vw,0.875rem)] py-[2vh] font-mono flex flex-col items-center justify-center">
+                <div className="text-[clamp(0.8rem,1.3vw,1.25rem)] mb-[0.3vh]">[NO_TASKS_TODAY]</div>
+                <div className="text-[clamp(0.5rem,0.7vw,0.75rem)]">Add tasks for today or move from backlog</div>
+              </div>
+            ) : (
+              pendingTasks.map((task) => (
                 <div
                   key={task.id}
                   className={`p-[0.5vw] border transition-colors group ${TIER_COLORS[task.tier]}`}
@@ -245,8 +243,8 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                   <div className="flex justify-between items-start">
                     <div className="flex items-start gap-[0.5vw] flex-1">
                       <button
-                        onClick={() => handleCompleteTask(task.id, true)}
-                        className="w-[1vw] h-[1vh] min-w-[16px] min-h-[16px] border-2 border-purple-500 rounded hover:bg-purple-500/30 transition-colors flex-shrink-0 mt-0.5"
+                        onClick={() => handleCompleteTask(task.id, task.type === 'WEEKLY')}
+                        className={`w-[1vw] h-[1vh] min-w-[16px] min-h-[16px] border-2 rounded hover:bg-green-500/30 transition-colors flex-shrink-0 mt-0.5 ${task.type === 'WEEKLY' ? 'border-purple-500' : 'border-green-500'}`}
                       />
                       <div className="flex-1">
                         <div className="flex items-center gap-[0.3vw] mb-[0.2vh]">
@@ -254,15 +252,13 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                             {task.tier}
                           </span>
                           <span className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 font-mono">{task.category}</span>
-                          <span className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-purple-400 font-mono">🔁 WEEKLY</span>
                         </div>
                         <h5 className="text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 font-mono">{task.title}</h5>
-                        <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-purple-400 mt-[0.2vh] font-mono">
-                          ⭐ +10 Bonus XP for completing on time
-                        </p>
+                        {task.description && (
+                          <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mt-[0.2vh] font-mono">{task.description}</p>
+                        )}
                       </div>
                     </div>
-                    
                     <button
                       onClick={() => handleDeleteTask(task.id)}
                       className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono ml-[0.3vw]"
@@ -271,119 +267,59 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                     </button>
                   </div>
                 </div>
-              ))}
-            </div>
+              ))
+            )}
           </div>
-        )}
-
-        {/* Daily Tasks Section */}
-        <div>
-          <h4 className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-500 uppercase tracking-wider mb-[0.3vh] font-mono">
-            Today&apos;s Specific Tasks
-          </h4>
-          <div className="space-y-[0.3vh]">
-          {incompleteTasks.length === 0 ? (
-            <div className="text-center text-gray-600 text-[clamp(0.6rem,0.85vw,0.875rem)] py-[2vh] font-mono flex flex-col items-center justify-center">
-              <div className="text-[clamp(0.8rem,1.3vw,1.25rem)] mb-[0.3vh]">[NO_TASKS_TODAY]</div>
-              <div className="text-[clamp(0.5rem,0.7vw,0.75rem)]">Add tasks for today or move from backlog</div>
-            </div>
-          ) : (
-            incompleteTasks.map((task) => (
-              <div
-                key={task.id}
-                className={`p-[0.5vw] border transition-colors group ${TIER_COLORS[task.tier]}`}
-              >
-                <div className="flex justify-between items-start">
-                  <div className="flex items-start gap-[0.5vw] flex-1">
-                    <button
-                      onClick={() => handleCompleteTask(task.id, false)}
-                      className={`w-[1vw] h-[1vh] min-w-[16px] min-h-[16px] border-2 rounded hover:bg-green-500/30 transition-colors flex-shrink-0 mt-0.5 border-green-500`}
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-[0.3vw] mb-[0.2vh]">
-                        <span className={`text-[clamp(0.5rem,0.7vw,0.75rem)] px-[0.3vw] py-[0.1vh] border font-mono ${TIER_COLORS[task.tier]}`}>
-                          {task.tier}
-                        </span>
-                        <span className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 font-mono">{task.category}</span>
-                      </div>
-                      <h5 className="text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 font-mono">{task.title}</h5>
-                      {task.description && (
-                        <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mt-[0.2vh] font-mono">{task.description}</p>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <button
-                    onClick={() => handleDeleteTask(task.id)}
-                    className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono ml-[0.3vw]"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
         </div>
-
         {/* Completed Tasks Section */}
-        {allCompletedTasks.length > 0 && (
+        {completedTasks.length > 0 && (
           <div className="mt-[0.5vh]">
             <button
               onClick={() => setShowCompleted(!showCompleted)}
               className="w-full flex items-center justify-between text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 uppercase tracking-wider mb-[0.3vh] font-mono hover:text-gray-400 transition-colors"
             >
-              <span>✓ Completed ({allCompletedTasks.length})</span>
+              <span>✓ Completed ({completedTasks.length})</span>
               <span>{showCompleted ? "▼" : "▶"}</span>
             </button>
-            
             {showCompleted && (
               <div className="space-y-2">
-                {allCompletedTasks.map((task) => {
-                  const isWeeklyTask = task.type === "WEEKLY";
-                  
-                  return (
-                    <div
-                      key={task.id}
-                      className="p-3 border border-gray-800 bg-gray-900/30 transition-colors group opacity-60"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-start gap-3 flex-1">
-                          <button
-                            onClick={() => handleUncompleteTask(task.id)}
-                            className="w-5 h-5 border-2 rounded bg-green-500 border-green-500 hover:bg-green-500/50 transition-colors flex-shrink-0 mt-0.5"
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs px-2 py-0.5 border border-gray-700 text-gray-500 font-mono">
-                                {task.tier}
-                              </span>
-                              <span className="text-xs text-gray-600 font-mono">{task.category}</span>
-                              {isWeeklyTask && (
-                                <span className="text-xs text-purple-600 font-mono">🔁 WEEKLY</span>
-                              )}
-                            </div>
-                            <h5 className="text-sm text-gray-500 font-mono line-through">{task.title}</h5>
-                            {task.finalPoints && (
-                              <p className="text-xs text-green-600 mt-1 font-mono">+{task.finalPoints} XP</p>
-                            )}
-                          </div>
-                        </div>
-                        
+                {completedTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className="p-3 border border-gray-800 bg-gray-900/30 transition-colors group opacity-60"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-start gap-3 flex-1">
                         <button
-                          onClick={() => handleDeleteTask(task.id)}
-                          className="text-xs text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono ml-2"
-                        >
-                          ✕
-                        </button>
+                          onClick={() => handleUncompleteTask(task.id)}
+                          className="w-5 h-5 border-2 rounded bg-green-500 border-green-500 hover:bg-green-500/50 transition-colors flex-shrink-0 mt-0.5"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs px-2 py-0.5 border border-gray-700 text-gray-500 font-mono">
+                              {task.tier}
+                            </span>
+                            <span className="text-xs text-gray-600 font-mono">{task.category}</span>
+                          </div>
+                          <h5 className="text-sm text-gray-500 font-mono line-through">{task.title}</h5>
+                          {task.finalPoints && (
+                            <p className="text-xs text-green-600 mt-1 font-mono">+{task.finalPoints} XP</p>
+                          )}
+                        </div>
                       </div>
+                      <button
+                        onClick={() => handleDeleteTask(task.id)}
+                        className="text-xs text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono ml-2"
+                      >
+                        ✕
+                      </button>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             )}
           </div>
         )}
-      </div>
       </div>
     </div>
   );
