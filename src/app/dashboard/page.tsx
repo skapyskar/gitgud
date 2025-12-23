@@ -47,13 +47,11 @@ export default async function DashboardPage() {
     const backlogTasks = user.tasks.filter(t => t.type === "BACKLOG" && !t.isCompleted);
     const weeklyTemplates = user.tasks.filter(t => t.type === "WEEKLY");
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const dailyTasks = user.tasks.filter(t => 
-      t.type === "DAILY" && 
-      t.scheduledDate && 
-      new Date(t.scheduledDate).setHours(0, 0, 0, 0) === today.getTime()
+    const todayISO = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD' in UTC
+    const dailyTasks = user.tasks.filter(t =>
+      t.type === "DAILY" &&
+      t.scheduledDate &&
+      new Date(t.scheduledDate).toISOString().slice(0, 10) === todayISO
     );
 
     return (
@@ -69,7 +67,7 @@ export default async function DashboardPage() {
         {/* CHANGE 1: CONTAINER WIDTH 
             Changed max-w-7xl to max-w-[1920px] (or w-full) to use the screen edges.
         */}
-        <div className="w-full max-w-[1920px] mx-auto relative z-10 px-0 lg:px-[0.5vw]">
+        <div className="w-full max-w-[1720px] mx-auto relative z-10 px-0 lg:px-[0.5vw]">
           
           {/* LEVEL 1: Header */}
           <header className="border-b border-green-800 pb-[0.2vh] grid grid-cols-3 items-center gap-[1vw] mb-[0.3vh]">

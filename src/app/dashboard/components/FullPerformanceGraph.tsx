@@ -69,7 +69,7 @@ export default function FullPerformanceGraph({ dayLogs, onClose, initialGraph = 
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-black border border-green-600 shadow-[0_0_20px_rgba(0,255,0,0.3)] w-full max-w-6xl max-h-[90vh] overflow-auto">
+      <div className="bg-black border border-green-600 shadow-[0_0_20px_rgba(0,255,0,0.3)] w-full max-w-4xl max-h-[80vh] overflow-auto">
         {/* Header */}
         <div className="border-b border-green-800 p-6 sticky top-0 bg-black z-10">
           <div className="flex justify-between items-center mb-4">
