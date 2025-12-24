@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Task, TaskTier, Category } from "../../../../prisma/generated/client";
 
@@ -30,6 +30,15 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
+  const [boardLoading, setBoardLoading] = useState(true);
+
+  // Simulate board loading for 600ms (or until tasks are ready)
+  // You can adjust this logic to fit your actual data fetching
+  // For SSR, you may want to use a prop or context instead
+  React.useEffect(() => {
+    const timer = setTimeout(() => setBoardLoading(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   const today = new Date();
   const todayDayIndex = today.getDay();
@@ -133,9 +142,9 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
 
   return (
     <div className="border border-green-900/30 p-[0.15vw] bg-black/50 flex flex-col h-[calc(100vh-60vh)] min-h-[12vh] max-h-[30vh] lg:h-[calc(100vh-40vh)] lg:max-h-[50vh] relative">
-      {isLoading && (
+      {(isLoading || boardLoading) && (
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="text-green-400 font-mono text-sm animate-pulse">LOADING...</div>
+          <div className="text-green-400 font-mono text-lg animate-pulse">LOADING TASKS...</div>
         </div>
       )}
       <div className="flex items-center justify-between mb-[0.5vh]">
