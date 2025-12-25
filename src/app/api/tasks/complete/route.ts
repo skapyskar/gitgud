@@ -113,14 +113,18 @@ export async function POST(request: Request) {
         update: {
           totalXP: { increment: totalXP },
           tasksDone: { increment: 1 },
-          // Note: possibleXP is tracked when task is created, not on completion
+          // For WEEKLY tasks, add to possibleXP since they don't go through the daily task create flow
+          // Include duration bonus (25%) if task has allocated duration
+          ...(task.type === 'WEEKLY' ? {
+            possibleXP: { increment: baseXP + (task.allocatedDuration ? Math.round(baseXP * 0.25) : 0) }
+          } : {}),
         },
         create: {
           userId: user.id,
           date: today,
           totalXP: totalXP,
           tasksDone: 1,
-          possibleXP: baseXP, // Fallback for tasks created before this update
+          possibleXP: baseXP + (task.allocatedDuration ? Math.round(baseXP * 0.25) : 0), // Include duration bonus
           cTierCount: task.tier === 'C' ? 1 : 0,
           sTierCount: task.tier === 'S' ? 1 : 0,
           streakAtEnd: newStreakDays,

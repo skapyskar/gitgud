@@ -30,6 +30,8 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
   const [moveTaskCategory, setMoveTaskCategory] = useState<Category>("LIFE");
   const [moveDeadlineTime, setMoveDeadlineTime] = useState("");
   const [moveDuration, setMoveDuration] = useState("");
+  // Delete confirmation state
+  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
 
   // Separate completed and incomplete tasks
   const incompleteTasks = optimisticTasks.filter(task => !task.isCompleted);
@@ -173,8 +175,18 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
     }
   };
 
-  // Optimistic delete
-  const handleDelete = async (taskId: string) => {
+  // Show delete confirmation dialog
+  const promptDelete = (taskId: string) => {
+    setDeletingTaskId(taskId);
+  };
+
+  // Confirm and execute delete
+  const confirmDelete = async () => {
+    if (!deletingTaskId) return;
+
+    const taskId = deletingTaskId;
+    setDeletingTaskId(null); // Close dialog
+
     const prev = [...optimisticTasks];
     setOptimisticTasks((current) => current.filter((t) => t.id !== taskId));
     setIsLoading(true);
@@ -324,6 +336,38 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
         </div>
       )}
 
+      {/* Delete Confirmation Modal */}
+      {deletingTaskId && (
+        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
+          <div className="bg-black border-2 border-red-500 p-[1vw] max-w-md w-full">
+            <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] text-red-400 font-mono mb-[0.5vh] uppercase">
+              Delete Task?
+            </h3>
+            <p className="text-[clamp(0.6rem,0.85vw,0.875rem)] text-gray-400 mb-[1vh] font-mono">
+              This task will be <span className="text-red-400 font-bold">permanently deleted</span>.
+            </p>
+            <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-yellow-500 mb-[1vh] font-mono">
+              ⚠️ This action cannot be undone!
+            </p>
+
+            <div className="flex gap-[0.5vw] pt-[0.3vh]">
+              <button
+                onClick={confirmDelete}
+                className="flex-1 bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-red-400 uppercase tracking-wider font-mono"
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => setDeletingTaskId(null)}
+                className="flex-1 bg-gray-900/30 hover:bg-gray-900/50 border border-gray-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-gray-400 uppercase font-mono"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center gap-[0.5vw] mb-[0.5vh]">
         <span className="w-[0.4vw] h-[0.4vh] min-w-[6px] min-h-[6px] bg-yellow-500 rounded-full animate-pulse"></span>
         <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] font-bold text-green-500 uppercase tracking-wider">
@@ -393,7 +437,7 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
                   → Today
                 </button>
                 <button
-                  onClick={() => handleDelete(task.id)}
+                  onClick={() => promptDelete(task.id)}
                   className="text-xs bg-red-900/30 hover:bg-red-900/50 border border-red-700/50 px-2 py-1 text-red-400 font-mono"
                 >
                   Delete
@@ -439,7 +483,7 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
                         ↺ Uncomplete
                       </button>
                       <button
-                        onClick={() => handleDelete(task.id)}
+                        onClick={() => promptDelete(task.id)}
                         className="text-xs bg-red-900/30 hover:bg-red-900/50 border border-red-700/50 px-2 py-1 text-red-400 font-mono"
                       >
                         Delete

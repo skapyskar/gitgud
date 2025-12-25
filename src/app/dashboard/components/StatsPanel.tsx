@@ -10,6 +10,7 @@ interface DayLog {
   date: Date;
   totalXP: number;
   tasksDone: number;
+  possibleXP: number;
 }
 
 
@@ -196,6 +197,7 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
           <div className="flex-1 p-2 min-h-[60px] flex flex-col justify-end">
             <div className="w-full h-full">
               <MiniEfficiencyGraph
+                key={`graph-${user.dayLogs?.map(d => `${d.totalXP}-${d.possibleXP}`).join('-') ?? 'empty'}`}
                 dayLogs={user.dayLogs || []}
                 onExpand={() => setShowFullGraph(true)}
               />

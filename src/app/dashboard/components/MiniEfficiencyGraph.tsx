@@ -18,7 +18,7 @@ export default function MiniEfficiencyGraph({ dayLogs, onExpand }: MiniEfficienc
 
   if (last7Days.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-600 text-xs font-mono">
+      <div className="flex items-center justify-center h-full text-gray-600 text-xs font-mono" style={{ minHeight: '60px' }}>
         NO_EFFICIENCY_DATA_AVAILABLE
       </div>
     );
@@ -26,8 +26,12 @@ export default function MiniEfficiencyGraph({ dayLogs, onExpand }: MiniEfficienc
 
   // Calculate efficiency values for each day
   const efficiencyData = last7Days.map((log) => {
-    const possibleXP = log.possibleXP || (log.tasksDone > 0 ? log.tasksDone * 30 : 100);
-    const efficiency = possibleXP > 0 ? (log.totalXP / possibleXP) * 100 : 0;
+    // Use possibleXP if available, otherwise use a reasonable fallback for legacy data
+    // For new data, possibleXP is set when tasks are created
+    const possibleXP = log.possibleXP ?? (log.tasksDone > 0 ? log.tasksDone * 30 : 0);
+    // If no tasks created/possible, efficiency is 100% (nothing to do = perfect)
+    // If tasks created but none completed, efficiency = 0%
+    const efficiency = possibleXP > 0 ? (log.totalXP / possibleXP) * 100 : 100;
     return Math.min(efficiency, 100); // Cap at 100%
   });
 

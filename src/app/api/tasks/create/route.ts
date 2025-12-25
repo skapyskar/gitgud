@@ -53,6 +53,9 @@ export async function POST(request: Request) {
       const taskDate = new Date(scheduledDate);
       taskDate.setHours(0, 0, 0, 0);
       const baseXP = tierBaseXP(tier || "C");
+      // Include duration bonus (25%) in possibleXP if task has allocated duration
+      const durationBonus = allocatedDuration ? Math.round(baseXP * 0.25) : 0;
+      const totalPossibleXP = baseXP + durationBonus;
 
       await prisma.dayLog.upsert({
         where: {
@@ -62,14 +65,14 @@ export async function POST(request: Request) {
           },
         },
         update: {
-          possibleXP: { increment: baseXP },
+          possibleXP: { increment: totalPossibleXP },
         },
         create: {
           userId: user.id,
           date: taskDate,
           totalXP: 0,
           tasksDone: 0,
-          possibleXP: baseXP,
+          possibleXP: totalPossibleXP,
         },
       });
     }

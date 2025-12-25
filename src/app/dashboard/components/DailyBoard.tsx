@@ -36,6 +36,8 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   const [boardLoading, setBoardLoading] = useState(true);
   // Duration confirmation dialog state
   const [completingTask, setCompletingTask] = useState<{ id: string; isWeekly: boolean; duration: number | null } | null>(null);
+  // Delete confirmation dialog state
+  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
 
   // Optimistic UI: local state for all tasks
   const [optimisticTasks, setOptimisticTasks] = useState<Task[]>([...dailyTasks]);
@@ -53,6 +55,54 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
 
   const today = new Date();
   const todayDayIndex = today.getDay();
+
+  // Helper: Get minimum deadline time (current time rounded up to next minute)
+  const getMinDeadlineTime = () => {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = (now.getMinutes() + 1).toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
+  // Helper: Max deadline time is 23:59 (midnight constraint - end of current day)
+  const MAX_DEADLINE_TIME = "23:59";
+
+  // Helper: Calculate max duration in minutes based on selected deadline time
+  const getMaxDuration = () => {
+    if (!newTask.deadlineTime) return 999; // No limit if no deadline set
+    const now = new Date();
+    const [deadlineHours, deadlineMinutes] = newTask.deadlineTime.split(':').map(Number);
+    const deadlineDate = new Date(now);
+    deadlineDate.setHours(deadlineHours, deadlineMinutes, 0, 0);
+
+    // Calculate minutes until deadline
+    const diffMs = deadlineDate.getTime() - now.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    return Math.max(1, diffMinutes); // At least 1 minute
+  };
+
+  // Update duration if it exceeds max when deadline changes
+  React.useEffect(() => {
+    if (newTask.deadlineTime && newTask.duration) {
+      const maxDur = getMaxDuration();
+      const currentDur = parseInt(newTask.duration);
+      if (currentDur > maxDur) {
+        setNewTask(prev => ({ ...prev, duration: maxDur.toString() }));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newTask.deadlineTime]);
+
+  // Helper: Get base XP for tier (for display purposes)
+  const getTierBaseXP = (tier: TaskTier): number => {
+    switch (tier) {
+      case "S": return 100;
+      case "A": return 60;
+      case "B": return 30;
+      case "C": return 10;
+      default: return 10;
+    }
+  };
 
   // Combine all tasks for today (optimistic + weekly templates for today)
   const todaysWeeklyTasks = weeklyTemplates.filter((template) => {
@@ -201,8 +251,18 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
     }
   };
 
-  // Optimistic delete
-  const handleDeleteTask = async (taskId: string) => {
+  // Show delete confirmation dialog
+  const promptDeleteTask = (taskId: string) => {
+    setDeletingTaskId(taskId);
+  };
+
+  // Confirm and execute delete
+  const confirmDeleteTask = async () => {
+    if (!deletingTaskId) return;
+
+    const taskId = deletingTaskId;
+    setDeletingTaskId(null); // Close dialog
+
     const prev = [...optimisticTasks];
     setOptimisticTasks((current) => current.filter((t) => t.id !== taskId));
     setIsLoading(true);
@@ -302,6 +362,38 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingTaskId && (
+        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
+          <div className="bg-black border-2 border-red-500 p-[1vw] max-w-md w-full">
+            <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] text-red-400 font-mono mb-[0.5vh] uppercase">
+              Delete Task?
+            </h3>
+            <p className="text-[clamp(0.6rem,0.85vw,0.875rem)] text-gray-400 mb-[1vh] font-mono">
+              This task will be <span className="text-red-400 font-bold">permanently deleted</span> and removed from your efficiency calculations.
+            </p>
+            <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-yellow-500 mb-[1vh] font-mono">
+              ⚠️ This action cannot be undone!
+            </p>
+
+            <div className="flex gap-[0.5vw] pt-[0.3vh]">
+              <button
+                onClick={confirmDeleteTask}
+                className="flex-1 bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-red-400 uppercase tracking-wider font-mono"
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => setDeletingTaskId(null)}
+                className="flex-1 bg-gray-900/30 hover:bg-gray-900/50 border border-gray-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-gray-400 uppercase font-mono"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex items-center justify-between mb-[0.5vh]">
         <div className="flex items-center gap-[0.5vw]">
           <span className="w-[0.4vw] h-[0.4vh] min-w-[6px] min-h-[6px] bg-green-500 rounded-full animate-ping"></span>
@@ -372,14 +464,19 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
 
           <div className="grid grid-cols-2 gap-[0.5vw] mb-[0.5vh]">
             <div>
-              <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Deadline Time *</label>
+              <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Deadline Time * (max 23:59)</label>
               <input
                 type="time"
                 value={newTask.deadlineTime}
                 onChange={(e) => setNewTask({ ...newTask, deadlineTime: e.target.value })}
+                min={getMinDeadlineTime()}
+                max={MAX_DEADLINE_TIME}
                 className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
                 required
               />
+              <span className="text-[clamp(0.4rem,0.5vw,0.6rem)] text-gray-600 font-mono">
+                {newTask.deadlineTime && `${getMaxDuration()} min available`}
+              </span>
             </div>
 
             <div>
@@ -387,9 +484,15 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
               <input
                 type="number"
                 value={newTask.duration}
-                onChange={(e) => setNewTask({ ...newTask, duration: e.target.value })}
-                placeholder="e.g. 60"
+                onChange={(e) => {
+                  const val = parseInt(e.target.value) || 0;
+                  const maxDur = getMaxDuration();
+                  // Clamp to max duration
+                  setNewTask({ ...newTask, duration: Math.min(val, maxDur).toString() });
+                }}
+                placeholder={newTask.deadlineTime ? `max ${getMaxDuration()}` : "e.g. 60"}
                 min="1"
+                max={getMaxDuration()}
                 className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono placeholder-gray-600"
               />
             </div>
@@ -445,6 +548,9 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                             {task.tier}
                           </span>
                           <span className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 font-mono">{task.category}</span>
+                          <span className="text-[clamp(0.45rem,0.6vw,0.65rem)] text-green-500 font-mono font-bold">
+                            +{getTierBaseXP(task.tier)} XP
+                          </span>
                         </div>
                         <h5 className="text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 font-mono">{task.title}</h5>
                         {/* Deadline and Duration Info */}
@@ -466,7 +572,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                       </div>
                     </div>
                     <button
-                      onClick={() => handleDeleteTask(task.id)}
+                      onClick={() => promptDeleteTask(task.id)}
                       className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono ml-[0.3vw]"
                     >
                       ✕
@@ -514,7 +620,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                         </div>
                       </div>
                       <button
-                        onClick={() => handleDeleteTask(task.id)}
+                        onClick={() => promptDeleteTask(task.id)}
                         className="text-xs text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono ml-2"
                       >
                         ✕

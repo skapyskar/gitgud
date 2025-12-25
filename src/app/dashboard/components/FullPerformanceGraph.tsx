@@ -31,8 +31,10 @@ export default function FullPerformanceGraph({ dayLogs, onClose }: FullPerforman
 
   // Calculate efficiency data
   const efficiencyData = logs.map((log) => {
-    const possibleXP = log.possibleXP || (log.tasksDone > 0 ? log.tasksDone * 30 : 100);
-    const efficiency = possibleXP > 0 ? (log.totalXP / possibleXP) * 100 : 0;
+    // Use possibleXP if available, otherwise use a reasonable fallback for legacy data
+    const possibleXP = log.possibleXP ?? (log.tasksDone > 0 ? log.tasksDone * 30 : 0);
+    // If no tasks created/possible, efficiency is 100% (nothing to do = perfect)
+    const efficiency = possibleXP > 0 ? (log.totalXP / possibleXP) * 100 : 100;
     return {
       date: log.date,
       efficiency: Math.min(efficiency, 100),

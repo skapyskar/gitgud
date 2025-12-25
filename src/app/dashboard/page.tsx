@@ -83,12 +83,12 @@ export default async function DashboardPage() {
           {/* LEVEL 1: Header */}
           <header className="border-b border-green-800 pb-[0.2vh] grid grid-cols-3 items-center gap-[1vw] mb-[0.3vh]">
             <div>
-              <h1 className="text-[clamp(0.875rem,2.2vw,2.25rem)] lg:text-[clamp(1.5rem,2.5vw,3rem)] font-bold text-green-400 font-mono uppercase tracking-wider">
+              <h1 className="text-[clamp(0.75rem,1.5vw,1.5rem)] lg:text-[clamp(1rem,1.8vw,2rem)] font-bold text-green-400 font-mono uppercase tracking-wider">
                 Git_Gud_Dashboard
               </h1>
             </div>
             <div className="text-center">
-              <p className="text-gray-400 text-[clamp(0.625rem,1.1vw,1.25rem)] lg:text-[clamp(0.875rem,1.3vw,1.5rem)]">
+              <p className="text-gray-400 text-[clamp(0.5rem,0.8vw,0.875rem)] lg:text-[clamp(0.625rem,0.9vw,1rem)]">
                 Welcome back, <span className="text-green-400 font-semibold">{user.name || user.email}</span>
               </p>
             </div>
@@ -98,8 +98,13 @@ export default async function DashboardPage() {
           </header>
 
           {/* LEVEL 2: Stats Panel - Full Width */}
+          {/* Key based on today's dayLog forces re-render when data changes */}
           <div className="mb-[0.5vh] lg:mb-[2.5vh]">
-            <StatsPanel user={user} isGitHubLinked={isGitHubLinked} />
+            <StatsPanel
+              key={`stats-${user.dayLogs?.[0]?.totalXP ?? 0}-${user.dayLogs?.[0]?.possibleXP ?? 0}-${user.dayLogs?.[0]?.tasksDone ?? 0}`}
+              user={user}
+              isGitHubLinked={isGitHubLinked}
+            />
           </div>
 
           {/* LEVEL 3: MAIN BATTLEFIELD GRID (Tasks) */}
