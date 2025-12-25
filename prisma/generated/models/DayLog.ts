@@ -29,6 +29,7 @@ export type AggregateDayLog = {
 export type DayLogAvgAggregateOutputType = {
   totalXP: number | null
   tasksDone: number | null
+  possibleXP: number | null
   cTierCount: number | null
   sTierCount: number | null
   streakAtEnd: number | null
@@ -37,6 +38,7 @@ export type DayLogAvgAggregateOutputType = {
 export type DayLogSumAggregateOutputType = {
   totalXP: number | null
   tasksDone: number | null
+  possibleXP: number | null
   cTierCount: number | null
   sTierCount: number | null
   streakAtEnd: number | null
@@ -48,6 +50,7 @@ export type DayLogMinAggregateOutputType = {
   date: Date | null
   totalXP: number | null
   tasksDone: number | null
+  possibleXP: number | null
   cTierCount: number | null
   sTierCount: number | null
   streakAtEnd: number | null
@@ -59,6 +62,7 @@ export type DayLogMaxAggregateOutputType = {
   date: Date | null
   totalXP: number | null
   tasksDone: number | null
+  possibleXP: number | null
   cTierCount: number | null
   sTierCount: number | null
   streakAtEnd: number | null
@@ -70,6 +74,7 @@ export type DayLogCountAggregateOutputType = {
   date: number
   totalXP: number
   tasksDone: number
+  possibleXP: number
   cTierCount: number
   sTierCount: number
   streakAtEnd: number
@@ -80,6 +85,7 @@ export type DayLogCountAggregateOutputType = {
 export type DayLogAvgAggregateInputType = {
   totalXP?: true
   tasksDone?: true
+  possibleXP?: true
   cTierCount?: true
   sTierCount?: true
   streakAtEnd?: true
@@ -88,6 +94,7 @@ export type DayLogAvgAggregateInputType = {
 export type DayLogSumAggregateInputType = {
   totalXP?: true
   tasksDone?: true
+  possibleXP?: true
   cTierCount?: true
   sTierCount?: true
   streakAtEnd?: true
@@ -99,6 +106,7 @@ export type DayLogMinAggregateInputType = {
   date?: true
   totalXP?: true
   tasksDone?: true
+  possibleXP?: true
   cTierCount?: true
   sTierCount?: true
   streakAtEnd?: true
@@ -110,6 +118,7 @@ export type DayLogMaxAggregateInputType = {
   date?: true
   totalXP?: true
   tasksDone?: true
+  possibleXP?: true
   cTierCount?: true
   sTierCount?: true
   streakAtEnd?: true
@@ -121,6 +130,7 @@ export type DayLogCountAggregateInputType = {
   date?: true
   totalXP?: true
   tasksDone?: true
+  possibleXP?: true
   cTierCount?: true
   sTierCount?: true
   streakAtEnd?: true
@@ -219,6 +229,7 @@ export type DayLogGroupByOutputType = {
   date: Date
   totalXP: number
   tasksDone: number
+  possibleXP: number
   cTierCount: number
   sTierCount: number
   streakAtEnd: number
@@ -253,6 +264,7 @@ export type DayLogWhereInput = {
   date?: Prisma.DateTimeFilter<"DayLog"> | Date | string
   totalXP?: Prisma.IntFilter<"DayLog"> | number
   tasksDone?: Prisma.IntFilter<"DayLog"> | number
+  possibleXP?: Prisma.IntFilter<"DayLog"> | number
   cTierCount?: Prisma.IntFilter<"DayLog"> | number
   sTierCount?: Prisma.IntFilter<"DayLog"> | number
   streakAtEnd?: Prisma.IntFilter<"DayLog"> | number
@@ -265,6 +277,7 @@ export type DayLogOrderByWithRelationInput = {
   date?: Prisma.SortOrder
   totalXP?: Prisma.SortOrder
   tasksDone?: Prisma.SortOrder
+  possibleXP?: Prisma.SortOrder
   cTierCount?: Prisma.SortOrder
   sTierCount?: Prisma.SortOrder
   streakAtEnd?: Prisma.SortOrder
@@ -281,6 +294,7 @@ export type DayLogWhereUniqueInput = Prisma.AtLeast<{
   date?: Prisma.DateTimeFilter<"DayLog"> | Date | string
   totalXP?: Prisma.IntFilter<"DayLog"> | number
   tasksDone?: Prisma.IntFilter<"DayLog"> | number
+  possibleXP?: Prisma.IntFilter<"DayLog"> | number
   cTierCount?: Prisma.IntFilter<"DayLog"> | number
   sTierCount?: Prisma.IntFilter<"DayLog"> | number
   streakAtEnd?: Prisma.IntFilter<"DayLog"> | number
@@ -293,6 +307,7 @@ export type DayLogOrderByWithAggregationInput = {
   date?: Prisma.SortOrder
   totalXP?: Prisma.SortOrder
   tasksDone?: Prisma.SortOrder
+  possibleXP?: Prisma.SortOrder
   cTierCount?: Prisma.SortOrder
   sTierCount?: Prisma.SortOrder
   streakAtEnd?: Prisma.SortOrder
@@ -312,6 +327,7 @@ export type DayLogScalarWhereWithAggregatesInput = {
   date?: Prisma.DateTimeWithAggregatesFilter<"DayLog"> | Date | string
   totalXP?: Prisma.IntWithAggregatesFilter<"DayLog"> | number
   tasksDone?: Prisma.IntWithAggregatesFilter<"DayLog"> | number
+  possibleXP?: Prisma.IntWithAggregatesFilter<"DayLog"> | number
   cTierCount?: Prisma.IntWithAggregatesFilter<"DayLog"> | number
   sTierCount?: Prisma.IntWithAggregatesFilter<"DayLog"> | number
   streakAtEnd?: Prisma.IntWithAggregatesFilter<"DayLog"> | number
@@ -322,6 +338,7 @@ export type DayLogCreateInput = {
   date: Date | string
   totalXP?: number
   tasksDone?: number
+  possibleXP?: number
   cTierCount?: number
   sTierCount?: number
   streakAtEnd?: number
@@ -334,6 +351,7 @@ export type DayLogUncheckedCreateInput = {
   date: Date | string
   totalXP?: number
   tasksDone?: number
+  possibleXP?: number
   cTierCount?: number
   sTierCount?: number
   streakAtEnd?: number
@@ -344,6 +362,7 @@ export type DayLogUpdateInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   totalXP?: Prisma.IntFieldUpdateOperationsInput | number
   tasksDone?: Prisma.IntFieldUpdateOperationsInput | number
+  possibleXP?: Prisma.IntFieldUpdateOperationsInput | number
   cTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   sTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   streakAtEnd?: Prisma.IntFieldUpdateOperationsInput | number
@@ -356,6 +375,7 @@ export type DayLogUncheckedUpdateInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   totalXP?: Prisma.IntFieldUpdateOperationsInput | number
   tasksDone?: Prisma.IntFieldUpdateOperationsInput | number
+  possibleXP?: Prisma.IntFieldUpdateOperationsInput | number
   cTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   sTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   streakAtEnd?: Prisma.IntFieldUpdateOperationsInput | number
@@ -367,6 +387,7 @@ export type DayLogCreateManyInput = {
   date: Date | string
   totalXP?: number
   tasksDone?: number
+  possibleXP?: number
   cTierCount?: number
   sTierCount?: number
   streakAtEnd?: number
@@ -377,6 +398,7 @@ export type DayLogUpdateManyMutationInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   totalXP?: Prisma.IntFieldUpdateOperationsInput | number
   tasksDone?: Prisma.IntFieldUpdateOperationsInput | number
+  possibleXP?: Prisma.IntFieldUpdateOperationsInput | number
   cTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   sTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   streakAtEnd?: Prisma.IntFieldUpdateOperationsInput | number
@@ -388,6 +410,7 @@ export type DayLogUncheckedUpdateManyInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   totalXP?: Prisma.IntFieldUpdateOperationsInput | number
   tasksDone?: Prisma.IntFieldUpdateOperationsInput | number
+  possibleXP?: Prisma.IntFieldUpdateOperationsInput | number
   cTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   sTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   streakAtEnd?: Prisma.IntFieldUpdateOperationsInput | number
@@ -414,6 +437,7 @@ export type DayLogCountOrderByAggregateInput = {
   date?: Prisma.SortOrder
   totalXP?: Prisma.SortOrder
   tasksDone?: Prisma.SortOrder
+  possibleXP?: Prisma.SortOrder
   cTierCount?: Prisma.SortOrder
   sTierCount?: Prisma.SortOrder
   streakAtEnd?: Prisma.SortOrder
@@ -422,6 +446,7 @@ export type DayLogCountOrderByAggregateInput = {
 export type DayLogAvgOrderByAggregateInput = {
   totalXP?: Prisma.SortOrder
   tasksDone?: Prisma.SortOrder
+  possibleXP?: Prisma.SortOrder
   cTierCount?: Prisma.SortOrder
   sTierCount?: Prisma.SortOrder
   streakAtEnd?: Prisma.SortOrder
@@ -433,6 +458,7 @@ export type DayLogMaxOrderByAggregateInput = {
   date?: Prisma.SortOrder
   totalXP?: Prisma.SortOrder
   tasksDone?: Prisma.SortOrder
+  possibleXP?: Prisma.SortOrder
   cTierCount?: Prisma.SortOrder
   sTierCount?: Prisma.SortOrder
   streakAtEnd?: Prisma.SortOrder
@@ -444,6 +470,7 @@ export type DayLogMinOrderByAggregateInput = {
   date?: Prisma.SortOrder
   totalXP?: Prisma.SortOrder
   tasksDone?: Prisma.SortOrder
+  possibleXP?: Prisma.SortOrder
   cTierCount?: Prisma.SortOrder
   sTierCount?: Prisma.SortOrder
   streakAtEnd?: Prisma.SortOrder
@@ -452,6 +479,7 @@ export type DayLogMinOrderByAggregateInput = {
 export type DayLogSumOrderByAggregateInput = {
   totalXP?: Prisma.SortOrder
   tasksDone?: Prisma.SortOrder
+  possibleXP?: Prisma.SortOrder
   cTierCount?: Prisma.SortOrder
   sTierCount?: Prisma.SortOrder
   streakAtEnd?: Prisma.SortOrder
@@ -504,6 +532,7 @@ export type DayLogCreateWithoutUserInput = {
   date: Date | string
   totalXP?: number
   tasksDone?: number
+  possibleXP?: number
   cTierCount?: number
   sTierCount?: number
   streakAtEnd?: number
@@ -514,6 +543,7 @@ export type DayLogUncheckedCreateWithoutUserInput = {
   date: Date | string
   totalXP?: number
   tasksDone?: number
+  possibleXP?: number
   cTierCount?: number
   sTierCount?: number
   streakAtEnd?: number
@@ -554,6 +584,7 @@ export type DayLogScalarWhereInput = {
   date?: Prisma.DateTimeFilter<"DayLog"> | Date | string
   totalXP?: Prisma.IntFilter<"DayLog"> | number
   tasksDone?: Prisma.IntFilter<"DayLog"> | number
+  possibleXP?: Prisma.IntFilter<"DayLog"> | number
   cTierCount?: Prisma.IntFilter<"DayLog"> | number
   sTierCount?: Prisma.IntFilter<"DayLog"> | number
   streakAtEnd?: Prisma.IntFilter<"DayLog"> | number
@@ -564,6 +595,7 @@ export type DayLogCreateManyUserInput = {
   date: Date | string
   totalXP?: number
   tasksDone?: number
+  possibleXP?: number
   cTierCount?: number
   sTierCount?: number
   streakAtEnd?: number
@@ -574,6 +606,7 @@ export type DayLogUpdateWithoutUserInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   totalXP?: Prisma.IntFieldUpdateOperationsInput | number
   tasksDone?: Prisma.IntFieldUpdateOperationsInput | number
+  possibleXP?: Prisma.IntFieldUpdateOperationsInput | number
   cTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   sTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   streakAtEnd?: Prisma.IntFieldUpdateOperationsInput | number
@@ -584,6 +617,7 @@ export type DayLogUncheckedUpdateWithoutUserInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   totalXP?: Prisma.IntFieldUpdateOperationsInput | number
   tasksDone?: Prisma.IntFieldUpdateOperationsInput | number
+  possibleXP?: Prisma.IntFieldUpdateOperationsInput | number
   cTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   sTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   streakAtEnd?: Prisma.IntFieldUpdateOperationsInput | number
@@ -594,6 +628,7 @@ export type DayLogUncheckedUpdateManyWithoutUserInput = {
   date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   totalXP?: Prisma.IntFieldUpdateOperationsInput | number
   tasksDone?: Prisma.IntFieldUpdateOperationsInput | number
+  possibleXP?: Prisma.IntFieldUpdateOperationsInput | number
   cTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   sTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   streakAtEnd?: Prisma.IntFieldUpdateOperationsInput | number
@@ -607,6 +642,7 @@ export type DayLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   date?: boolean
   totalXP?: boolean
   tasksDone?: boolean
+  possibleXP?: boolean
   cTierCount?: boolean
   sTierCount?: boolean
   streakAtEnd?: boolean
@@ -619,6 +655,7 @@ export type DayLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   date?: boolean
   totalXP?: boolean
   tasksDone?: boolean
+  possibleXP?: boolean
   cTierCount?: boolean
   sTierCount?: boolean
   streakAtEnd?: boolean
@@ -631,6 +668,7 @@ export type DayLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   date?: boolean
   totalXP?: boolean
   tasksDone?: boolean
+  possibleXP?: boolean
   cTierCount?: boolean
   sTierCount?: boolean
   streakAtEnd?: boolean
@@ -643,12 +681,13 @@ export type DayLogSelectScalar = {
   date?: boolean
   totalXP?: boolean
   tasksDone?: boolean
+  possibleXP?: boolean
   cTierCount?: boolean
   sTierCount?: boolean
   streakAtEnd?: boolean
 }
 
-export type DayLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "date" | "totalXP" | "tasksDone" | "cTierCount" | "sTierCount" | "streakAtEnd", ExtArgs["result"]["dayLog"]>
+export type DayLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "date" | "totalXP" | "tasksDone" | "possibleXP" | "cTierCount" | "sTierCount" | "streakAtEnd", ExtArgs["result"]["dayLog"]>
 export type DayLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -670,6 +709,7 @@ export type $DayLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     date: Date
     totalXP: number
     tasksDone: number
+    possibleXP: number
     cTierCount: number
     sTierCount: number
     streakAtEnd: number
@@ -1102,6 +1142,7 @@ export interface DayLogFieldRefs {
   readonly date: Prisma.FieldRef<"DayLog", 'DateTime'>
   readonly totalXP: Prisma.FieldRef<"DayLog", 'Int'>
   readonly tasksDone: Prisma.FieldRef<"DayLog", 'Int'>
+  readonly possibleXP: Prisma.FieldRef<"DayLog", 'Int'>
   readonly cTierCount: Prisma.FieldRef<"DayLog", 'Int'>
   readonly sTierCount: Prisma.FieldRef<"DayLog", 'Int'>
   readonly streakAtEnd: Prisma.FieldRef<"DayLog", 'Int'>

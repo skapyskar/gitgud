@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import MiniPerformanceGraph from "./MiniPerformanceGraph";
-import MiniWeeklyGrowthGraph from "./MiniWeeklyGrowthGraph";
 import MiniEfficiencyGraph from "./MiniEfficiencyGraph";
 import FullPerformanceGraph from "./FullPerformanceGraph";
 import ConnectGitHubButton from "./ConnectGitHubButton";
-import { Sparkles, Zap, Trophy, TrendingUp, Coins, BarChart3, Target, Activity } from "lucide-react";
+import { Zap, Trophy, Coins, Target } from "lucide-react";
 
 interface DayLog {
   date: Date;
@@ -14,7 +12,7 @@ interface DayLog {
   tasksDone: number;
 }
 
-type GraphType = 'daily' | 'weekly' | 'efficiency';
+
 
 interface StatsPanelProps {
   user: {
@@ -31,7 +29,6 @@ interface StatsPanelProps {
 
 export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
   const [showFullGraph, setShowFullGraph] = useState(false);
-  const [selectedGraph, setSelectedGraph] = useState<GraphType>('daily');
 
   if (!user) {
     return (
@@ -42,7 +39,7 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
   }
 
   // Calculate XP Progress (assuming level * 500 for next level, adjust formula as needed)
-  const xpForNextLevel = 500; 
+  const xpForNextLevel = 500;
   const currentLevelProgress = user.xp % 500;
   const xpRemaining = 500 - currentLevelProgress;
 
@@ -58,13 +55,13 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
   const startOfWeek = new Date();
   startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Sunday
   startOfWeek.setHours(0, 0, 0, 0);
-  
+
   const thisWeekLogs = user.dayLogs?.filter(log => {
     const logDate = new Date(log.date);
     return logDate >= startOfWeek;
   }) || [];
-  
-  const highestXPThisWeek = thisWeekLogs.length > 0 
+
+  const highestXPThisWeek = thisWeekLogs.length > 0
     ? Math.max(...thisWeekLogs.map(log => log.totalXP))
     : 0;
 
@@ -75,15 +72,15 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-[0.5vw] mb-[2vh]">
-        
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-[0.5vw] mb-[1vh]">
+
         {/* MODULE 1: OPERATOR STATUS (Level & XP) */}
         <div className="lg:col-span-1 bg-black/40 backdrop-blur-sm border border-green-500/30 p-[0.2vw] relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-2 opacity-20">
             <Trophy className="w-16 h-16 text-green-500" />
           </div>
-          
-          <h3 className="text-xs font-mono text-green-600 mb-4 flex items-center gap-2">
+
+          <h3 className="text-xs font-mono text-green-600 mb-2 flex items-center gap-2">
             <span className="w-2 h-2 bg-green-500 rounded-sm"></span>
             OPERATOR_LEVEL
           </h3>
@@ -102,7 +99,7 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
             </div>
             {/* Cyberpunk Progress Bar */}
             <div className="h-[0.5vh] min-h-[0.3vh] w-full bg-gray-900 border border-green-900/50 relative">
-              <div 
+              <div
                 className="h-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)] transition-all duration-500"
                 style={{ width: `${(currentLevelProgress / 500) * 100}%` }}
               />
@@ -120,9 +117,9 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
 
         {/* MODULE 2: COMBAT METRICS (Streak, Multiplier, Records) */}
         <div className="lg:col-span-1 bg-black/40 backdrop-blur-sm border border-green-500/30 p-0 flex flex-col">
-          
-          <div className="p-5 flex-1">
-            <h3 className="text-xs font-mono text-green-600 mb-4 flex items-center gap-2">
+
+          <div className="p-3 flex-1">
+            <h3 className="text-xs font-mono text-green-600 mb-2 flex items-center gap-2">
               <span className="w-2 h-2 bg-green-500 rounded-sm"></span>
               COMBAT_METRICS
             </h3>
@@ -175,87 +172,35 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
           </div>
         </div>
 
-        {/* MODULE 3: PERFORMANCE LOG (The Graph) */}
-        {/* Spans 2 columns on large screens to give the graph breathing room */}
+        {/* MODULE 3: EFFICIENCY LOG (Single Graph) */}
         <div className="md:col-span-2 lg:col-span-2 bg-black/40 backdrop-blur-sm border border-green-500/30 flex flex-col relative">
-           <div className="absolute top-2 right-2 flex gap-1">
-             <div className="w-1 h-1 bg-green-500 rounded-full animate-ping"></div>
-           </div>
-           
-           <div className="p-3 border-b border-green-500/30 flex justify-between items-center bg-green-500/5">
-             <div className="flex items-center gap-2">
-               <h3 className="text-xs font-mono text-green-500">
-                 RECENT_ACTIVITY_LOG
-               </h3>
-               
-               {/* Graph Type Selector */}
-               <div className="flex gap-1">
-                 <button
-                   onClick={() => setSelectedGraph('daily')}
-                   className={`p-1 transition-colors ${
-                     selectedGraph === 'daily' 
-                       ? 'text-green-400 bg-green-500/20' 
-                       : 'text-gray-600 hover:text-green-400'
-                   }`}
-                   title="Daily XP"
-                 >
-                   <Activity className="w-3 h-3" />
-                 </button>
-                 <button
-                   onClick={() => setSelectedGraph('weekly')}
-                   className={`p-1 transition-colors ${
-                     selectedGraph === 'weekly' 
-                       ? 'text-green-400 bg-green-500/20' 
-                       : 'text-gray-600 hover:text-green-400'
-                   }`}
-                   title="Weekly Growth"
-                 >
-                   <BarChart3 className="w-3 h-3" />
-                 </button>
-                 <button
-                   onClick={() => setSelectedGraph('efficiency')}
-                   className={`p-1 transition-colors ${
-                     selectedGraph === 'efficiency' 
-                       ? 'text-green-400 bg-green-500/20' 
-                       : 'text-gray-600 hover:text-green-400'
-                   }`}
-                   title="Efficiency Rate"
-                 >
-                   <Target className="w-3 h-3" />
-                 </button>
-               </div>
-             </div>
-             
-             <button 
-                onClick={() => setShowFullGraph(true)}
-                className="text-[10px] hover:bg-green-500/20 text-green-400 px-2 py-0.5 border border-green-500/30 transition-colors"
-             >
-               [EXPAND_VIEW]
-             </button>
-           </div>
-           
-           <div className="flex-1 p-4 min-h-[80px] flex flex-col justify-end">
-             <div className="w-full h-full">
-                {selectedGraph === 'daily' && (
-                  <MiniPerformanceGraph 
-                    dayLogs={user.dayLogs || []} 
-                    onExpand={() => setShowFullGraph(true)}
-                  />
-                )}
-                {selectedGraph === 'weekly' && (
-                  <MiniWeeklyGrowthGraph 
-                    dayLogs={user.dayLogs || []} 
-                    onExpand={() => setShowFullGraph(true)}
-                  />
-                )}
-                {selectedGraph === 'efficiency' && (
-                  <MiniEfficiencyGraph 
-                    dayLogs={user.dayLogs || []} 
-                    onExpand={() => setShowFullGraph(true)}
-                  />
-                )}
-             </div>
-           </div>
+          <div className="absolute top-2 right-2 flex gap-1">
+            <div className="w-1 h-1 bg-green-500 rounded-full animate-ping"></div>
+          </div>
+
+          <div className="p-2 border-b border-green-500/30 flex justify-between items-center bg-green-500/5">
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs font-mono text-green-500">
+                EFFICIENCY_RATE
+              </h3>
+            </div>
+
+            <button
+              onClick={() => setShowFullGraph(true)}
+              className="text-[10px] hover:bg-green-500/20 text-green-400 px-2 py-0.5 border border-green-500/30 transition-colors"
+            >
+              [EXPAND_VIEW]
+            </button>
+          </div>
+
+          <div className="flex-1 p-2 min-h-[60px] flex flex-col justify-end">
+            <div className="w-full h-full">
+              <MiniEfficiencyGraph
+                dayLogs={user.dayLogs || []}
+                onExpand={() => setShowFullGraph(true)}
+              />
+            </div>
+          </div>
         </div>
 
         {/* MODULE 4: SYSTEM LOGS */}
@@ -264,7 +209,7 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
             <span className="w-2 h-2 bg-green-500 rounded-sm"></span>
             SYSTEM_STATUS
           </h3>
-          
+
           <div className="space-y-3 text-xs font-mono">
             {/* System Status - Always show */}
             <div className="flex flex-col items-center justify-center py-6">
@@ -298,10 +243,9 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
 
       {/* Full Performance Graph Modal */}
       {showFullGraph && (
-        <FullPerformanceGraph 
-          dayLogs={user.dayLogs || []} 
+        <FullPerformanceGraph
+          dayLogs={user.dayLogs || []}
           onClose={() => setShowFullGraph(false)}
-          initialGraph={selectedGraph}
         />
       )}
     </>

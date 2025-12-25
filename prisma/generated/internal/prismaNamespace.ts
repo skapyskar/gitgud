@@ -1008,6 +1008,10 @@ export const TaskScalarFieldEnum = {
   isBonus: 'isBonus',
   timeBonus: 'timeBonus',
   finalPoints: 'finalPoints',
+  deadlineTime: 'deadlineTime',
+  allocatedDuration: 'allocatedDuration',
+  durationMet: 'durationMet',
+  isExpired: 'isExpired',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1021,6 +1025,7 @@ export const DayLogScalarFieldEnum = {
   date: 'date',
   totalXP: 'totalXP',
   tasksDone: 'tasksDone',
+  possibleXP: 'possibleXP',
   cTierCount: 'cTierCount',
   sTierCount: 'sTierCount',
   streakAtEnd: 'streakAtEnd'

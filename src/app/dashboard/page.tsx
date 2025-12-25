@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 export default async function DashboardPage() {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       redirect("/login");
     }
@@ -36,9 +36,9 @@ export default async function DashboardPage() {
 
     // ✅ Check Account table for GitHub connection
     const githubAccount = await prisma.account.findFirst({
-      where: { 
-        userId: user.id, 
-        provider: "github" 
+      where: {
+        userId: user.id,
+        provider: "github"
       },
     });
     const isGitHubLinked = !!githubAccount;
@@ -48,11 +48,22 @@ export default async function DashboardPage() {
     const weeklyTemplates = user.tasks.filter(t => t.type === "WEEKLY");
 
     const todayISO = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD' in UTC
+    console.log('[Dashboard] Today ISO:', todayISO);
+    console.log('[Dashboard] Total tasks:', user.tasks.length);
+    console.log('[Dashboard] Daily type tasks:', user.tasks.filter(t => t.type === "DAILY").map(t => ({
+      id: t.id.slice(0, 8),
+      title: t.title,
+      scheduledDate: t.scheduledDate,
+      scheduledDateISO: t.scheduledDate ? new Date(t.scheduledDate).toISOString().slice(0, 10) : null,
+      matches: t.scheduledDate ? new Date(t.scheduledDate).toISOString().slice(0, 10) === todayISO : false
+    })));
     const dailyTasks = user.tasks.filter(t =>
       t.type === "DAILY" &&
       t.scheduledDate &&
       new Date(t.scheduledDate).toISOString().slice(0, 10) === todayISO
     );
+    console.log('[Dashboard] Filtered daily tasks count:', dailyTasks.length);
+
 
     return (
       <main className="min-h-screen p-[0.2vw] lg:p-[0.4vw] bg-gradient-to-b from-black via-gray-900 to-black relative overflow-hidden">
@@ -68,7 +79,7 @@ export default async function DashboardPage() {
             Changed max-w-7xl to max-w-[1920px] (or w-full) to use the screen edges.
         */}
         <div className="w-full max-w-[1720px] mx-auto relative z-10 px-0 lg:px-[0.5vw]">
-          
+
           {/* LEVEL 1: Header */}
           <header className="border-b border-green-800 pb-[0.2vh] grid grid-cols-3 items-center gap-[1vw] mb-[0.3vh]">
             <div>
@@ -93,7 +104,7 @@ export default async function DashboardPage() {
 
           {/* LEVEL 3: MAIN BATTLEFIELD GRID (Tasks) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-[1vw]">
-            
+
             {/* COLUMN 1: THE DUMP (BACKLOG) */}
             {/* Kept at 3 (25%) */}
             <div className="lg:col-span-3 space-y-[0.5vh]">

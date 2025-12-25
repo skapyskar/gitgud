@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Task, TaskTier, Category } from "../../../../prisma/generated/client";
 
@@ -16,22 +16,66 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
-  
+  // Optimistic UI: local state for tasks
+  const [optimisticTasks, setOptimisticTasks] = useState<Task[]>([...tasks]);
+
+  // Sync optimisticTasks with props when tasks change (after server response replaces temp tasks)
+  useEffect(() => {
+    setOptimisticTasks([...tasks]);
+  }, [tasks]);
+
   // Move to daily modal state
   const [movingTaskId, setMovingTaskId] = useState<string | null>(null);
   const [moveTaskTier, setMoveTaskTier] = useState<TaskTier>("C");
   const [moveTaskCategory, setMoveTaskCategory] = useState<Category>("LIFE");
+  const [moveDeadlineTime, setMoveDeadlineTime] = useState("");
+  const [moveDuration, setMoveDuration] = useState("");
 
   // Separate completed and incomplete tasks
-  const incompleteTasks = tasks.filter(task => !task.isCompleted);
-  const completedTasks = tasks.filter(task => task.isCompleted);
+  const incompleteTasks = optimisticTasks.filter(task => !task.isCompleted);
+  const completedTasks = optimisticTasks.filter(task => task.isCompleted);
 
+  // Optimistic add
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTask.trim()) return;
 
     setIsAdding(true);
     setIsLoading(true);
+    // 1. Create a fake task for instant UI
+    const tempId = Math.random().toString();
+    const now = new Date();
+    const tempTask: Task = {
+      id: tempId,
+      title: newTask,
+      isCompleted: false,
+      type: "BACKLOG",
+      userId,
+      deadline: deadline ? new Date(deadline) : null,
+      createdAt: now,
+      updatedAt: now,
+      tier: "C",
+      category: "LIFE",
+      description: null,
+      plannedDate: now,
+      plannedStartTime: null,
+      plannedEndTime: null,
+      scheduledDate: null,
+      repeatDays: null,
+      completedAt: null,
+      basePoints: 10,
+      xpWorth: 10,
+      isBonus: false,
+      timeBonus: 0,
+      finalPoints: 0,
+      // New fields for deadline/duration system
+      deadlineTime: null,
+      allocatedDuration: null,
+      durationMet: false,
+      isExpired: false,
+    };
+    setOptimisticTasks((current) => [tempTask, ...current]);
+
     try {
       const res = await fetch("/api/tasks/create", {
         method: "POST",
@@ -46,9 +90,12 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
       if (res.ok) {
         setNewTask("");
         setDeadline("");
-        router.refresh();
+        router.refresh(); // Will replace fake with real
+      } else {
+        setOptimisticTasks((current) => current.filter(t => t.id !== tempId));
       }
     } catch (error) {
+      setOptimisticTasks((current) => current.filter(t => t.id !== tempId));
       console.error("Failed to create backlog task:", error);
     } finally {
       setIsLoading(false);
@@ -57,43 +104,93 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
   };
 
   const handleMoveToDaily = async (taskId: string) => {
-    setIsLoading(true);
-    try {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+    // Validate that tier and category are selected
+    if (!moveTaskTier || !moveTaskCategory) {
+      alert("Please select both Task Tier and Category before moving to daily tasks.");
+      return;
+    }
 
-      await fetch("/api/tasks/update", {
+    // Check if this is a temporary optimistic task (not yet saved to DB)
+    // Temporary IDs from Math.random() start with "0." while cuid starts with "c"
+    if (taskId.startsWith("0.")) {
+      alert("Please wait for the task to finish saving before moving it.");
+      return;
+    }
+
+    // Optimistic update: remove task from backlog immediately
+    const prev = [...optimisticTasks];
+    setOptimisticTasks((current) => current.filter((t) => t.id !== taskId));
+    setIsLoading(true);
+
+    try {
+      // Use UTC midnight to match server-side date handling
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+
+      // Build deadline time if provided
+      let deadlineTimeValue = null;
+      if (moveDeadlineTime) {
+        const [hours, minutes] = moveDeadlineTime.split(':').map(Number);
+        const deadlineDate = new Date(today);
+        deadlineDate.setHours(hours, minutes, 0, 0);
+        deadlineTimeValue = deadlineDate.toISOString();
+      }
+
+      const res = await fetch("/api/tasks/update", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           taskId,
           type: "DAILY",
-          scheduledDate: today.toISOString(),
+          plannedDate: today.toISOString(),
           tier: moveTaskTier,
           category: moveTaskCategory,
+          deadlineTime: deadlineTimeValue,
+          allocatedDuration: moveDuration ? parseInt(moveDuration) : null,
         }),
       });
-      setMovingTaskId(null);
-      setMoveTaskTier("C");
-      setMoveTaskCategory("LIFE");
-      router.refresh();
+
+      if (res.ok) {
+        setMovingTaskId(null);
+        setMoveTaskTier("C");
+        setMoveTaskCategory("LIFE");
+        setMoveDeadlineTime("");
+        setMoveDuration("");
+        router.refresh();
+      } else {
+        // Revert on failure
+        setOptimisticTasks(prev);
+        const errorData = await res.json();
+        alert(`Failed to move task: ${errorData.error || 'Unknown error'}`);
+      }
     } catch (error) {
+      // Revert on error
+      setOptimisticTasks(prev);
       console.error("Failed to move task:", error);
+      alert("Failed to move task. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Optimistic delete
   const handleDelete = async (taskId: string) => {
+    const prev = [...optimisticTasks];
+    setOptimisticTasks((current) => current.filter((t) => t.id !== taskId));
     setIsLoading(true);
     try {
-      await fetch("/api/tasks/delete", {
+      const res = await fetch("/api/tasks/delete", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ taskId }),
       });
-      router.refresh();
+      if (res.ok) {
+        router.refresh();
+      } else {
+        setOptimisticTasks(prev);
+      }
     } catch (error) {
+      setOptimisticTasks(prev);
       console.error("Failed to delete task:", error);
     } finally {
       setIsLoading(false);
@@ -101,15 +198,31 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
   };
 
   const handleUncompleteTask = async (taskId: string) => {
+    // Optimistic update: mark task as uncompleted immediately
+    const prev = [...optimisticTasks];
+    setOptimisticTasks((current) =>
+      current.map((t) =>
+        t.id === taskId
+          ? { ...t, isCompleted: false, completedAt: null }
+          : t
+      )
+    );
     setIsLoading(true);
     try {
-      await fetch("/api/tasks/uncomplete", {
+      const res = await fetch("/api/tasks/uncomplete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ taskId }),
       });
-      router.refresh();
+      if (res.ok) {
+        router.refresh();
+      } else {
+        // Revert on failure
+        setOptimisticTasks(prev);
+      }
     } catch (error) {
+      // Revert on error
+      setOptimisticTasks(prev);
       console.error("Failed to uncomplete task:", error);
     } finally {
       setIsLoading(false);
@@ -129,14 +242,16 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
         <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
           <div className="bg-black border-2 border-green-500 p-[1vw] max-w-md w-full">
             <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] text-green-400 font-mono mb-[0.5vh] uppercase">Schedule for Today</h3>
-            
+            <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-400 mb-[1vh] font-mono">Select tier and category before adding to daily tasks</p>
+
             <div className="space-y-[0.5vh]">
               <div>
-                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.3vh] block font-mono uppercase">Task Tier</label>
+                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Task Tier *</label>
                 <select
                   value={moveTaskTier}
                   onChange={(e) => setMoveTaskTier(e.target.value as TaskTier)}
                   className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
+                  required
                 >
                   <option value="S">S - Critical (High XP)</option>
                   <option value="A">A - Important</option>
@@ -146,11 +261,12 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
               </div>
 
               <div>
-                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.3vh] block font-mono uppercase">Category</label>
+                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Category *</label>
                 <select
                   value={moveTaskCategory}
                   onChange={(e) => setMoveTaskCategory(e.target.value as Category)}
                   className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
+                  required
                 >
                   <option value="DEV">DEV</option>
                   <option value="ACADEMICS">ACADEMICS</option>
@@ -159,10 +275,34 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
                 </select>
               </div>
 
+              <div>
+                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Deadline Time *</label>
+                <input
+                  type="time"
+                  value={moveDeadlineTime}
+                  onChange={(e) => setMoveDeadlineTime(e.target.value)}
+                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Duration (minutes)</label>
+                <input
+                  type="number"
+                  value={moveDuration}
+                  onChange={(e) => setMoveDuration(e.target.value)}
+                  placeholder="e.g. 60"
+                  min="1"
+                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono placeholder-gray-600"
+                />
+              </div>
+
               <div className="flex gap-[0.5vw] pt-[0.3vh]">
                 <button
                   onClick={() => handleMoveToDaily(movingTaskId)}
-                  className="flex-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 uppercase tracking-wider font-mono"
+                  disabled={!moveDeadlineTime}
+                  className="flex-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 uppercase tracking-wider font-mono disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   → Move to Today
                 </button>
@@ -171,6 +311,8 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
                     setMovingTaskId(null);
                     setMoveTaskTier("C");
                     setMoveTaskCategory("LIFE");
+                    setMoveDeadlineTime("");
+                    setMoveDuration("");
                   }}
                   className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-400 uppercase font-mono"
                 >
@@ -188,7 +330,7 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
           &gt;&gt; The_Dump
         </h3>
       </div>
-      
+
       <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.5vh] font-mono">
         Schedule when ready
       </p>
@@ -236,7 +378,7 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
               <div className="flex justify-between items-start gap-2 mb-2">
                 <h4 className="text-sm text-green-400 font-mono">{task.title}</h4>
               </div>
-              
+
               {task.deadline && (
                 <div className="text-xs text-yellow-600 mb-2 font-mono">
                   Deadline: {new Date(task.deadline).toLocaleDateString()}
@@ -271,7 +413,7 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
               <span>✓ Completed ({completedTasks.length})</span>
               <span>{showCompleted ? "▼" : "▶"}</span>
             </button>
-            
+
             {showCompleted && (
               <div className="space-y-2">
                 {completedTasks.map((task) => (
@@ -282,7 +424,7 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
                     <div className="flex justify-between items-start gap-2 mb-2">
                       <h4 className="text-sm text-gray-500 font-mono line-through">{task.title}</h4>
                     </div>
-                    
+
                     {task.finalPoints && (
                       <div className="text-xs text-green-600 mb-2 font-mono">
                         +{task.finalPoints} XP

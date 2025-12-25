@@ -100,6 +100,12 @@ model Task {
   timeBonus        Int       @default(0)
   finalPoints      Int       @default(0)
   
+  // Duration & Expiry System
+  deadlineTime      DateTime?  // Time of day the task expires
+  allocatedDuration Int?       // Expected duration in minutes
+  durationMet       Boolean    @default(false)  // Did user complete within duration?
+  isExpired         Boolean    @default(false)  // Task was cut at deadline
+  
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -116,6 +122,7 @@ model DayLog {
   
   totalXP      Int      @default(0)
   tasksDone    Int      @default(0)
+  possibleXP   Int      @default(0)  // Total XP that could have been earned
   
   // Anti-Cheat Metrics
   cTierCount   Int      @default(0)

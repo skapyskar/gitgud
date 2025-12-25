@@ -7,7 +7,7 @@ import { tierBaseXP, streakMultiplier } from "@/lib/gamification";
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { taskId, isWeeklyBonus } = body;
+    const { taskId, isWeeklyBonus, durationMet } = body;
 
     if (!taskId) {
       return NextResponse.json({ error: "Task ID required" }, { status: 400 });
@@ -37,9 +37,9 @@ export async function POST(request: Request) {
 
     // Prevent XP farming: Check if task is already completed
     if (task.isCompleted) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: "Task already completed",
-        alreadyCompleted: true 
+        alreadyCompleted: true
       }, { status: 400 });
     }
 
@@ -47,18 +47,21 @@ export async function POST(request: Request) {
     const baseXP = tierBaseXP(task.tier);
     const streakBonus = streakMultiplier(user.streakDays);
     const weeklyBonus = isWeeklyBonus ? 10 : 0;
-    
-    // Calculate final XP: base * streak + weekly bonus
-    const totalXP = Math.round(baseXP * streakBonus) + weeklyBonus;
+
+    // Calculate duration bonus (25% extra if task was completed within allocated duration)
+    const durationBonusMultiplier = durationMet ? 1.25 : 1.0;
+
+    // Calculate final XP: (base * streak * duration bonus) + weekly bonus
+    const totalXP = Math.round(baseXP * streakBonus * durationBonusMultiplier) + weeklyBonus;
 
     // Update streak logic
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const lastTaskDate = user.lastTaskDate ? new Date(user.lastTaskDate) : null;
     lastTaskDate?.setHours(0, 0, 0, 0);
-    
+
     let newStreakDays = user.streakDays;
-    
+
     if (!lastTaskDate || lastTaskDate.getTime() !== today.getTime()) {
       // First task of the day
       if (lastTaskDate) {
@@ -86,13 +89,14 @@ export async function POST(request: Request) {
           completedAt: new Date(),
           isBonus: isWeeklyBonus || false,
           finalPoints: totalXP,
+          durationMet: durationMet || false,
         },
       }),
       prisma.user.update({
         where: { id: user.id },
         data: {
           xp: { increment: totalXP },
-          level: { 
+          level: {
             set: Math.floor(1 + Math.sqrt((user.xp + totalXP) / 500))
           },
           streakDays: newStreakDays,
@@ -109,12 +113,14 @@ export async function POST(request: Request) {
         update: {
           totalXP: { increment: totalXP },
           tasksDone: { increment: 1 },
+          // Note: possibleXP is tracked when task is created, not on completion
         },
         create: {
           userId: user.id,
           date: today,
           totalXP: totalXP,
           tasksDone: 1,
+          possibleXP: baseXP, // Fallback for tasks created before this update
           cTierCount: task.tier === 'C' ? 1 : 0,
           sTierCount: task.tier === 'S' ? 1 : 0,
           streakAtEnd: newStreakDays,
@@ -122,12 +128,15 @@ export async function POST(request: Request) {
       }),
     ]);
 
-    return NextResponse.json({ 
-      success: true, 
+    const durationBonusAmount = durationMet ? Math.round(baseXP * streakBonus * 0.25) : 0;
+
+    return NextResponse.json({
+      success: true,
       xpGained: totalXP,
       baseXP,
       streakBonus: streakBonus > 1 ? Math.round(baseXP * (streakBonus - 1)) : 0,
       weeklyBonus,
+      durationBonus: durationBonusAmount,
       newStreak: newStreakDays,
     });
   } catch (error) {

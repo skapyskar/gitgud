@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { tierBaseXP } from "@/lib/gamification";
 
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { title, type, tier, category, deadline, scheduledDate, repeatDays } = body;
+    const { title, type, tier, category, deadline, scheduledDate, repeatDays, deadlineTime, allocatedDuration } = body;
 
     // Validate required fields
     if (!title || !type) {
@@ -42,8 +43,36 @@ export async function POST(request: Request) {
         scheduledDate: scheduledDate ? new Date(scheduledDate) : null,
         plannedDate: scheduledDate ? new Date(scheduledDate) : new Date(),
         repeatDays: repeatDays || null,
+        deadlineTime: deadlineTime ? new Date(deadlineTime) : null,
+        allocatedDuration: allocatedDuration || null,
       },
     });
+
+    // For DAILY tasks, update DayLog to track possibleXP (for efficiency calculation)
+    if (type === "DAILY" && scheduledDate) {
+      const taskDate = new Date(scheduledDate);
+      taskDate.setHours(0, 0, 0, 0);
+      const baseXP = tierBaseXP(tier || "C");
+
+      await prisma.dayLog.upsert({
+        where: {
+          userId_date: {
+            userId: user.id,
+            date: taskDate,
+          },
+        },
+        update: {
+          possibleXP: { increment: baseXP },
+        },
+        create: {
+          userId: user.id,
+          date: taskDate,
+          totalXP: 0,
+          tasksDone: 0,
+          possibleXP: baseXP,
+        },
+      });
+    }
 
     return NextResponse.json({ success: true, task });
   } catch (error) {
