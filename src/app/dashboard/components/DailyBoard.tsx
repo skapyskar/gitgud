@@ -129,6 +129,19 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
     ...optimisticTasks,
     ...todaysWeeklyTasks
   ];
+
+  // Helper: Check if a task's deadline has passed
+  const isTaskExpired = (task: Task | WeeklyTask): boolean => {
+    if (!task.deadlineTime) return false;
+    const now = new Date();
+    const deadlineDate = new Date(task.deadlineTime);
+    // For weekly tasks, the deadlineTime might be a date from when the template was created
+    // We need to check if the TIME part is in the past for TODAY
+    const todayDeadline = new Date();
+    todayDeadline.setHours(deadlineDate.getHours(), deadlineDate.getMinutes(), 0, 0);
+    return now.getTime() > todayDeadline.getTime();
+  };
+
   const pendingTasks = allTodayTasks.filter(task => !task.isCompleted);
   const completedTasks = allTodayTasks.filter(task => task.isCompleted);
 
@@ -561,55 +574,70 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                 <div className="text-[clamp(0.5rem,0.7vw,0.75rem)]">Add tasks for today or move from backlog</div>
               </div>
             ) : (
-              pendingTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={`p-[0.5vw] border transition-colors group ${TIER_COLORS[task.tier]}`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-start gap-[0.5vw] flex-1">
-                      <button
-                        onClick={() => handleCompleteTask(task.id, task.type === 'WEEKLY')}
-                        className={`w-[1vw] h-[1vh] min-w-[16px] min-h-[16px] border-2 rounded hover:bg-green-500/30 transition-colors flex-shrink-0 mt-0.5 ${task.type === 'WEEKLY' ? 'border-purple-500' : 'border-green-500'}`}
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-[0.3vw] mb-[0.2vh]">
-                          <span className={`text-[clamp(0.5rem,0.7vw,0.75rem)] px-[0.3vw] py-[0.1vh] border font-mono ${TIER_COLORS[task.tier]}`}>
-                            {task.tier}
-                          </span>
-                          <span className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 font-mono">{task.category}</span>
-                          <span className="text-[clamp(0.45rem,0.6vw,0.65rem)] text-green-500 font-mono font-bold">
-                            +{getTierBaseXP(task.tier)} XP
-                          </span>
-                        </div>
-                        <h5 className="text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 font-mono">{task.title}</h5>
-                        {/* Deadline and Duration Info */}
-                        <div className="flex gap-[0.5vw] mt-[0.2vh] flex-wrap">
-                          {task.deadlineTime && (
-                            <span className="text-[clamp(0.45rem,0.6vw,0.65rem)] text-yellow-500 font-mono">
-                              ⏰ {new Date(task.deadlineTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                          )}
-                          {task.allocatedDuration && (
-                            <span className="text-[clamp(0.45rem,0.6vw,0.65rem)] text-cyan-500 font-mono">
-                              ⏱ {task.allocatedDuration}min
-                            </span>
-                          )}
-                        </div>
-                        {task.description && (
-                          <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mt-[0.2vh] font-mono">{task.description}</p>
+              pendingTasks.map((task) => {
+                const expired = isTaskExpired(task);
+                return (
+                  <div
+                    key={task.id}
+                    className={`p-[0.5vw] border transition-colors group ${expired ? 'border-gray-700 bg-gray-900/30 opacity-60' : TIER_COLORS[task.tier]}`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-start gap-[0.5vw] flex-1">
+                        {expired ? (
+                          <div className="w-[1vw] h-[1vh] min-w-[16px] min-h-[16px] border-2 border-gray-600 rounded bg-gray-700/50 flex-shrink-0 mt-0.5 flex items-center justify-center">
+                            <span className="text-[0.5rem] text-gray-500">✕</span>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleCompleteTask(task.id, task.type === 'WEEKLY')}
+                            className={`w-[1vw] h-[1vh] min-w-[16px] min-h-[16px] border-2 rounded hover:bg-green-500/30 transition-colors flex-shrink-0 mt-0.5 ${task.type === 'WEEKLY' ? 'border-purple-500' : 'border-green-500'}`}
+                          />
                         )}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-[0.3vw] mb-[0.2vh]">
+                            <span className={`text-[clamp(0.5rem,0.7vw,0.75rem)] px-[0.3vw] py-[0.1vh] border font-mono ${expired ? 'border-gray-700 text-gray-500' : TIER_COLORS[task.tier]}`}>
+                              {task.tier}
+                            </span>
+                            <span className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 font-mono">{task.category}</span>
+                            {expired ? (
+                              <span className="text-[clamp(0.45rem,0.6vw,0.65rem)] text-red-500 font-mono font-bold">
+                                EXPIRED (0 XP)
+                              </span>
+                            ) : (
+                              <span className="text-[clamp(0.45rem,0.6vw,0.65rem)] text-green-500 font-mono font-bold">
+                                +{getTierBaseXP(task.tier)} XP
+                              </span>
+                            )}
+                          </div>
+                          <h5 className={`text-[clamp(0.6rem,0.85vw,0.875rem)] font-mono ${expired ? 'text-gray-500 line-through' : 'text-green-400'}`}>{task.title}</h5>
+                          {/* Deadline and Duration Info */}
+                          <div className="flex gap-[0.5vw] mt-[0.2vh] flex-wrap">
+                            {task.deadlineTime && (
+                              <span className={`text-[clamp(0.45rem,0.6vw,0.65rem)] font-mono ${expired ? 'text-red-500' : 'text-yellow-500'}`}>
+                                ⏰ {new Date(task.deadlineTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {expired && '(PASSED)'}
+                              </span>
+                            )}
+                            {task.allocatedDuration && (
+                              <span className="text-[clamp(0.45rem,0.6vw,0.65rem)] text-cyan-500 font-mono">
+                                ⏱ {task.allocatedDuration}min
+                              </span>
+                            )}
+                          </div>
+                          {task.description && (
+                            <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mt-[0.2vh] font-mono">{task.description}</p>
+                          )}
+                        </div>
                       </div>
+                      <button
+                        onClick={() => promptDeleteTask(task.id)}
+                        className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono ml-[0.3vw]"
+                      >
+                        ✕
+                      </button>
                     </div>
-                    <button
-                      onClick={() => promptDeleteTask(task.id)}
-                      className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono ml-[0.3vw]"
-                    >
-                      ✕
-                    </button>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

@@ -35,6 +35,42 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
   // Delete confirmation state
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
 
+  // Helper: Get minimum deadline time (current time rounded up to next 5 minutes)
+  const getMinDeadlineTime = () => {
+    const now = new Date();
+    // Round up to next 5 minutes
+    const minutes = Math.ceil((now.getMinutes() + 1) / 5) * 5;
+    const hours = now.getHours() + Math.floor(minutes / 60);
+    const finalMinutes = minutes % 60;
+    if (hours >= 24) return "23:59"; // Already past end of day
+    return `${hours.toString().padStart(2, '0')}:${finalMinutes.toString().padStart(2, '0')}`;
+  };
+
+  // Helper: Max deadline time is 23:59
+  const MAX_DEADLINE_TIME = "23:59";
+
+  // Helper: Calculate max duration in minutes based on selected deadline time
+  const getMaxDuration = () => {
+    if (!moveDeadlineTime) return 999;
+    const now = new Date();
+    const [deadlineHours, deadlineMinutes] = moveDeadlineTime.split(':').map(Number);
+    const deadlineDate = new Date(now);
+    deadlineDate.setHours(deadlineHours, deadlineMinutes, 0, 0);
+    const diffMs = deadlineDate.getTime() - now.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+    return Math.max(1, diffMinutes);
+  };
+
+  // Helper: Check if deadline time is valid (in the future)
+  const isDeadlineValid = () => {
+    if (!moveDeadlineTime) return false;
+    const now = new Date();
+    const [hours, minutes] = moveDeadlineTime.split(':').map(Number);
+    const deadlineDate = new Date(now);
+    deadlineDate.setHours(hours, minutes, 0, 0);
+    return deadlineDate.getTime() > now.getTime();
+  };
+
   // Separate completed and incomplete tasks
   const incompleteTasks = optimisticTasks.filter(task => !task.isCompleted);
   const completedTasks = optimisticTasks.filter(task => task.isCompleted);
@@ -294,14 +330,33 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
               </div>
 
               <div>
-                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Deadline Time *</label>
+                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Deadline Time * (now - 23:59)</label>
                 <input
                   type="time"
                   value={moveDeadlineTime}
-                  onChange={(e) => setMoveDeadlineTime(e.target.value)}
+                  onChange={(e) => {
+                    setMoveDeadlineTime(e.target.value);
+                    // Auto-clamp duration when deadline changes
+                    if (moveDuration) {
+                      const now = new Date();
+                      const [h, m] = e.target.value.split(':').map(Number);
+                      const dl = new Date(now); dl.setHours(h, m, 0, 0);
+                      const maxMins = Math.max(1, Math.floor((dl.getTime() - now.getTime()) / 60000));
+                      if (parseInt(moveDuration) > maxMins) {
+                        setMoveDuration(maxMins.toString());
+                      }
+                    }
+                  }}
+                  min={getMinDeadlineTime()}
+                  max={MAX_DEADLINE_TIME}
                   className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
                   required
                 />
+                {moveDeadlineTime && (
+                  <span className={`text-[clamp(0.4rem,0.5vw,0.6rem)] font-mono ${isDeadlineValid() ? 'text-gray-600' : 'text-red-500'}`}>
+                    {isDeadlineValid() ? `${getMaxDuration()} min available` : '⚠️ Time must be in the future!'}
+                  </span>
+                )}
               </div>
 
               <div>
@@ -309,9 +364,14 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
                 <input
                   type="number"
                   value={moveDuration}
-                  onChange={(e) => setMoveDuration(e.target.value)}
-                  placeholder="e.g. 60"
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value) || 0;
+                    const maxDur = getMaxDuration();
+                    setMoveDuration(Math.min(val, maxDur).toString());
+                  }}
+                  placeholder={moveDeadlineTime ? `max ${getMaxDuration()}` : "e.g. 60"}
                   min="1"
+                  max={getMaxDuration()}
                   className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono placeholder-gray-600"
                 />
               </div>
@@ -319,7 +379,7 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
               <div className="flex gap-[0.5vw] pt-[0.3vh]">
                 <button
                   onClick={() => handleMoveToDaily(movingTaskId)}
-                  disabled={!moveDeadlineTime}
+                  disabled={!moveDeadlineTime || !isDeadlineValid()}
                   className="flex-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 uppercase tracking-wider font-mono disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   → Move to Today

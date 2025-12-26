@@ -45,8 +45,8 @@ export const GitGudLogo: React.FC<GitGudLogoProps> = ({
             {/* Optional Typography */}
             {withText && (
                 <div className="flex flex-col leading-none">
-                    <span className="font-mono font-bold text-lg tracking-tighter">GIT_GUD</span>
-                    <span className="text-[0.6rem] text-green-500/60 tracking-[0.2em] uppercase">
+                    <span className="font-mono font-bold text-2xl lg:text-3xl tracking-tighter text-green-400">GIT_GUD</span>
+                    <span className="text-xs lg:text-sm text-green-500/60 tracking-[0.2em] uppercase">
                         Protocol_v1
                     </span>
                 </div>
