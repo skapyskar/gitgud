@@ -44,6 +44,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   // Timer state: track which task has timer open
   const [timerTaskId, setTimerTaskId] = useState<string | null>(null);
   const [timerDuration, setTimerDuration] = useState<number>(60); // Default 60 minutes
+  const [timerHasAllocatedDuration, setTimerHasAllocatedDuration] = useState<boolean>(false);
 
   // Optimistic UI: local state for all tasks
   const [optimisticTasks, setOptimisticTasks] = useState<Task[]>([...dailyTasks]);
@@ -415,7 +416,16 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
         <TaskTimer
           taskId={timerTaskId}
           initialMinutes={timerDuration}
+          hasAllocatedDuration={timerHasAllocatedDuration}
           onClose={() => setTimerTaskId(null)}
+          onTimerComplete={() => {
+            // Auto-complete the task when timer finishes (only if had allocated duration)
+            const task = allTodayTasks.find(t => t.id === timerTaskId);
+            if (task) {
+              confirmCompleteTask(timerTaskId, task.type === 'WEEKLY', true);
+            }
+            setTimerTaskId(null);
+          }}
         />
       )}
 
@@ -648,6 +658,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                             onClick={() => {
                               setTimerTaskId(task.id);
                               setTimerDuration(task.allocatedDuration || 60);
+                              setTimerHasAllocatedDuration(!!task.allocatedDuration);
                             }}
                             className="text-lg lg:text-xl text-cyan-500 hover:text-cyan-400 hover:scale-110 opacity-0 group-hover:opacity-100 transition-all font-mono p-1"
                             title="Start Timer"

@@ -5,10 +5,12 @@ import React, { useState, useEffect, useRef } from "react";
 interface TaskTimerProps {
     taskId: string;
     initialMinutes: number; // Default duration in minutes (from task.allocatedDuration or 60)
+    hasAllocatedDuration: boolean; // True if task had a pre-set duration
     onClose: () => void;
+    onTimerComplete?: () => void; // Called when timer reaches 0 AND hasAllocatedDuration is true
 }
 
-export default function TaskTimer({ taskId, initialMinutes, onClose }: TaskTimerProps) {
+export default function TaskTimer({ taskId, initialMinutes, hasAllocatedDuration, onClose, onTimerComplete }: TaskTimerProps) {
     // Convert initial minutes to seconds
     const [totalSeconds, setTotalSeconds] = useState(initialMinutes * 60);
     const [isRunning, setIsRunning] = useState(false);
@@ -25,6 +27,9 @@ export default function TaskTimer({ taskId, initialMinutes, onClose }: TaskTimer
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
 
+    // Track if completion callback has been called (prevent double calls)
+    const hasCalledCompleteRef = useRef(false);
+
     // Timer logic
     useEffect(() => {
         if (isRunning && totalSeconds > 0) {
@@ -32,7 +37,12 @@ export default function TaskTimer({ taskId, initialMinutes, onClose }: TaskTimer
                 setTotalSeconds((prev) => {
                     if (prev <= 1) {
                         setIsRunning(false);
-                        // Optional: play notification sound or show alert
+                        // Auto-complete task if duration was pre-assigned
+                        // Only call once using ref guard
+                        if (hasAllocatedDuration && onTimerComplete && !hasCalledCompleteRef.current) {
+                            hasCalledCompleteRef.current = true;
+                            setTimeout(() => onTimerComplete(), 0);
+                        }
                         return 0;
                     }
                     return prev - 1;
@@ -45,7 +55,7 @@ export default function TaskTimer({ taskId, initialMinutes, onClose }: TaskTimer
                 clearInterval(intervalRef.current);
             }
         };
-    }, [isRunning, totalSeconds]);
+    }, [isRunning, hasAllocatedDuration, onTimerComplete]);
 
     // Update edit fields when timer changes (for display sync)
     useEffect(() => {
