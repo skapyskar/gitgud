@@ -1,3 +1,5 @@
+import { GitGudLogo } from "./components/GitGudLogo";
+
 export default function RootLoading() {
   return (
     <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-black via-gray-900 to-black relative overflow-hidden">
@@ -10,8 +12,11 @@ export default function RootLoading() {
       <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
 
       <div className="relative z-10 text-center space-y-8 p-8">
-        {/* System Initializing Animation */}
-        <div className="space-y-4">
+        {/* System Initializing Animation with Logo */}
+        <div className="space-y-4 flex flex-col items-center">
+          <div className="animate-pulse">
+            <GitGudLogo className="w-32 h-32 text-green-500" />
+          </div>
           <h1 className="text-6xl font-bold text-green-400 font-mono uppercase tracking-wider animate-pulse">
             Git_Gud<span className="animate-pulse">_</span>
           </h1>

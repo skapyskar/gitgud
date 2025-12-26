@@ -1,0 +1,13 @@
+<svg viewBox="0 0 100 100" fill="#22c55e" xmlns="http://www.w3.org/2000/svg">
+  <!-- BAR 1: The Start (Low) -->
+  <rect x="10" y="60" width="20" height="40" rx="2" />
+  
+  <!-- BAR 2: The Grind (Medium) -->
+  <rect x="40" y="35" width="20" height="65" rx="2" />
+  
+  <!-- BAR 3: The Peak (Tall) -->
+  <rect x="70" y="20" width="20" height="80" rx="2" />
+
+  <!-- THE BOULDER / THE DOT -->
+  <circle cx="80" cy="10" r="10" />
+</svg>

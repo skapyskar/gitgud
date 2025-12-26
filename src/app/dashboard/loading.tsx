@@ -1,3 +1,5 @@
+import { GitGudLogo } from "../components/GitGudLogo";
+
 export default function DashboardLoading() {
   return (
     <main className="min-h-screen p-8 bg-gradient-to-b from-black via-gray-900 to-black relative overflow-hidden">
@@ -10,10 +12,13 @@ export default function DashboardLoading() {
       <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
 
       <div className="w-full max-w-[1920px] mx-auto space-y-6 relative z-10 animate-pulse">
-        {/* Header Skeleton */}
+        {/* Header Skeleton with animated logo */}
         <header className="border-b border-green-800 pb-4 grid grid-cols-3 items-center">
-          <div>
-            <div className="h-10 w-72 bg-green-900/20 mb-2"></div>
+          <div className="flex items-center gap-3">
+            <div className="animate-pulse">
+              <GitGudLogo className="w-10 h-10 text-green-500" />
+            </div>
+            <div className="h-8 w-32 bg-green-900/20"></div>
           </div>
           <div className="text-center">
             <div className="h-8 w-64 bg-green-900/10 mx-auto"></div>

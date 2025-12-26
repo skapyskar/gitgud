@@ -2,6 +2,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
+import { GitGudLogo } from "./components/GitGudLogo";
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
@@ -18,8 +19,9 @@ export default async function Home() {
       <div className="absolute bottom-1/4 right-1/3 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
 
       <div className="relative z-10 text-center space-y-8 p-8">
-        {/* Title with Glitch Effect */}
-        <div className="space-y-4">
+        {/* Logo and Title */}
+        <div className="space-y-4 flex flex-col items-center">
+          <GitGudLogo className="w-24 h-24 md:w-32 md:h-32 text-green-500" />
           <h1 className="text-6xl md:text-8xl font-bold text-green-400 tracking-tighter uppercase font-mono glitch-text">
             Git_Gud<span className="animate-pulse">_</span>
           </h1>

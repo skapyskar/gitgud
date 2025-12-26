@@ -8,6 +8,7 @@ import ConnectGitHubButton from "./components/ConnectGitHubButton";
 import WeeklyPlanner from "./components/WeeklyPlanner";
 import DailyBoard from "./components/DailyBoard";
 import BacklogPanel from "./components/BacklogPanel";
+import { GitGudLogo } from "../components/GitGudLogo";
 
 export const dynamic = "force-dynamic";
 
@@ -82,10 +83,8 @@ export default async function DashboardPage() {
 
           {/* LEVEL 1: Header */}
           <header className="border-b border-green-800 pb-[0.2vh] grid grid-cols-3 items-center gap-[1vw] mb-[0.3vh]">
-            <div>
-              <h1 className="text-[clamp(0.75rem,1.5vw,1.5rem)] lg:text-[clamp(1rem,1.8vw,2rem)] font-bold text-green-400 font-mono uppercase tracking-wider">
-                Git_Gud_Dashboard
-              </h1>
+            <div className="flex items-center gap-3">
+              <GitGudLogo className="w-8 h-8 lg:w-10 lg:h-10 text-green-500" withText={true} />
             </div>
             <div className="text-center">
               <p className="text-gray-400 text-[clamp(0.5rem,0.8vw,0.875rem)] lg:text-[clamp(0.625rem,0.9vw,1rem)]">
