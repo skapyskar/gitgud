@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import StatsPanel from "./components/StatsPanel";
 import LogoutButton from "../components/LogoutButton";
-import ConnectGitHubButton from "./components/ConnectGitHubButton";
 import WeeklyPlanner from "./components/WeeklyPlanner";
 import DailyBoard from "./components/DailyBoard";
 import BacklogPanel from "./components/BacklogPanel";

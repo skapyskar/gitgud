@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Task, TaskTier, Category } from "../../../../prisma/generated/client";
+import TaskTimer from "./TaskTimer";
 
 type WeeklyTask = Task & { repeatDays?: string | null };
 
@@ -40,6 +41,9 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
   // Track dismissed weekly tasks for today (only hide from view, don't delete the template)
   const [dismissedWeeklyIds, setDismissedWeeklyIds] = useState<string[]>([]);
+  // Timer state: track which task has timer open
+  const [timerTaskId, setTimerTaskId] = useState<string | null>(null);
+  const [timerDuration, setTimerDuration] = useState<number>(60); // Default 60 minutes
 
   // Optimistic UI: local state for all tasks
   const [optimisticTasks, setOptimisticTasks] = useState<Task[]>([...dailyTasks]);
@@ -406,6 +410,15 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
         </div>
       )}
 
+      {/* Task Timer Modal */}
+      {timerTaskId && (
+        <TaskTimer
+          taskId={timerTaskId}
+          initialMinutes={timerDuration}
+          onClose={() => setTimerTaskId(null)}
+        />
+      )}
+
       {/* Delete Confirmation Modal */}
       {deletingTaskId && (
         <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
@@ -628,12 +641,27 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                           )}
                         </div>
                       </div>
-                      <button
-                        onClick={() => promptDeleteTask(task.id)}
-                        className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono ml-[0.3vw]"
-                      >
-                        ✕
-                      </button>
+                      {/* Timer and Delete Buttons */}
+                      <div className="flex flex-col gap-2 items-center">
+                        {!expired && (
+                          <button
+                            onClick={() => {
+                              setTimerTaskId(task.id);
+                              setTimerDuration(task.allocatedDuration || 60);
+                            }}
+                            className="text-lg lg:text-xl text-cyan-500 hover:text-cyan-400 hover:scale-110 opacity-0 group-hover:opacity-100 transition-all font-mono p-1"
+                            title="Start Timer"
+                          >
+                            ⏱️
+                          </button>
+                        )}
+                        <button
+                          onClick={() => promptDeleteTask(task.id)}
+                          className="text-lg lg:text-xl text-red-500 hover:text-red-400 hover:scale-110 opacity-0 group-hover:opacity-100 transition-all font-mono p-1"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
