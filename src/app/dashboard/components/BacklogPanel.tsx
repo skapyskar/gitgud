@@ -18,6 +18,8 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
   const [showCompleted, setShowCompleted] = useState(false);
   // Optimistic UI: local state for tasks
   const [optimisticTasks, setOptimisticTasks] = useState<Task[]>([...tasks]);
+  // Track temp ID to real ID mapping after creation completes
+  const [tempToRealIdMap, setTempToRealIdMap] = useState<Record<string, string>>({});
 
   // Sync optimisticTasks with props when tasks change (after server response replaces temp tasks)
   useEffect(() => {
@@ -90,9 +92,17 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
       });
 
       if (res.ok) {
+        const data = await res.json();
+        const createdTask = data.task;
+        // Map temp ID to real ID so task can be moved immediately
+        setTempToRealIdMap(prev => ({ ...prev, [tempId]: createdTask.id }));
+        // Update the task in optimistic state with the real ID
+        setOptimisticTasks((current) =>
+          current.map(t => t.id === tempId ? { ...t, id: createdTask.id } : t)
+        );
         setNewTask("");
         setDeadline("");
-        router.refresh(); // Will replace fake with real
+        router.refresh(); // Will sync with server state
       } else {
         setOptimisticTasks((current) => current.filter(t => t.id !== tempId));
       }
@@ -112,12 +122,8 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
       return;
     }
 
-    // Check if this is a temporary optimistic task (not yet saved to DB)
-    // Temporary IDs from Math.random() start with "0." while cuid starts with "c"
-    if (taskId.startsWith("0.")) {
-      alert("Please wait for the task to finish saving before moving it.");
-      return;
-    }
+    // The task ID should already be the real ID from the updated optimistic state
+    // No need to check for temp IDs since we update them immediately after creation
 
     // Optimistic update: remove task from backlog immediately
     const prev = [...optimisticTasks];

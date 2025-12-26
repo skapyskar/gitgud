@@ -38,6 +38,8 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   const [completingTask, setCompletingTask] = useState<{ id: string; isWeekly: boolean; duration: number | null } | null>(null);
   // Delete confirmation dialog state
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
+  // Track dismissed weekly tasks for today (only hide from view, don't delete the template)
+  const [dismissedWeeklyIds, setDismissedWeeklyIds] = useState<string[]>([]);
 
   // Optimistic UI: local state for all tasks
   const [optimisticTasks, setOptimisticTasks] = useState<Task[]>([...dailyTasks]);
@@ -51,6 +53,19 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   React.useEffect(() => {
     const timer = setTimeout(() => setBoardLoading(false), 600);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Load dismissed weekly tasks from localStorage on mount (for today only)
+  React.useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const stored = localStorage.getItem(`dismissedWeekly_${today}`);
+    if (stored) {
+      try {
+        setDismissedWeeklyIds(JSON.parse(stored));
+      } catch {
+        setDismissedWeeklyIds([]);
+      }
+    }
   }, []);
 
   const today = new Date();
@@ -107,7 +122,8 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   // Combine all tasks for today (optimistic + weekly templates for today)
   const todaysWeeklyTasks = weeklyTemplates.filter((template) => {
     const days = template.repeatDays?.split(",").map(Number) || [];
-    return days.includes(todayDayIndex);
+    // Also filter out dismissed weekly tasks
+    return days.includes(todayDayIndex) && !dismissedWeeklyIds.includes(template.id);
   });
   const allTodayTasks = [
     ...optimisticTasks,
@@ -263,6 +279,20 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
     const taskId = deletingTaskId;
     setDeletingTaskId(null); // Close dialog
 
+    // Check if this is a weekly task (from weeklyTemplates)
+    const isWeeklyTask = weeklyTemplates.some(t => t.id === taskId);
+
+    if (isWeeklyTask) {
+      // Don't delete the weekly template - just dismiss it for today
+      const today = new Date().toISOString().slice(0, 10);
+      const newDismissed = [...dismissedWeeklyIds, taskId];
+      setDismissedWeeklyIds(newDismissed);
+      localStorage.setItem(`dismissedWeekly_${today}`, JSON.stringify(newDismissed));
+      // No API call needed - the weekly template stays intact
+      return;
+    }
+
+    // For regular daily tasks, proceed with deletion
     const prev = [...optimisticTasks];
     setOptimisticTasks((current) => current.filter((t) => t.id !== taskId));
     setIsLoading(true);
