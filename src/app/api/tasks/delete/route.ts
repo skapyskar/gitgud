@@ -57,6 +57,34 @@ export async function DELETE(request: Request) {
       });
     }
 
+    // If task is WEEKLY and today is one of its repeatDays, decrement today's possibleXP
+    if (task.type === "WEEKLY" && task.repeatDays && !task.isCompleted) {
+      const today = new Date();
+      const todayDayIndex = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const selectedDays = task.repeatDays.split(",").map(Number);
+
+      if (selectedDays.includes(todayDayIndex)) {
+        // This weekly task was active today, decrement today's possibleXP
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0);
+
+        const baseXP = tierBaseXP(task.tier);
+        // Include duration bonus (25%) if task had allocated duration
+        const durationBonus = task.allocatedDuration ? Math.round(baseXP * 0.25) : 0;
+        const totalPossibleXP = baseXP + durationBonus;
+
+        await prisma.dayLog.updateMany({
+          where: {
+            userId: user.id,
+            date: todayDate,
+          },
+          data: {
+            possibleXP: { decrement: totalPossibleXP },
+          },
+        });
+      }
+    }
+
     // If task was completed, also remove the XP and tasksDone count
     if (task.isCompleted && task.finalPoints) {
       const taskDate = task.completedAt || task.scheduledDate || new Date();

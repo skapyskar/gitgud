@@ -139,6 +139,10 @@ export default async function DashboardPage() {
       </main>
     );
   } catch (error) {
+    // allow redirect to work without being caught
+    if ((error as Error).message === "NEXT_REDIRECT") {
+      throw error;
+    }
     console.error("Dashboard error:", error);
     redirect("/login");
   }

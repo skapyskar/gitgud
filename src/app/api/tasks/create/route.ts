@@ -77,6 +77,43 @@ export async function POST(request: Request) {
       });
     }
 
+    // For WEEKLY tasks, update today's DayLog if today is one of the repeatDays
+    if (type === "WEEKLY" && repeatDays) {
+      const today = new Date();
+      const todayDayIndex = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const selectedDays = repeatDays.split(",").map(Number);
+
+      if (selectedDays.includes(todayDayIndex)) {
+        // This weekly task is active today, update today's possibleXP
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0);
+
+        const baseXP = tierBaseXP(tier || "C");
+        // Include duration bonus (25%) in possibleXP if task has allocated duration
+        const durationBonus = allocatedDuration ? Math.round(baseXP * 0.25) : 0;
+        const totalPossibleXP = baseXP + durationBonus;
+
+        await prisma.dayLog.upsert({
+          where: {
+            userId_date: {
+              userId: user.id,
+              date: todayDate,
+            },
+          },
+          update: {
+            possibleXP: { increment: totalPossibleXP },
+          },
+          create: {
+            userId: user.id,
+            date: todayDate,
+            totalXP: 0,
+            tasksDone: 0,
+            possibleXP: totalPossibleXP,
+          },
+        });
+      }
+    }
+
     return NextResponse.json({ success: true, task });
   } catch (error) {
     console.error("Create task error:", error);

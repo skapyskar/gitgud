@@ -1,6 +1,6 @@
 "use client";
 
-import { Target } from "lucide-react";
+import { Target, RefreshCw } from "lucide-react";
 
 interface DayLog {
   date: Date;
@@ -13,9 +13,11 @@ interface FullPerformanceGraphProps {
   dayLogs: DayLog[];
   onClose: () => void;
   initialGraph?: string;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
-export default function FullPerformanceGraph({ dayLogs, onClose }: FullPerformanceGraphProps) {
+export default function FullPerformanceGraph({ dayLogs, onClose, onRefresh, isRefreshing }: FullPerformanceGraphProps) {
   // Prepare data - last 30 days
   const logs = [...dayLogs].reverse().slice(-30);
 
@@ -90,12 +92,25 @@ export default function FullPerformanceGraph({ dayLogs, onClose }: FullPerforman
                 </p>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="text-red-500 hover:text-red-400 text-2xl font-bold font-mono px-4 py-2 border border-red-900 hover:border-red-700 transition-colors"
-            >
-              [X]
-            </button>
+            <div className="flex items-center gap-3">
+              {onRefresh && (
+                <button
+                  onClick={onRefresh}
+                  disabled={isRefreshing}
+                  className="text-green-500 hover:text-green-400 font-bold font-mono px-4 py-2 border border-green-900 hover:border-green-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                  title="Refresh graph data (auto-refreshes every 15 min)"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  {isRefreshing ? 'SYNCING...' : '[REFRESH]'}
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="text-red-500 hover:text-red-400 text-2xl font-bold font-mono px-4 py-2 border border-red-900 hover:border-red-700 transition-colors"
+              >
+                [X]
+              </button>
+            </div>
           </div>
         </div>
 

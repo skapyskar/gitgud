@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import MiniEfficiencyGraph from "./MiniEfficiencyGraph";
 import FullPerformanceGraph from "./FullPerformanceGraph";
 import ConnectGitHubButton from "./ConnectGitHubButton";
-import { Zap, Trophy, Coins, Target } from "lucide-react";
+import { Zap, Trophy, Coins, Target, RefreshCw } from "lucide-react";
 
 interface DayLog {
   date: Date;
@@ -13,7 +13,7 @@ interface DayLog {
   possibleXP: number;
 }
 
-
+const AUTO_REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
 
 interface StatsPanelProps {
   user: {
@@ -30,6 +30,38 @@ interface StatsPanelProps {
 
 export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
   const [showFullGraph, setShowFullGraph] = useState(false);
+  const [currentDayLogs, setCurrentDayLogs] = useState<DayLog[]>(user?.dayLogs || []);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Sync with props when they change
+  useEffect(() => {
+    setCurrentDayLogs(user?.dayLogs || []);
+  }, [user?.dayLogs]);
+
+  // Refresh function to fetch fresh dayLogs
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const res = await fetch("/api/stats/daylogs");
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentDayLogs(data.dayLogs || []);
+      }
+    } catch (error) {
+      console.error("Failed to refresh dayLogs:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
+
+  // Auto-refresh interval
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      handleRefresh();
+    }, AUTO_REFRESH_INTERVAL);
+
+    return () => clearInterval(intervalId);
+  }, [handleRefresh]);
 
   if (!user) {
     return (
@@ -186,19 +218,30 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
               </h3>
             </div>
 
-            <button
-              onClick={() => setShowFullGraph(true)}
-              className="text-[10px] hover:bg-green-500/20 text-green-400 px-2 py-0.5 border border-green-500/30 transition-colors"
-            >
-              [EXPAND_VIEW]
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="text-[10px] hover:bg-green-500/20 text-green-400 px-2 py-0.5 border border-green-500/30 transition-colors flex items-center gap-1 disabled:opacity-50"
+                title="Refresh graph data (auto-refreshes every 15 min)"
+              >
+                <RefreshCw className={`w-3 h-3 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'SYNCING...' : '[REFRESH]'}
+              </button>
+              <button
+                onClick={() => setShowFullGraph(true)}
+                className="text-[10px] hover:bg-green-500/20 text-green-400 px-2 py-0.5 border border-green-500/30 transition-colors"
+              >
+                [EXPAND_VIEW]
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 p-2 min-h-[60px] flex flex-col justify-end">
             <div className="w-full h-full">
               <MiniEfficiencyGraph
-                key={`graph-${user.dayLogs?.map(d => `${d.totalXP}-${d.possibleXP}`).join('-') ?? 'empty'}`}
-                dayLogs={user.dayLogs || []}
+                key={`graph-${currentDayLogs?.map(d => `${d.totalXP}-${d.possibleXP}`).join('-') ?? 'empty'}`}
+                dayLogs={currentDayLogs}
                 onExpand={() => setShowFullGraph(true)}
               />
             </div>
@@ -246,8 +289,10 @@ export default function StatsPanel({ user, isGitHubLinked }: StatsPanelProps) {
       {/* Full Performance Graph Modal */}
       {showFullGraph && (
         <FullPerformanceGraph
-          dayLogs={user.dayLogs || []}
+          dayLogs={currentDayLogs}
           onClose={() => setShowFullGraph(false)}
+          onRefresh={handleRefresh}
+          isRefreshing={isRefreshing}
         />
       )}
     </>
