@@ -179,11 +179,11 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
       const today = new Date();
       today.setUTCHours(0, 0, 0, 0);
 
-      // Build deadline time if provided
+      // Build deadline time if provided (using local time)
       let deadlineTimeValue = null;
       if (moveDeadlineTime) {
         const [hours, minutes] = moveDeadlineTime.split(':').map(Number);
-        const deadlineDate = new Date(today);
+        const deadlineDate = new Date();
         deadlineDate.setHours(hours, minutes, 0, 0);
         deadlineTimeValue = deadlineDate.toISOString();
       }

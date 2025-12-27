@@ -87,7 +87,8 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
           tier,
           category,
           repeatDays: selectedDays.sort().join(","),
-          deadlineTime: deadlineTime ? `1970-01-01T${deadlineTime}:00.000Z` : null,
+          // Store as local time without UTC offset (use today's date as base)
+          deadlineTime: deadlineTime ? new Date(`${new Date().toISOString().slice(0, 10)}T${deadlineTime}:00`).toISOString() : null,
           allocatedDuration: duration ? parseInt(duration) : null,
         }),
       });

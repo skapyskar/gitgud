@@ -154,7 +154,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
     const now = new Date();
     const utcMidnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     const [hours, minutes] = newTask.deadlineTime.split(':').map(Number);
-    const deadlineDate = new Date(utcMidnight);
+    const deadlineDate = new Date();
     deadlineDate.setHours(hours, minutes, 0, 0);
 
     const optimisticTask: Task = {
