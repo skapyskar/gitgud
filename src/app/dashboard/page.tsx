@@ -25,7 +25,7 @@ export default async function DashboardPage() {
         tasks: true,
         dayLogs: {
           orderBy: { date: 'desc' },
-          take: 30, // Last 30 days for full graph
+          take: 30,
         },
       },
     });
@@ -33,8 +33,6 @@ export default async function DashboardPage() {
     if (!user) {
       redirect("/login");
     }
-
-    // ✅ Check Account table for GitHub connection
     const githubAccount = await prisma.account.findFirst({
       where: {
         userId: user.id,
@@ -43,12 +41,10 @@ export default async function DashboardPage() {
     });
     const isGitHubLinked = !!githubAccount;
 
-    // SEPARATE TASKS BY TYPE
     const backlogTasks = user.tasks.filter(t => t.type === "BACKLOG" && !t.isCompleted);
     const weeklyTemplates = user.tasks.filter(t => t.type === "WEEKLY");
 
-    const todayISO = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD' in UTC
-    console.log('[Dashboard] Today ISO:', todayISO);
+    const todayISO = new Date().toISOString().slice(0, 10);
     console.log('[Dashboard] Total tasks:', user.tasks.length);
     console.log('[Dashboard] Daily type tasks:', user.tasks.filter(t => t.type === "DAILY").map(t => ({
       id: t.id.slice(0, 8),
@@ -67,20 +63,12 @@ export default async function DashboardPage() {
 
     return (
       <main className="min-h-screen p-[0.2vw] lg:p-[0.4vw] bg-gradient-to-b from-black via-gray-900 to-black relative overflow-hidden">
-        {/* Cyberpunk Grid Background */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,65,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,65,0.1)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
         </div>
-
-        {/* Glowing Orb Effect */}
         <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
 
-        {/* CHANGE 1: CONTAINER WIDTH 
-            Changed max-w-7xl to max-w-[1920px] (or w-full) to use the screen edges.
-        */}
         <div className="w-full max-w-[1720px] mx-auto relative z-10 px-0 lg:px-[0.5vw]">
-
-          {/* LEVEL 1: Header */}
           <header className="border-b border-green-800 pb-[0.2vh] grid grid-cols-3 items-center gap-[1vw] mb-[0.3vh]">
             <div className="flex items-center gap-3">
               <GitGudLogo className="w-8 h-8 lg:w-10 lg:h-10 text-green-500" withText={true} />
@@ -95,8 +83,6 @@ export default async function DashboardPage() {
             </div>
           </header>
 
-          {/* LEVEL 2: Stats Panel - Full Width */}
-          {/* Key based on today's dayLog forces re-render when data changes */}
           <div className="mb-[0.5vh] lg:mb-[2.5vh]">
             <StatsPanel
               key={`stats-${user.dayLogs?.[0]?.totalXP ?? 0}-${user.dayLogs?.[0]?.possibleXP ?? 0}-${user.dayLogs?.[0]?.tasksDone ?? 0}`}
@@ -105,39 +91,22 @@ export default async function DashboardPage() {
             />
           </div>
 
-          {/* LEVEL 3: MAIN BATTLEFIELD GRID (Tasks) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-[1vw]">
-
-            {/* COLUMN 1: THE DUMP (BACKLOG) */}
-            {/* Kept at 3 (25%) */}
             <div className="lg:col-span-3 space-y-[0.5vh]">
               <BacklogPanel tasks={backlogTasks} userId={user.id} />
             </div>
-
-            {/* COLUMN 2: DAILY OPERATIONS (CENTER) */}
-            {/* CHANGE 2: GRID RATIO 
-                Reduced from 6 to 5. The center usually has less density than the side panels.
-            */}
             <div className="lg:col-span-5 space-y-[1.5vh]">
               <DailyBoard dailyTasks={dailyTasks} weeklyTemplates={weeklyTemplates} userId={user.id} />
             </div>
-
-            {/* COLUMN 3: WEEKLY TEMPLATES (RIGHT) */}
-            {/* CHANGE 3: GRID RATIO
-                Increased from 3 to 4. This gives your weekly templates 33% grid width instead of 25%.
-            */}
             <div className="lg:col-span-4 space-y-[1.5vh]">
               <WeeklyPlanner templates={weeklyTemplates} userId={user.id} />
             </div>
           </div>
         </div>
-
-        {/* Scanline Effect */}
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.3)_50%)] bg-[length:100%_4px] animate-scan"></div>
       </main>
     );
   } catch (error) {
-    // allow redirect to work without being caught
     if ((error as Error).message === "NEXT_REDIRECT") {
       throw error;
     }

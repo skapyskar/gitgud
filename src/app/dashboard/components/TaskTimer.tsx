@@ -4,41 +4,31 @@ import React, { useState, useEffect, useRef } from "react";
 
 interface TaskTimerProps {
     taskId: string;
-    initialMinutes: number; // Default duration in minutes (from task.allocatedDuration or 60)
-    hasAllocatedDuration: boolean; // True if task had a pre-set duration
+    initialMinutes: number;
+    hasAllocatedDuration: boolean;
     onClose: () => void;
-    onTimerComplete?: () => void; // Called when timer reaches 0 AND hasAllocatedDuration is true
+    onTimerComplete?: () => void;
 }
 
 export default function TaskTimer({ taskId, initialMinutes, hasAllocatedDuration, onClose, onTimerComplete }: TaskTimerProps) {
-    // Convert initial minutes to seconds
     const [totalSeconds, setTotalSeconds] = useState(initialMinutes * 60);
     const [isRunning, setIsRunning] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-    // Editable time inputs
     const [editHours, setEditHours] = useState(Math.floor(initialMinutes / 60));
     const [editMinutes, setEditMinutes] = useState(initialMinutes % 60);
     const [editSeconds, setEditSeconds] = useState(0);
-
-    // Format time display
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
-
-    // Track if completion callback has been called (prevent double calls)
     const hasCalledCompleteRef = useRef(false);
 
-    // Timer logic
     useEffect(() => {
         if (isRunning && totalSeconds > 0) {
             intervalRef.current = setInterval(() => {
                 setTotalSeconds((prev) => {
                     if (prev <= 1) {
                         setIsRunning(false);
-                        // Auto-complete task if duration was pre-assigned
-                        // Only call once using ref guard
                         if (hasAllocatedDuration && onTimerComplete && !hasCalledCompleteRef.current) {
                             hasCalledCompleteRef.current = true;
                             setTimeout(() => onTimerComplete(), 0);
@@ -57,7 +47,6 @@ export default function TaskTimer({ taskId, initialMinutes, hasAllocatedDuration
         };
     }, [isRunning, hasAllocatedDuration, onTimerComplete]);
 
-    // Update edit fields when timer changes (for display sync)
     useEffect(() => {
         if (!isEditing) {
             setEditHours(hours);
@@ -95,7 +84,6 @@ export default function TaskTimer({ taskId, initialMinutes, hasAllocatedDuration
         setIsEditing(false);
     };
 
-    // Quick time adjustments
     const addTime = (addMinutes: number) => {
         setTotalSeconds((prev) => Math.max(0, prev + addMinutes * 60));
     };
@@ -118,7 +106,6 @@ export default function TaskTimer({ taskId, initialMinutes, hasAllocatedDuration
                     </button>
                 </div>
 
-                {/* Timer Display */}
                 <div className={`text-center py-6 mb-6 border ${isComplete ? 'border-red-500 bg-red-900/20' : 'border-green-900/50 bg-green-900/10'}`}>
                     {isEditing ? (
                         <div className="flex items-center justify-center gap-2">
@@ -171,8 +158,6 @@ export default function TaskTimer({ taskId, initialMinutes, hasAllocatedDuration
                         </div>
                     )}
                 </div>
-
-                {/* Edit Confirmation Buttons */}
                 {isEditing && (
                     <div className="flex gap-2 mb-4">
                         <button
@@ -189,8 +174,6 @@ export default function TaskTimer({ taskId, initialMinutes, hasAllocatedDuration
                         </button>
                     </div>
                 )}
-
-                {/* Quick Time Adjustments */}
                 {!isEditing && (
                     <div className="flex gap-2 mb-4 justify-center">
                         <button
@@ -231,7 +214,6 @@ export default function TaskTimer({ taskId, initialMinutes, hasAllocatedDuration
                     </div>
                 )}
 
-                {/* Control Buttons */}
                 <div className="flex gap-3">
                     {!isRunning ? (
                         <button
@@ -256,8 +238,6 @@ export default function TaskTimer({ taskId, initialMinutes, hasAllocatedDuration
                         ↺ RESET
                     </button>
                 </div>
-
-                {/* Progress Bar */}
                 <div className="mt-6">
                     <div className="h-2 bg-gray-800 overflow-hidden">
                         <div

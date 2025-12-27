@@ -35,32 +35,23 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   const [isLoading, setIsLoading] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
   const [boardLoading, setBoardLoading] = useState(true);
-  // Duration confirmation dialog state
   const [completingTask, setCompletingTask] = useState<{ id: string; isWeekly: boolean; duration: number | null } | null>(null);
-  // Delete confirmation dialog state
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
-  // Track dismissed weekly tasks for today (only hide from view, don't delete the template)
   const [dismissedWeeklyIds, setDismissedWeeklyIds] = useState<string[]>([]);
-  // Timer state: track which task has timer open
   const [timerTaskId, setTimerTaskId] = useState<string | null>(null);
-  const [timerDuration, setTimerDuration] = useState<number>(60); // Default 60 minutes
+  const [timerDuration, setTimerDuration] = useState<number>(60);
   const [timerHasAllocatedDuration, setTimerHasAllocatedDuration] = useState<boolean>(false);
 
-  // Optimistic UI: local state for all tasks
   const [optimisticTasks, setOptimisticTasks] = useState<Task[]>([...dailyTasks]);
 
-  // Sync optimisticTasks with props when dailyTasks change (after server response replaces temp tasks)
   React.useEffect(() => {
     setOptimisticTasks([...dailyTasks]);
   }, [dailyTasks]);
-
-  // Simulate board loading for 600ms (or until tasks are ready)
   React.useEffect(() => {
     const timer = setTimeout(() => setBoardLoading(false), 600);
     return () => clearTimeout(timer);
   }, []);
 
-  // Load dismissed weekly tasks from localStorage on mount (for today only)
   React.useEffect(() => {
     const today = new Date().toISOString().slice(0, 10);
     const stored = localStorage.getItem(`dismissedWeekly_${today}`);
@@ -76,7 +67,6 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   const today = new Date();
   const todayDayIndex = today.getDay();
 
-  // Helper: Get minimum deadline time (current time rounded up to next minute)
   const getMinDeadlineTime = () => {
     const now = new Date();
     const hours = now.getHours().toString().padStart(2, '0');
@@ -84,24 +74,20 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
     return `${hours}:${minutes}`;
   };
 
-  // Helper: Max deadline time is 23:59 (midnight constraint - end of current day)
   const MAX_DEADLINE_TIME = "23:59";
 
-  // Helper: Calculate max duration in minutes based on selected deadline time
   const getMaxDuration = () => {
-    if (!newTask.deadlineTime) return 999; // No limit if no deadline set
+    if (!newTask.deadlineTime) return 999;
     const now = new Date();
     const [deadlineHours, deadlineMinutes] = newTask.deadlineTime.split(':').map(Number);
     const deadlineDate = new Date(now);
     deadlineDate.setHours(deadlineHours, deadlineMinutes, 0, 0);
 
-    // Calculate minutes until deadline
     const diffMs = deadlineDate.getTime() - now.getTime();
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
-    return Math.max(1, diffMinutes); // At least 1 minute
+    return Math.max(1, diffMinutes);
   };
 
-  // Update duration if it exceeds max when deadline changes
   React.useEffect(() => {
     if (newTask.deadlineTime && newTask.duration) {
       const maxDur = getMaxDuration();
@@ -110,10 +96,8 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
         setNewTask(prev => ({ ...prev, duration: maxDur.toString() }));
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newTask.deadlineTime]);
 
-  // Helper: Get base XP for tier (for display purposes)
   const getTierBaseXP = (tier: TaskTier): number => {
     switch (tier) {
       case "S": return 100;
@@ -124,10 +108,8 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
     }
   };
 
-  // Combine all tasks for today (optimistic + weekly templates for today)
   const todaysWeeklyTasks = weeklyTemplates.filter((template) => {
     const days = template.repeatDays?.split(",").map(Number) || [];
-    // Also filter out dismissed weekly tasks
     return days.includes(todayDayIndex) && !dismissedWeeklyIds.includes(template.id);
   });
   const allTodayTasks = [
@@ -135,36 +117,42 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
     ...todaysWeeklyTasks
   ];
 
-  // Helper: Check if a task's deadline has passed
   const isTaskExpired = (task: Task | WeeklyTask): boolean => {
     if (!task.deadlineTime) return false;
     const now = new Date();
     const deadlineDate = new Date(task.deadlineTime);
-    // For weekly tasks, the deadlineTime might be a date from when the template was created
-    // We need to check if the TIME part is in the past for TODAY
     const todayDeadline = new Date();
     todayDeadline.setHours(deadlineDate.getHours(), deadlineDate.getMinutes(), 0, 0);
     return now.getTime() > todayDeadline.getTime();
   };
 
-  const pendingTasks = allTodayTasks.filter(task => !task.isCompleted);
+  const pendingTasks = allTodayTasks
+    .filter(task => !task.isCompleted)
+    .sort((a, b) => {
+      // 1st priority: deadline time ascending (tasks without deadline go to the end)
+      const aTime = a.deadlineTime ? new Date(a.deadlineTime).getTime() : Infinity;
+      const bTime = b.deadlineTime ? new Date(b.deadlineTime).getTime() : Infinity;
+      if (aTime !== bTime) return aTime - bTime;
+
+      // 2nd priority: duration ascending (tasks without duration go to the end)
+      const aDuration = a.allocatedDuration ?? Infinity;
+      const bDuration = b.allocatedDuration ?? Infinity;
+      if (aDuration !== bDuration) return aDuration - bDuration;
+
+      // 3rd priority: name alphabetically
+      return a.title.localeCompare(b.title);
+    });
   const completedTasks = allTodayTasks.filter(task => task.isCompleted);
 
-  // Optimistic add
   const handleCreateDailyTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTask.title.trim() || !newTask.deadlineTime) return;
-
-    // Close form IMMEDIATELY (optimistic UX)
     setIsCreating(false);
     setIsSubmitting(true);
 
-    // 1. Create a fake task for instant UI
     const tempId = Math.random().toString();
     const now = new Date();
     const utcMidnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-
-    // Build deadline time
     const [hours, minutes] = newTask.deadlineTime.split(':').map(Number);
     const deadlineDate = new Date(utcMidnight);
     deadlineDate.setHours(hours, minutes, 0, 0);
@@ -199,7 +187,6 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
     };
     setOptimisticTasks((current) => [optimisticTask, ...current]);
 
-    // Store values before reset
     const taskData = {
       title: newTask.title,
       type: "DAILY",
@@ -210,7 +197,6 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
       allocatedDuration: newTask.duration ? parseInt(newTask.duration) : null,
     };
 
-    // Reset form immediately
     setNewTask({ title: "", tier: "C", category: "LIFE", deadlineTime: "", duration: "" });
 
     try {
@@ -220,7 +206,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
         body: JSON.stringify(taskData),
       });
       if (res.ok) {
-        router.refresh(); // Will replace fake with real
+        router.refresh();
       } else {
         setOptimisticTasks((current) => current.filter(t => t.id !== tempId));
       }
@@ -233,24 +219,17 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   };
 
   const handleCompleteTask = async (taskId: string, isWeeklyTask: boolean) => {
-    // Find the task to check if it has an allocated duration
     const task = allTodayTasks.find(t => t.id === taskId);
-
-    // If task has allocated duration, show confirmation dialog
     if (task?.allocatedDuration) {
       setCompletingTask({ id: taskId, isWeekly: isWeeklyTask, duration: task.allocatedDuration });
       return;
     }
 
-    // No duration set, complete immediately
     await confirmCompleteTask(taskId, isWeeklyTask, false);
   };
 
   const confirmCompleteTask = async (taskId: string, isWeeklyTask: boolean, durationMet: boolean) => {
-    // Clear the modal
     setCompletingTask(null);
-
-    // Optimistic update: mark task as completed immediately
     const prev = [...optimisticTasks];
     setOptimisticTasks((current) =>
       current.map((t) =>
@@ -273,11 +252,9 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
       if (res.ok) {
         router.refresh();
       } else {
-        // Revert on failure
         setOptimisticTasks(prev);
       }
     } catch (error) {
-      // Revert on error
       setOptimisticTasks(prev);
       console.error("Failed to complete task:", error);
     } finally {
@@ -285,32 +262,24 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
     }
   };
 
-  // Show delete confirmation dialog
   const promptDeleteTask = (taskId: string) => {
     setDeletingTaskId(taskId);
   };
-
-  // Confirm and execute delete
   const confirmDeleteTask = async () => {
     if (!deletingTaskId) return;
 
     const taskId = deletingTaskId;
     setDeletingTaskId(null); // Close dialog
 
-    // Check if this is a weekly task (from weeklyTemplates)
     const isWeeklyTask = weeklyTemplates.some(t => t.id === taskId);
 
     if (isWeeklyTask) {
-      // Don't delete the weekly template - just dismiss it for today
       const today = new Date().toISOString().slice(0, 10);
       const newDismissed = [...dismissedWeeklyIds, taskId];
       setDismissedWeeklyIds(newDismissed);
       localStorage.setItem(`dismissedWeekly_${today}`, JSON.stringify(newDismissed));
-      // No API call needed - the weekly template stays intact
       return;
     }
-
-    // For regular daily tasks, proceed with deletion
     const prev = [...optimisticTasks];
     setOptimisticTasks((current) => current.filter((t) => t.id !== taskId));
     setIsLoading(true);
@@ -334,7 +303,6 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   };
 
   const handleUncompleteTask = async (taskId: string) => {
-    // Optimistic update: mark task as uncompleted immediately
     const prev = [...optimisticTasks];
     setOptimisticTasks((current) =>
       current.map((t) =>
@@ -353,11 +321,9 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
       if (res.ok) {
         router.refresh();
       } else {
-        // Revert on failure
         setOptimisticTasks(prev);
       }
     } catch (error) {
-      // Revert on error
       setOptimisticTasks(prev);
       console.error("Failed to uncomplete task:", error);
     } finally {
@@ -372,8 +338,6 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
           <div className="text-green-400 font-mono text-lg animate-pulse">LOADING TASKS...</div>
         </div>
       )}
-
-      {/* Duration Confirmation Modal */}
       {completingTask && (
         <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
           <div className="bg-black border-2 border-green-500 p-[1vw] max-w-md w-full">
@@ -410,8 +374,6 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
           </div>
         </div>
       )}
-
-      {/* Task Timer Modal */}
       {timerTaskId && (
         <TaskTimer
           taskId={timerTaskId}
@@ -419,7 +381,6 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
           hasAllocatedDuration={timerHasAllocatedDuration}
           onClose={() => setTimerTaskId(null)}
           onTimerComplete={() => {
-            // Auto-complete the task when timer finishes (only if had allocated duration)
             const task = allTodayTasks.find(t => t.id === timerTaskId);
             if (task) {
               confirmCompleteTask(timerTaskId, task.type === 'WEEKLY', true);
@@ -429,7 +390,6 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
         />
       )}
 
-      {/* Delete Confirmation Modal */}
       {deletingTaskId && (
         <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
           <div className="bg-black border-2 border-red-500 p-[1vw] max-w-md w-full">
@@ -486,7 +446,6 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
         {today.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
       </p>
 
-      {/* Create Daily Task Form */}
       {isCreating && (
         <form onSubmit={handleCreateDailyTask} className="mb-[0.5vh] p-[0.5vw] bg-green-900/10 border border-green-700/30">
           <input
@@ -586,9 +545,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
         </form>
       )}
 
-      {/* Scrollable Content Area */}
       <div className="flex-1 overflow-y-auto pr-2">
-        {/* Pending Tasks Section */}
         <div>
           <div className="space-y-[0.3vh]">
             {pendingTasks.length === 0 ? (
@@ -633,7 +590,6 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                             )}
                           </div>
                           <h5 className={`text-[clamp(0.6rem,0.85vw,0.875rem)] font-mono ${expired ? 'text-gray-500 line-through' : 'text-green-400'}`}>{task.title}</h5>
-                          {/* Deadline and Duration Info */}
                           <div className="flex gap-[0.5vw] mt-[0.2vh] flex-wrap">
                             {task.deadlineTime && (
                               <span className={`text-[clamp(0.45rem,0.6vw,0.65rem)] font-mono ${expired ? 'text-red-500' : 'text-yellow-500'}`}>
@@ -680,7 +636,6 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
             )}
           </div>
         </div>
-        {/* Completed Tasks Section */}
         {completedTasks.length > 0 && (
           <div className="mt-[0.5vh]">
             <button

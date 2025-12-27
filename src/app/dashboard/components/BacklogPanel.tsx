@@ -72,7 +72,15 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
   };
 
   // Separate completed and incomplete tasks
-  const incompleteTasks = optimisticTasks.filter(task => !task.isCompleted);
+  const incompleteTasks = optimisticTasks
+    .filter(task => !task.isCompleted)
+    .sort((a, b) => {
+      // Sort by deadline ascending (tasks without deadline go to the end)
+      if (!a.deadline && !b.deadline) return 0;
+      if (!a.deadline) return 1;
+      if (!b.deadline) return -1;
+      return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+    });
   const completedTasks = optimisticTasks.filter(task => task.isCompleted);
 
   // Optimistic add
