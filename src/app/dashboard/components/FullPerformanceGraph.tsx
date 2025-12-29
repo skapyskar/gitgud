@@ -18,24 +18,18 @@ interface FullPerformanceGraphProps {
 }
 
 export default function FullPerformanceGraph({ dayLogs, onClose, onRefresh, isRefreshing }: FullPerformanceGraphProps) {
-  // Prepare data - last 30 days
   const logs = [...dayLogs].reverse().slice(-30);
 
-  // Helper function
   const formatDate = (date: Date) => {
     const d = new Date(date);
     return `${d.getMonth() + 1}/${d.getDate()}`;
   };
 
-  // Calculate stats
   const totalXP = logs.reduce((sum, log) => sum + log.totalXP, 0);
   const totalTasks = logs.reduce((sum, log) => sum + log.tasksDone, 0);
 
-  // Calculate efficiency data
   const efficiencyData = logs.map((log) => {
-    // Use possibleXP if available, otherwise use a reasonable fallback for legacy data
     const possibleXP = log.possibleXP ?? (log.tasksDone > 0 ? log.tasksDone * 30 : 0);
-    // If no tasks created/possible, efficiency is 100% (nothing to do = perfect)
     const efficiency = possibleXP > 0 ? (log.totalXP / possibleXP) * 100 : 100;
     return {
       date: log.date,
@@ -49,26 +43,21 @@ export default function FullPerformanceGraph({ dayLogs, onClose, onRefresh, isRe
     ? Math.round(efficiencyData.reduce((sum, d) => sum + d.efficiency, 0) / efficiencyData.length)
     : 0;
 
-  // SVG dimensions
   const width = 800;
   const height = 300;
   const padding = { top: 20, right: 30, bottom: 40, left: 50 };
   const graphWidth = width - padding.left - padding.right;
   const graphHeight = height - padding.top - padding.bottom;
 
-  // Create points for the line graph
   const points = efficiencyData.map((data, index) => {
     const x = padding.left + (index / (efficiencyData.length - 1 || 1)) * graphWidth;
     const y = padding.top + (1 - data.efficiency / 100) * graphHeight;
     return { x, y, ...data };
   });
 
-  // Create SVG path
   const pathD = points.length > 0
     ? `M ${points[0].x} ${points[0].y} ` + points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ')
     : '';
-
-  // Create area path
   const areaD = points.length > 0
     ? `M ${points[0].x} ${height - padding.bottom} L ${points[0].x} ${points[0].y} ` +
     points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ') +
@@ -78,7 +67,6 @@ export default function FullPerformanceGraph({ dayLogs, onClose, onRefresh, isRe
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-black border border-green-600 shadow-[0_0_20px_rgba(0,255,0,0.3)] w-full max-w-4xl max-h-[80vh] overflow-auto">
-        {/* Header */}
         <div className="border-b border-green-800 p-6 sticky top-0 bg-black z-10">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
@@ -113,8 +101,6 @@ export default function FullPerformanceGraph({ dayLogs, onClose, onRefresh, isRe
             </div>
           </div>
         </div>
-
-        {/* Stats Summary */}
         <div className="p-6 border-b border-green-900/30">
           <div className="grid grid-cols-3 gap-6">
             <div className="border border-green-900/30 p-4 bg-green-900/10">
@@ -131,8 +117,6 @@ export default function FullPerformanceGraph({ dayLogs, onClose, onRefresh, isRe
             </div>
           </div>
         </div>
-
-        {/* Main Graph */}
         <div className="p-6">
           <div className="text-xs text-gray-500 mb-4 font-mono uppercase tracking-wider">
             Efficiency Rate (Points Earned / Possible Points)
@@ -145,15 +129,12 @@ export default function FullPerformanceGraph({ dayLogs, onClose, onRefresh, isRe
               </div>
             ) : (
               <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
-                {/* Gradient definition */}
                 <defs>
                   <linearGradient id="efficiencyGradientFull" x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" stopColor="rgba(34, 197, 94, 0.3)" />
                     <stop offset="100%" stopColor="rgba(34, 197, 94, 0)" />
                   </linearGradient>
                 </defs>
-
-                {/* Grid lines */}
                 {[0, 25, 50, 75, 100].map((percent) => {
                   const y = padding.top + (1 - percent / 100) * graphHeight;
                   return (
@@ -180,10 +161,8 @@ export default function FullPerformanceGraph({ dayLogs, onClose, onRefresh, isRe
                   );
                 })}
 
-                {/* Area fill */}
                 <path d={areaD} fill="url(#efficiencyGradientFull)" />
 
-                {/* Line */}
                 <path
                   d={pathD}
                   fill="none"
@@ -193,8 +172,6 @@ export default function FullPerformanceGraph({ dayLogs, onClose, onRefresh, isRe
                   strokeLinejoin="round"
                   style={{ filter: 'drop-shadow(0 0 4px rgba(34, 197, 94, 0.6))' }}
                 />
-
-                {/* Data points with tooltips */}
                 {points.map((point, index) => (
                   <g key={index} className="group">
                     <circle
@@ -207,7 +184,6 @@ export default function FullPerformanceGraph({ dayLogs, onClose, onRefresh, isRe
                       className="cursor-pointer hover:r-6"
                       style={{ filter: 'drop-shadow(0 0 3px rgba(34, 197, 94, 0.8))' }}
                     />
-                    {/* Tooltip - show on hover via CSS */}
                     <g className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                       <rect
                         x={point.x - 50}
@@ -230,7 +206,6 @@ export default function FullPerformanceGraph({ dayLogs, onClose, onRefresh, isRe
                       </text>
                     </g>
 
-                    {/* X-axis labels (every 5th day) */}
                     {(index % 5 === 0 || index === points.length - 1) && (
                       <text
                         x={point.x}
@@ -250,7 +225,6 @@ export default function FullPerformanceGraph({ dayLogs, onClose, onRefresh, isRe
             )}
           </div>
 
-          {/* Legend */}
           <div className="mt-6 pt-6 border-t border-green-900/30 flex items-center justify-between">
             <div className="flex items-center gap-6 text-xs font-mono">
               <div className="flex items-center gap-2">

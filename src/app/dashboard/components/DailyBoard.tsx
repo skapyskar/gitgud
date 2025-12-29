@@ -34,6 +34,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
+  const [showBacklog, setShowBacklog] = useState(false);
   const [boardLoading, setBoardLoading] = useState(true);
   const [completingTask, setCompletingTask] = useState<{ id: string; isWeekly: boolean; duration: number | null } | null>(null);
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
@@ -41,6 +42,11 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   const [timerTaskId, setTimerTaskId] = useState<string | null>(null);
   const [timerDuration, setTimerDuration] = useState<number>(60);
   const [timerHasAllocatedDuration, setTimerHasAllocatedDuration] = useState<boolean>(false);
+  const [movingBacklogTaskId, setMovingBacklogTaskId] = useState<string | null>(null);
+  const [moveBacklogTier, setMoveBacklogTier] = useState<TaskTier>("C");
+  const [moveBacklogCategory, setMoveBacklogCategory] = useState<Category>("LIFE");
+  const [moveBacklogDeadlineTime, setMoveBacklogDeadlineTime] = useState("");
+  const [moveBacklogDuration, setMoveBacklogDuration] = useState("");
 
   const [optimisticTasks, setOptimisticTasks] = useState<Task[]>([...dailyTasks]);
 
@@ -112,8 +118,19 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
     const days = template.repeatDays?.split(",").map(Number) || [];
     return days.includes(todayDayIndex) && !dismissedWeeklyIds.includes(template.id);
   });
+
+  const todayISO = today.toISOString().slice(0, 10);
+  const todaysTasks = optimisticTasks.filter(task =>
+    task.scheduledDate && new Date(task.scheduledDate).toISOString().slice(0, 10) === todayISO
+  );
+  const backlogTasks = optimisticTasks.filter(task =>
+    task.scheduledDate &&
+    new Date(task.scheduledDate).toISOString().slice(0, 10) < todayISO &&
+    !task.isCompleted
+  );
+
   const allTodayTasks = [
-    ...optimisticTasks,
+    ...todaysTasks,
     ...todaysWeeklyTasks
   ];
 
@@ -129,17 +146,12 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
   const pendingTasks = allTodayTasks
     .filter(task => !task.isCompleted)
     .sort((a, b) => {
-      // 1st priority: deadline time ascending (tasks without deadline go to the end)
       const aTime = a.deadlineTime ? new Date(a.deadlineTime).getTime() : Infinity;
       const bTime = b.deadlineTime ? new Date(b.deadlineTime).getTime() : Infinity;
       if (aTime !== bTime) return aTime - bTime;
-
-      // 2nd priority: duration ascending (tasks without duration go to the end)
       const aDuration = a.allocatedDuration ?? Infinity;
       const bDuration = b.allocatedDuration ?? Infinity;
       if (aDuration !== bDuration) return aDuration - bDuration;
-
-      // 3rd priority: name alphabetically
       return a.title.localeCompare(b.title);
     });
   const completedTasks = allTodayTasks.filter(task => task.isCompleted);
@@ -331,6 +343,100 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
     }
   };
 
+  // Backlog handlers
+  const getBacklogMaxDuration = () => {
+    if (!moveBacklogDeadlineTime) return 999;
+    const now = new Date();
+    const [h, m] = moveBacklogDeadlineTime.split(':').map(Number);
+    const dl = new Date(now);
+    dl.setHours(h, m, 0, 0);
+    const diffMs = dl.getTime() - now.getTime();
+    return Math.max(1, Math.floor(diffMs / 60000));
+  };
+
+  const isBacklogDeadlineValid = () => {
+    if (!moveBacklogDeadlineTime) return false;
+    const now = new Date();
+    const [h, m] = moveBacklogDeadlineTime.split(':').map(Number);
+    const dl = new Date(now);
+    dl.setHours(h, m, 0, 0);
+    return dl.getTime() > now.getTime();
+  };
+
+  const handleMoveBacklogToToday = async () => {
+    if (!movingBacklogTaskId || !moveBacklogDeadlineTime || !isBacklogDeadlineValid()) return;
+
+    const prev = [...optimisticTasks];
+    setOptimisticTasks(current => current.filter(t => t.id !== movingBacklogTaskId));
+    setIsLoading(true);
+
+    try {
+      const todayDate = new Date();
+      todayDate.setUTCHours(0, 0, 0, 0);
+
+      const [hours, minutes] = moveBacklogDeadlineTime.split(':').map(Number);
+      const deadlineDate = new Date();
+      deadlineDate.setHours(hours, minutes, 0, 0);
+
+      const res = await fetch("/api/tasks/update", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          taskId: movingBacklogTaskId,
+          scheduledDate: todayDate.toISOString(),
+          tier: moveBacklogTier,
+          category: moveBacklogCategory,
+          deadlineTime: deadlineDate.toISOString(),
+          allocatedDuration: moveBacklogDuration ? parseInt(moveBacklogDuration) : null,
+        }),
+      });
+
+      if (res.ok) {
+        setMovingBacklogTaskId(null);
+        setMoveBacklogTier("C");
+        setMoveBacklogCategory("LIFE");
+        setMoveBacklogDeadlineTime("");
+        setMoveBacklogDuration("");
+        router.refresh();
+      } else {
+        setOptimisticTasks(prev);
+      }
+    } catch (error) {
+      setOptimisticTasks(prev);
+      console.error("Failed to move backlog task to today:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleMoveBacklogToDump = async (taskId: string) => {
+    const prev = [...optimisticTasks];
+    setOptimisticTasks(current => current.filter(t => t.id !== taskId));
+    setIsLoading(true);
+
+    try {
+      const res = await fetch("/api/tasks/update", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          taskId,
+          type: "BACKLOG",
+        }),
+      });
+
+      if (res.ok) {
+        router.refresh();
+      } else {
+        setOptimisticTasks(prev);
+      }
+    } catch (error) {
+      setOptimisticTasks(prev);
+      console.error("Failed to move backlog task to dump:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="border border-green-900/30 p-[0.15vw] bg-black/50 flex flex-col h-[calc(100vh-60vh)] min-h-[12vh] max-h-[30vh] lg:h-[calc(100vh-40vh)] lg:max-h-[50vh] relative">
       {(isLoading || boardLoading) && (
@@ -416,6 +522,112 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
               >
                 Cancel
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {movingBacklogTaskId && (
+        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
+          <div className="bg-black border-2 border-green-500 p-[1vw] max-w-md w-full">
+            <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] text-green-400 font-mono mb-[0.5vh] uppercase">Reschedule for Today</h3>
+            <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-400 mb-[1vh] font-mono">Set deadline and details for today</p>
+
+            <div className="space-y-[0.5vh]">
+              <div>
+                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Task Tier *</label>
+                <select
+                  value={moveBacklogTier}
+                  onChange={(e) => setMoveBacklogTier(e.target.value as TaskTier)}
+                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
+                >
+                  <option value="S">S - Critical (High XP)</option>
+                  <option value="A">A - Important</option>
+                  <option value="B">B - Maintenance</option>
+                  <option value="C">C - Chores</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Category *</label>
+                <select
+                  value={moveBacklogCategory}
+                  onChange={(e) => setMoveBacklogCategory(e.target.value as Category)}
+                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
+                >
+                  <option value="DEV">DEV</option>
+                  <option value="ACADEMICS">ACADEMICS</option>
+                  <option value="HEALTH">HEALTH</option>
+                  <option value="LIFE">LIFE</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Deadline Time *</label>
+                <input
+                  type="time"
+                  value={moveBacklogDeadlineTime}
+                  onChange={(e) => {
+                    setMoveBacklogDeadlineTime(e.target.value);
+                    if (moveBacklogDuration) {
+                      const now = new Date();
+                      const [h, m] = e.target.value.split(':').map(Number);
+                      const dl = new Date(now); dl.setHours(h, m, 0, 0);
+                      const maxMins = Math.max(1, Math.floor((dl.getTime() - now.getTime()) / 60000));
+                      if (parseInt(moveBacklogDuration) > maxMins) {
+                        setMoveBacklogDuration(maxMins.toString());
+                      }
+                    }
+                  }}
+                  min={getMinDeadlineTime()}
+                  max={MAX_DEADLINE_TIME}
+                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
+                  required
+                />
+                {moveBacklogDeadlineTime && (
+                  <span className={`text-[clamp(0.4rem,0.5vw,0.6rem)] font-mono ${isBacklogDeadlineValid() ? 'text-gray-600' : 'text-red-500'}`}>
+                    {isBacklogDeadlineValid() ? `${getBacklogMaxDuration()} min available` : '⚠️ Time must be in the future!'}
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Duration (minutes)</label>
+                <input
+                  type="number"
+                  value={moveBacklogDuration}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value) || 0;
+                    const maxDur = getBacklogMaxDuration();
+                    setMoveBacklogDuration(Math.min(val, maxDur).toString());
+                  }}
+                  placeholder={moveBacklogDeadlineTime ? `max ${getBacklogMaxDuration()}` : "e.g. 60"}
+                  min="1"
+                  max={getBacklogMaxDuration()}
+                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono placeholder-gray-600"
+                />
+              </div>
+
+              <div className="flex gap-[0.5vw] pt-[0.3vh]">
+                <button
+                  onClick={handleMoveBacklogToToday}
+                  disabled={!moveBacklogDeadlineTime || !isBacklogDeadlineValid()}
+                  className="flex-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 uppercase tracking-wider font-mono disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  → Move to Today
+                </button>
+                <button
+                  onClick={() => {
+                    setMovingBacklogTaskId(null);
+                    setMoveBacklogTier("C");
+                    setMoveBacklogCategory("LIFE");
+                    setMoveBacklogDeadlineTime("");
+                    setMoveBacklogDuration("");
+                  }}
+                  className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-400 uppercase font-mono"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -607,7 +819,6 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                           )}
                         </div>
                       </div>
-                      {/* Timer and Delete Buttons */}
                       <div className="flex flex-col gap-2 items-center">
                         {!expired && (
                           <button
@@ -677,6 +888,69 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                       >
                         ✕
                       </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        {backlogTasks.length > 0 && (
+          <div className="mt-[0.5vh]">
+            <button
+              onClick={() => setShowBacklog(!showBacklog)}
+              className="w-full flex items-center justify-between text-[clamp(0.5rem,0.7vw,0.75rem)] text-orange-500 uppercase tracking-wider mb-[0.3vh] font-mono hover:text-orange-400 transition-colors"
+            >
+              <span>⏳ Backlog ({backlogTasks.length})</span>
+              <span>{showBacklog ? "▼" : "▶"}</span>
+            </button>
+            {showBacklog && (
+              <div className="space-y-2">
+                {backlogTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className="p-3 border border-orange-800/50 bg-orange-900/10 transition-colors group opacity-70"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs px-2 py-0.5 border border-orange-700/50 text-orange-500 font-mono">
+                            {task.tier}
+                          </span>
+                          <span className="text-xs text-orange-600 font-mono">{task.category}</span>
+                          <span className="text-xs text-gray-600 font-mono">
+                            {task.scheduledDate && new Date(task.scheduledDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                        </div>
+                        <h5 className="text-sm text-orange-400/70 font-mono line-through">{task.title}</h5>
+                        <p className="text-[clamp(0.4rem,0.55vw,0.65rem)] text-gray-600 font-mono mt-1">
+                          (Not counted for efficiency until rescheduled)
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => {
+                            setMovingBacklogTaskId(task.id);
+                            setMoveBacklogTier(task.tier);
+                            setMoveBacklogCategory(task.category);
+                          }}
+                          className="text-xs bg-green-900/30 hover:bg-green-900/50 border border-green-700/50 px-2 py-1 text-green-400 font-mono"
+                        >
+                          → Today
+                        </button>
+                        <button
+                          onClick={() => handleMoveBacklogToDump(task.id)}
+                          className="text-xs bg-yellow-900/30 hover:bg-yellow-900/50 border border-yellow-700/50 px-2 py-1 text-yellow-400 font-mono"
+                        >
+                          → Dump
+                        </button>
+                        <button
+                          onClick={() => promptDeleteTask(task.id)}
+                          className="text-xs bg-red-900/30 hover:bg-red-900/50 border border-red-700/50 px-2 py-1 text-red-400 font-mono"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

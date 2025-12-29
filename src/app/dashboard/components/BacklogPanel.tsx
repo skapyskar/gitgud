@@ -16,26 +16,19 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
-  // Optimistic UI: local state for tasks
   const [optimisticTasks, setOptimisticTasks] = useState<Task[]>([...tasks]);
-  // Track temp ID to real ID mapping after creation completes
   const [tempToRealIdMap, setTempToRealIdMap] = useState<Record<string, string>>({});
 
-  // Sync optimisticTasks with props when tasks change (after server response replaces temp tasks)
   useEffect(() => {
     setOptimisticTasks([...tasks]);
   }, [tasks]);
-
-  // Move to daily modal state
   const [movingTaskId, setMovingTaskId] = useState<string | null>(null);
   const [moveTaskTier, setMoveTaskTier] = useState<TaskTier>("C");
   const [moveTaskCategory, setMoveTaskCategory] = useState<Category>("LIFE");
   const [moveDeadlineTime, setMoveDeadlineTime] = useState("");
   const [moveDuration, setMoveDuration] = useState("");
-  // Delete confirmation state
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
 
-  // Helper: Get minimum deadline time (current time rounded up to next 5 minutes)
   const getMinDeadlineTime = () => {
     const now = new Date();
     // Round up to next 5 minutes
@@ -46,10 +39,8 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
     return `${hours.toString().padStart(2, '0')}:${finalMinutes.toString().padStart(2, '0')}`;
   };
 
-  // Helper: Max deadline time is 23:59
   const MAX_DEADLINE_TIME = "23:59";
 
-  // Helper: Calculate max duration in minutes based on selected deadline time
   const getMaxDuration = () => {
     if (!moveDeadlineTime) return 999;
     const now = new Date();
@@ -61,7 +52,6 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
     return Math.max(1, diffMinutes);
   };
 
-  // Helper: Check if deadline time is valid (in the future)
   const isDeadlineValid = () => {
     if (!moveDeadlineTime) return false;
     const now = new Date();
@@ -71,11 +61,9 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
     return deadlineDate.getTime() > now.getTime();
   };
 
-  // Separate completed and incomplete tasks
   const incompleteTasks = optimisticTasks
     .filter(task => !task.isCompleted)
     .sort((a, b) => {
-      // Sort by deadline ascending (tasks without deadline go to the end)
       if (!a.deadline && !b.deadline) return 0;
       if (!a.deadline) return 1;
       if (!b.deadline) return -1;
@@ -83,14 +71,12 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
     });
   const completedTasks = optimisticTasks.filter(task => task.isCompleted);
 
-  // Optimistic add
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTask.trim()) return;
 
     setIsAdding(true);
     setIsLoading(true);
-    // 1. Create a fake task for instant UI
     const tempId = Math.random().toString();
     const now = new Date();
     const tempTask: Task = {
@@ -116,7 +102,6 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
       isBonus: false,
       timeBonus: 0,
       finalPoints: 0,
-      // New fields for deadline/duration system
       deadlineTime: null,
       allocatedDuration: null,
       durationMet: false,
@@ -138,15 +123,13 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
       if (res.ok) {
         const data = await res.json();
         const createdTask = data.task;
-        // Map temp ID to real ID so task can be moved immediately
         setTempToRealIdMap(prev => ({ ...prev, [tempId]: createdTask.id }));
-        // Update the task in optimistic state with the real ID
         setOptimisticTasks((current) =>
           current.map(t => t.id === tempId ? { ...t, id: createdTask.id } : t)
         );
         setNewTask("");
         setDeadline("");
-        router.refresh(); // Will sync with server state
+        router.refresh();
       } else {
         setOptimisticTasks((current) => current.filter(t => t.id !== tempId));
       }
@@ -160,26 +143,19 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
   };
 
   const handleMoveToDaily = async (taskId: string) => {
-    // Validate that tier and category are selected
     if (!moveTaskTier || !moveTaskCategory) {
       alert("Please select both Task Tier and Category before moving to daily tasks.");
       return;
     }
 
-    // The task ID should already be the real ID from the updated optimistic state
-    // No need to check for temp IDs since we update them immediately after creation
-
-    // Optimistic update: remove task from backlog immediately
     const prev = [...optimisticTasks];
     setOptimisticTasks((current) => current.filter((t) => t.id !== taskId));
     setIsLoading(true);
 
     try {
-      // Use UTC midnight to match server-side date handling
       const today = new Date();
       today.setUTCHours(0, 0, 0, 0);
 
-      // Build deadline time if provided (using local time)
       let deadlineTimeValue = null;
       if (moveDeadlineTime) {
         const [hours, minutes] = moveDeadlineTime.split(':').map(Number);
@@ -210,13 +186,11 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
         setMoveDuration("");
         router.refresh();
       } else {
-        // Revert on failure
         setOptimisticTasks(prev);
         const errorData = await res.json();
         alert(`Failed to move task: ${errorData.error || 'Unknown error'}`);
       }
     } catch (error) {
-      // Revert on error
       setOptimisticTasks(prev);
       console.error("Failed to move task:", error);
       alert("Failed to move task. Please try again.");
@@ -225,12 +199,9 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
     }
   };
 
-  // Show delete confirmation dialog
   const promptDelete = (taskId: string) => {
     setDeletingTaskId(taskId);
   };
-
-  // Confirm and execute delete
   const confirmDelete = async () => {
     if (!deletingTaskId) return;
 
@@ -260,7 +231,6 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
   };
 
   const handleUncompleteTask = async (taskId: string) => {
-    // Optimistic update: mark task as uncompleted immediately
     const prev = [...optimisticTasks];
     setOptimisticTasks((current) =>
       current.map((t) =>
@@ -279,11 +249,9 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
       if (res.ok) {
         router.refresh();
       } else {
-        // Revert on failure
         setOptimisticTasks(prev);
       }
     } catch (error) {
-      // Revert on error
       setOptimisticTasks(prev);
       console.error("Failed to uncomplete task:", error);
     } finally {
@@ -298,8 +266,6 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
           <div className="text-green-400 font-mono text-sm animate-pulse">LOADING...</div>
         </div>
       )}
-
-      {/* Move to Daily Modal */}
       {movingTaskId && (
         <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
           <div className="bg-black border-2 border-green-500 p-[1vw] max-w-md w-full">
@@ -344,7 +310,6 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
                   value={moveDeadlineTime}
                   onChange={(e) => {
                     setMoveDeadlineTime(e.target.value);
-                    // Auto-clamp duration when deadline changes
                     if (moveDuration) {
                       const now = new Date();
                       const [h, m] = e.target.value.split(':').map(Number);
@@ -478,8 +443,6 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
           {isAdding ? "Adding..." : "+ Add to Dump"}
         </button>
       </form>
-
-      {/* Task List */}
       <div className="space-y-2 flex-1 overflow-y-auto pr-2">
         {incompleteTasks.length === 0 ? (
           <div className="text-center text-gray-600 text-xs py-8 font-mono">
@@ -520,8 +483,6 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
             </div>
           ))
         )}
-
-        {/* Completed Tasks Section */}
         {completedTasks.length > 0 && (
           <div className="mt-4">
             <button

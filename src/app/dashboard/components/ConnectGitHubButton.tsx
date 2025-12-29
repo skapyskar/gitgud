@@ -8,8 +8,6 @@ export default function ConnectGitHubButton() {
 
   const linkGithub = () => {
     setIsLoading(true);
-    // Trigger GitHub login. NextAuth handles the account linking automatically
-    // if a session already exists.
     signIn("github", { callbackUrl: "/dashboard" });
   };
 

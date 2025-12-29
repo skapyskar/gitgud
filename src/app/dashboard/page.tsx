@@ -54,9 +54,7 @@ export default async function DashboardPage() {
       matches: t.scheduledDate ? new Date(t.scheduledDate).toISOString().slice(0, 10) === todayISO : false
     })));
     const dailyTasks = user.tasks.filter(t =>
-      t.type === "DAILY" &&
-      t.scheduledDate &&
-      new Date(t.scheduledDate).toISOString().slice(0, 10) === todayISO
+      t.type === "DAILY" && t.scheduledDate
     );
     console.log('[Dashboard] Filtered daily tasks count:', dailyTasks.length);
 
