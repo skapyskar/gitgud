@@ -410,7 +410,7 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
       <div className="flex items-center gap-[0.5vw] mb-[0.5vh]">
         <span className="w-[0.4vw] h-[0.4vh] min-w-[6px] min-h-[6px] bg-yellow-500 rounded-full animate-pulse"></span>
         <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] font-bold text-green-500 uppercase tracking-wider">
-          &gt;&gt; The_Dump
+          &gt;&gt; Dump
         </h3>
       </div>
 
