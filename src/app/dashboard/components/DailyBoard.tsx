@@ -820,87 +820,13 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                             <span className="text-[0.5rem] text-gray-500">✕</span>
                           </div>
                         ) : (
-                          <div className="flex flex-col gap-1">
-                            {frequency > 1 ? (
-                              <div className="flex items-center gap-1 flex-wrap max-w-[10vw]">
-                                {Array.from({ length: frequency }).map((_, idx) => {
-                                  const isFilled = idx < completedFrequency;
-                                  return (
-                                    <button
-                                      key={idx}
-                                      onClick={() => {
-                                        if (isFilled) {
-                                          if (idx === completedFrequency - 1) {
-                                            // Uncomplete the last filled tick
-                                            handleUncompleteTask(task.id); // Default count 1
-                                          }
-                                        } else {
-                                          if (idx === completedFrequency) {
-                                            // Complete the next tick
-                                            handleCompleteTask(task.id, task.type === 'WEEKLY');
-                                          }
-                                        }
-                                      }}
-                                      className={`w-[0.8vw] h-[0.8vw] min-w-[12px] min-h-[12px] border rounded transition-colors ${isFilled
-                                        ? (task.type === 'WEEKLY' ? 'bg-purple-500 border-purple-500' : 'bg-green-500 border-green-500')
-                                        : (task.type === 'WEEKLY' ? 'border-purple-500 hover:bg-purple-500/30' : 'border-green-500 hover:bg-green-500/30')
-                                        }`}
-                                    />
-                                  );
-                                })}
-                                <button
-                                  onClick={() => {
-                                    // Tick all remaining
-                                    const remaining = frequency - completedFrequency;
-                                    if (remaining > 0) {
-                                      // We can call complete with custom count, but handleCompleteTask currently assumes 1 or full duration check.
-                                      // I need to update handleCompleteTask to support count.
-                                      // For now, let's just complete 1 recursively? No, that's bad.
-                                      // Let's rely on api accepting count.
-                                      // I need to update handleCompleteTask signature.
-                                      // Or just trigger confirming completion which sends 1.
-                                      // Wait, requested "Tick All".
-                                      // I will implement a specific "completeAll" handler.
-
-                                      const prev = [...optimisticTasks];
-                                      // Update optimistic
-                                      const newLen = frequency;
-                                      setOptimisticTasks((current) =>
-                                        current.map((t) =>
-                                          t.id === task.id
-                                            ? { ...t, isCompleted: true, completedFrequency: newLen, completedAt: new Date(), durationMet: false }
-                                            : t
-                                        )
-                                      );
-
-                                      fetch("/api/tasks/complete", {
-                                        method: "POST",
-                                        headers: { "Content-Type": "application/json" },
-                                        body: JSON.stringify({
-                                          taskId: task.id,
-                                          isWeeklyBonus: task.type === 'WEEKLY',
-                                          durationMet: false,
-                                          count: remaining
-                                        }),
-                                      }).then(res => {
-                                        if (res.ok) router.refresh();
-                                        else setOptimisticTasks(prev);
-                                      });
-                                    }
-                                  }}
-                                  className="ml-1 text-[0.6rem] text-green-400 font-mono hover:underline"
-                                  title="Tick All"
-                                >
-                                  [ALL]
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => handleCompleteTask(task.id, task.type === 'WEEKLY')}
-                                className={`w-[1vw] h-[1vh] min-w-[16px] min-h-[16px] border-2 rounded hover:bg-green-500/30 transition-colors flex-shrink-0 mt-0.5 ${task.type === 'WEEKLY' ? 'border-purple-500' : 'border-green-500'}`}
-                              />
-                            )}
-                          </div>
+                          // Only show completion button if frequency is 1, otherwise ticks are shown below title
+                          frequency === 1 && (
+                            <button
+                              onClick={() => handleCompleteTask(task.id, task.type === 'WEEKLY')}
+                              className={`w-[1vw] h-[1vh] min-w-[16px] min-h-[16px] border-2 rounded hover:bg-green-500/30 transition-colors flex-shrink-0 mt-0.5 ${task.type === 'WEEKLY' ? 'border-purple-500' : 'border-green-500'}`}
+                            />
+                          )
                         )}
                         <div className="flex-1">
                           <div className="flex items-center gap-[0.3vw] mb-[0.2vh]">
@@ -940,6 +866,65 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                           </div>
                           {task.description && (
                             <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mt-[0.2vh] font-mono">{task.description}</p>
+                          )}
+                          {!expired && frequency > 1 && (
+                            <div className="flex items-center gap-1 flex-wrap mt-[0.5vh]">
+                              {Array.from({ length: frequency }).map((_, idx) => {
+                                const isFilled = idx < completedFrequency;
+                                return (
+                                  <button
+                                    key={idx}
+                                    onClick={() => {
+                                      if (isFilled) {
+                                        if (idx === completedFrequency - 1) {
+                                          handleUncompleteTask(task.id);
+                                        }
+                                      } else {
+                                        if (idx === completedFrequency) {
+                                          handleCompleteTask(task.id, task.type === 'WEEKLY');
+                                        }
+                                      }
+                                    }}
+                                    className={`w-[0.8vw] h-[0.8vw] min-w-[12px] min-h-[12px] border rounded transition-colors ${isFilled
+                                        ? (task.type === 'WEEKLY' ? 'bg-purple-500 border-purple-500' : 'bg-green-500 border-green-500')
+                                        : (task.type === 'WEEKLY' ? 'border-purple-500 hover:bg-purple-500/30' : 'border-green-500 hover:bg-green-500/30')
+                                      }`}
+                                  />
+                                );
+                              })}
+                              <button
+                                onClick={() => {
+                                  const remaining = frequency - completedFrequency;
+                                  if (remaining > 0) {
+                                    const prev = [...optimisticTasks];
+                                    setOptimisticTasks((current) =>
+                                      current.map((t) =>
+                                        t.id === task.id
+                                          ? { ...t, isCompleted: true, completedFrequency: frequency, completedAt: new Date(), durationMet: false }
+                                          : t
+                                      )
+                                    );
+                                    fetch("/api/tasks/complete", {
+                                      method: "POST",
+                                      headers: { "Content-Type": "application/json" },
+                                      body: JSON.stringify({
+                                        taskId: task.id,
+                                        isWeeklyBonus: task.type === 'WEEKLY',
+                                        durationMet: false,
+                                        count: remaining
+                                      }),
+                                    }).then(res => {
+                                      if (res.ok) router.refresh();
+                                      else setOptimisticTasks(prev);
+                                    });
+                                  }
+                                }}
+                                className="ml-1 text-[0.6rem] text-green-400 font-mono hover:underline"
+                                title="Tick All"
+                              >
+                                [ALL]
+                              </button>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -999,8 +984,34 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                               {task.tier}
                             </span>
                             <span className="text-xs text-gray-600 font-mono">{task.category}</span>
+                            {/* @ts-ignore */}
+                            {task.frequency > 1 && (
+                              <span className="text-[10px] text-gray-500 font-mono ml-1">
+                                {/* @ts-ignore */}
+                                ({task.completedFrequency}/{task.frequency})
+                              </span>
+                            )}
                           </div>
-                          <h5 className="text-sm text-gray-500 font-mono line-through">{task.title}</h5>
+                          <div className="flex flex-col">
+                            <h5 className="text-sm text-gray-500 font-mono line-through">{task.title}</h5>
+                            {/* @ts-ignore */}
+                            {task.frequency > 1 && (
+                              <div className="flex items-center gap-1 flex-wrap mt-1 opacity-50">
+                                {/* @ts-ignore */}
+                                {Array.from({ length: task.frequency }).map((_, idx) => (
+                                  <div
+                                    key={idx}
+                                    className={`w-[10px] h-[10px] border rounded ${
+                                      // @ts-ignore
+                                      idx < task.completedFrequency
+                                        ? (task.type === 'WEEKLY' ? 'bg-purple-500/50 border-purple-500' : 'bg-green-500/50 border-green-500')
+                                        : 'border-gray-600'
+                                      }`}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </div>
                           {task.finalPoints && (
                             <p className="text-xs text-green-600 mt-1 font-mono">+{task.finalPoints} XP</p>
                           )}
@@ -1045,8 +1056,32 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                           <span className="text-xs text-gray-600 font-mono">
                             {task.scheduledDate && new Date(task.scheduledDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                           </span>
+                          {/* @ts-ignore */}
+                          {task.frequency > 1 && (
+                            <span className="text-[10px] text-gray-500 font-mono ml-1">
+                              {/* @ts-ignore */}
+                              ({task.completedFrequency}/{task.frequency})
+                            </span>
+                          )}
                         </div>
                         <h5 className="text-sm text-orange-400/70 font-mono line-through">{task.title}</h5>
+                        {/* @ts-ignore */}
+                        {task.frequency > 1 && (
+                          <div className="flex items-center gap-1 flex-wrap mt-1 opacity-50">
+                            {/* @ts-ignore */}
+                            {Array.from({ length: task.frequency }).map((_, idx) => (
+                              <div
+                                key={idx}
+                                className={`w-[10px] h-[10px] border rounded ${
+                                  // @ts-ignore
+                                  idx < task.completedFrequency
+                                    ? (task.type === 'WEEKLY' ? 'bg-purple-500/50 border-purple-500' : 'bg-green-500/50 border-green-500')
+                                    : 'border-gray-600'
+                                  }`}
+                              />
+                            ))}
+                          </div>
+                        )}
                         <p className="text-[clamp(0.4rem,0.55vw,0.65rem)] text-gray-600 font-mono mt-1">
                           (Not counted for efficiency until rescheduled)
                         </p>
