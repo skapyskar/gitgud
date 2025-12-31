@@ -250,11 +250,23 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
     setCompletingTask(null);
     const prev = [...optimisticTasks];
     setOptimisticTasks((current) =>
-      current.map((t) =>
-        t.id === taskId
-          ? { ...t, isCompleted: true, completedAt: new Date(), durationMet }
-          : t
-      )
+      current.map((t) => {
+        if (t.id !== taskId) return t;
+        // @ts-ignore
+        const currentFreq = t.frequency || 1;
+        // @ts-ignore
+        const currentDone = t.completedFrequency || 0;
+        const newDone = currentDone + 1;
+        const isNowDone = newDone >= currentFreq;
+
+        return {
+          ...t,
+          isCompleted: isNowDone,
+          completedFrequency: newDone,
+          completedAt: isNowDone ? new Date() : null,
+          durationMet: isNowDone ? durationMet : t.durationMet
+        };
+      })
     );
     setIsLoading(true);
     try {
@@ -265,6 +277,7 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
           taskId,
           isWeeklyBonus: isWeeklyTask,
           durationMet,
+          count: 1,
         }),
       });
       if (res.ok) {
