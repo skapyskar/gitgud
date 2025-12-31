@@ -50,6 +50,9 @@ export async function PATCH(request: Request) {
     if (allocatedDuration !== undefined) {
       updateData.allocatedDuration = allocatedDuration;
     }
+    if (body.frequency !== undefined) {
+      updateData.frequency = body.frequency;
+    }
 
     // Handle plannedDate (preferred) or scheduledDate (backward compatibility)
     // IMPORTANT: Always set BOTH scheduledDate and plannedDate for daily tasks

@@ -45,6 +45,8 @@ export async function POST(request: Request) {
         repeatDays: repeatDays || null,
         deadlineTime: deadlineTime ? new Date(deadlineTime) : null,
         allocatedDuration: allocatedDuration || null,
+        frequency: body.frequency || 1,
+        completedFrequency: 0,
       },
     });
 
