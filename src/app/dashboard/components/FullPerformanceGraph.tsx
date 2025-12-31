@@ -167,7 +167,7 @@ export default function FullPerformanceGraph({ dayLogs, onClose, onRefresh, isRe
                   d={pathD}
                   fill="none"
                   stroke="rgb(34, 197, 94)"
-                  strokeWidth="2"
+                  strokeWidth="0.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   style={{ filter: 'drop-shadow(0 0 4px rgba(34, 197, 94, 0.6))' }}

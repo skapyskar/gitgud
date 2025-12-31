@@ -98,7 +98,7 @@ export default function MiniEfficiencyGraph({ dayLogs, onExpand }: MiniEfficienc
           d={pathD}
           fill="none"
           stroke="rgb(34, 197, 94)"
-          strokeWidth="1"
+          strokeWidth="0.1"
           strokeLinecap="round"
           strokeLinejoin="round"
           style={{ filter: 'drop-shadow(0 0 3px rgba(34, 197, 94, 0.6))' }}
