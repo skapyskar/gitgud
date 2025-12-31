@@ -452,42 +452,49 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
           <div className="text-green-400 font-mono text-lg animate-pulse">LOADING TASKS...</div>
         </div>
       )}
-      {completingTask && (
-        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
-          <div className="bg-black border-2 border-green-500 p-[1vw] max-w-md w-full">
-            <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] text-green-400 font-mono mb-[0.5vh] uppercase">
-              Task Complete?
-            </h3>
-            <p className="text-[clamp(0.6rem,0.85vw,0.875rem)] text-gray-400 mb-[1vh] font-mono">
-              Did you complete this task within <span className="text-green-400 font-bold">{completingTask.duration} minutes</span>?
-            </p>
-            <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-yellow-500 mb-[1vh] font-mono">
-              +25% XP BONUS if yes!
-            </p>
+      {completingTask && (() => {
+        const taskComp = allTodayTasks.find(t => t.id === completingTask.id);
+        // @ts-ignore
+        const freq = taskComp?.frequency || 1;
+        const bonusPct = freq > 1 ? (25 / freq).toFixed(1).replace(/\.0$/, '') : "25";
 
-            <div className="flex gap-[0.5vw] pt-[0.3vh]">
-              <button
-                onClick={() => confirmCompleteTask(completingTask.id, completingTask.isWeekly, true)}
-                className="flex-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 uppercase tracking-wider font-mono"
-              >
-                Yes (+25% XP)
-              </button>
-              <button
-                onClick={() => confirmCompleteTask(completingTask.id, completingTask.isWeekly, false)}
-                className="flex-1 bg-gray-900/30 hover:bg-gray-900/50 border border-gray-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-gray-400 uppercase font-mono"
-              >
-                No
-              </button>
-              <button
-                onClick={() => setCompletingTask(null)}
-                className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-red-400 uppercase font-mono"
-              >
-                Cancel
-              </button>
+        return (
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
+            <div className="bg-black border-2 border-green-500 p-[1vw] max-w-md w-full">
+              <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] text-green-400 font-mono mb-[0.5vh] uppercase">
+                Task Complete?
+              </h3>
+              <p className="text-[clamp(0.6rem,0.85vw,0.875rem)] text-gray-400 mb-[1vh] font-mono">
+                Did you complete this task within <span className="text-green-400 font-bold">{completingTask.duration} minutes</span>?
+              </p>
+              <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-yellow-500 mb-[1vh] font-mono">
+                +{bonusPct}% XP BONUS if yes!
+              </p>
+
+              <div className="flex gap-[0.5vw] pt-[0.3vh]">
+                <button
+                  onClick={() => confirmCompleteTask(completingTask.id, completingTask.isWeekly, true)}
+                  className="flex-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 uppercase tracking-wider font-mono"
+                >
+                  Yes (+{bonusPct}% XP)
+                </button>
+                <button
+                  onClick={() => confirmCompleteTask(completingTask.id, completingTask.isWeekly, false)}
+                  className="flex-1 bg-gray-900/30 hover:bg-gray-900/50 border border-gray-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-gray-400 uppercase font-mono"
+                >
+                  No
+                </button>
+                <button
+                  onClick={() => setCompletingTask(null)}
+                  className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-red-400 uppercase font-mono"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
       {timerTaskId && (
         <TaskTimer
           taskId={timerTaskId}
@@ -886,8 +893,8 @@ export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: Dail
                                       }
                                     }}
                                     className={`w-[0.8vw] h-[0.8vw] min-w-[12px] min-h-[12px] border rounded transition-colors ${isFilled
-                                        ? (task.type === 'WEEKLY' ? 'bg-purple-500 border-purple-500' : 'bg-green-500 border-green-500')
-                                        : (task.type === 'WEEKLY' ? 'border-purple-500 hover:bg-purple-500/30' : 'border-green-500 hover:bg-green-500/30')
+                                      ? (task.type === 'WEEKLY' ? 'bg-purple-500 border-purple-500' : 'bg-green-500 border-green-500')
+                                      : (task.type === 'WEEKLY' ? 'border-purple-500 hover:bg-purple-500/30' : 'border-green-500 hover:bg-green-500/30')
                                       }`}
                                   />
                                 );
