@@ -22,6 +22,7 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
   const [category, setCategory] = useState<Category>("LIFE");
   const [deadlineTime, setDeadlineTime] = useState("");
   const [duration, setDuration] = useState("");
+  const [frequency, setFrequency] = useState("1");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   // Delete confirmation state
@@ -74,6 +75,10 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
       allocatedDuration: duration ? parseInt(duration) : null,
       durationMet: false,
       isExpired: false,
+      // @ts-ignore
+      frequency: parseInt(frequency) || 1,
+      // @ts-ignore
+      completedFrequency: 0,
     };
     setOptimisticTemplates((current) => [tempTemplate, ...current]);
 
@@ -90,6 +95,7 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
           // Store as local time without UTC offset (use today's date as base)
           deadlineTime: deadlineTime ? new Date(`${new Date().toISOString().slice(0, 10)}T${deadlineTime}:00`).toISOString() : null,
           allocatedDuration: duration ? parseInt(duration) : null,
+          frequency: parseInt(frequency) || 1,
         }),
       });
       if (res.ok) {
@@ -99,6 +105,7 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
         setCategory("LIFE");
         setDeadlineTime("");
         setDuration("");
+        setFrequency("1");
         setIsCreating(false);
         router.refresh(); // Will replace fake with real
       } else {
@@ -292,6 +299,17 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
                 className="w-full bg-black/70 border border-purple-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-purple-500 font-mono placeholder-gray-600"
               />
             </div>
+            <div>
+              <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Frequency</label>
+              <input
+                type="number"
+                value={frequency}
+                onChange={(e) => setFrequency(e.target.value)}
+                placeholder="1"
+                min="1"
+                className="w-full bg-black/70 border border-purple-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-purple-500 font-mono placeholder-gray-600"
+              />
+            </div>
           </div>
 
           <div className="flex gap-[0.5vw]">
@@ -312,6 +330,7 @@ export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps)
                 setCategory("LIFE");
                 setDeadlineTime("");
                 setDuration("");
+                setFrequency("1");
               }}
               className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-400 uppercase font-mono"
             >

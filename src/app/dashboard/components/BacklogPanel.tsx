@@ -27,6 +27,7 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
   const [moveTaskCategory, setMoveTaskCategory] = useState<Category>("LIFE");
   const [moveDeadlineTime, setMoveDeadlineTime] = useState("");
   const [moveDuration, setMoveDuration] = useState("");
+  const [moveTaskFrequency, setMoveTaskFrequency] = useState("1");
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
 
   const getMinDeadlineTime = () => {
@@ -106,6 +107,8 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
       allocatedDuration: null,
       durationMet: false,
       isExpired: false,
+      frequency: 1,
+      completedFrequency: 0,
     };
     setOptimisticTasks((current) => [tempTask, ...current]);
 
@@ -175,6 +178,7 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
           category: moveTaskCategory,
           deadlineTime: deadlineTimeValue,
           allocatedDuration: moveDuration ? parseInt(moveDuration) : null,
+          frequency: parseInt(moveTaskFrequency) || 1,
         }),
       });
 
@@ -184,6 +188,7 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
         setMoveTaskCategory("LIFE");
         setMoveDeadlineTime("");
         setMoveDuration("");
+        setMoveTaskFrequency("1");
         router.refresh();
       } else {
         setOptimisticTasks(prev);
@@ -349,6 +354,18 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
                 />
               </div>
 
+              <div>
+                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Frequency</label>
+                <input
+                  type="number"
+                  value={moveTaskFrequency}
+                  onChange={(e) => setMoveTaskFrequency(e.target.value)}
+                  placeholder="1"
+                  min="1"
+                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono placeholder-gray-600"
+                />
+              </div>
+
               <div className="flex gap-[0.5vw] pt-[0.3vh]">
                 <button
                   onClick={() => handleMoveToDaily(movingTaskId)}
@@ -364,6 +381,7 @@ export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
                     setMoveTaskCategory("LIFE");
                     setMoveDeadlineTime("");
                     setMoveDuration("");
+                    setMoveTaskFrequency("1");
                   }}
                   className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-400 uppercase font-mono"
                 >
