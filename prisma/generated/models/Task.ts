@@ -32,6 +32,8 @@ export type TaskAvgAggregateOutputType = {
   timeBonus: number | null
   finalPoints: number | null
   allocatedDuration: number | null
+  frequency: number | null
+  completedFrequency: number | null
 }
 
 export type TaskSumAggregateOutputType = {
@@ -40,6 +42,8 @@ export type TaskSumAggregateOutputType = {
   timeBonus: number | null
   finalPoints: number | null
   allocatedDuration: number | null
+  frequency: number | null
+  completedFrequency: number | null
 }
 
 export type TaskMinAggregateOutputType = {
@@ -67,6 +71,8 @@ export type TaskMinAggregateOutputType = {
   allocatedDuration: number | null
   durationMet: boolean | null
   isExpired: boolean | null
+  frequency: number | null
+  completedFrequency: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -96,6 +102,8 @@ export type TaskMaxAggregateOutputType = {
   allocatedDuration: number | null
   durationMet: boolean | null
   isExpired: boolean | null
+  frequency: number | null
+  completedFrequency: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -125,6 +133,8 @@ export type TaskCountAggregateOutputType = {
   allocatedDuration: number
   durationMet: number
   isExpired: number
+  frequency: number
+  completedFrequency: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -137,6 +147,8 @@ export type TaskAvgAggregateInputType = {
   timeBonus?: true
   finalPoints?: true
   allocatedDuration?: true
+  frequency?: true
+  completedFrequency?: true
 }
 
 export type TaskSumAggregateInputType = {
@@ -145,6 +157,8 @@ export type TaskSumAggregateInputType = {
   timeBonus?: true
   finalPoints?: true
   allocatedDuration?: true
+  frequency?: true
+  completedFrequency?: true
 }
 
 export type TaskMinAggregateInputType = {
@@ -172,6 +186,8 @@ export type TaskMinAggregateInputType = {
   allocatedDuration?: true
   durationMet?: true
   isExpired?: true
+  frequency?: true
+  completedFrequency?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -201,6 +217,8 @@ export type TaskMaxAggregateInputType = {
   allocatedDuration?: true
   durationMet?: true
   isExpired?: true
+  frequency?: true
+  completedFrequency?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -230,6 +248,8 @@ export type TaskCountAggregateInputType = {
   allocatedDuration?: true
   durationMet?: true
   isExpired?: true
+  frequency?: true
+  completedFrequency?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -346,6 +366,8 @@ export type TaskGroupByOutputType = {
   allocatedDuration: number | null
   durationMet: boolean
   isExpired: boolean
+  frequency: number
+  completedFrequency: number
   createdAt: Date
   updatedAt: Date
   _count: TaskCountAggregateOutputType | null
@@ -398,6 +420,8 @@ export type TaskWhereInput = {
   allocatedDuration?: Prisma.IntNullableFilter<"Task"> | number | null
   durationMet?: Prisma.BoolFilter<"Task"> | boolean
   isExpired?: Prisma.BoolFilter<"Task"> | boolean
+  frequency?: Prisma.IntFilter<"Task"> | number
+  completedFrequency?: Prisma.IntFilter<"Task"> | number
   createdAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -428,6 +452,8 @@ export type TaskOrderByWithRelationInput = {
   allocatedDuration?: Prisma.SortOrderInput | Prisma.SortOrder
   durationMet?: Prisma.SortOrder
   isExpired?: Prisma.SortOrder
+  frequency?: Prisma.SortOrder
+  completedFrequency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -461,6 +487,8 @@ export type TaskWhereUniqueInput = Prisma.AtLeast<{
   allocatedDuration?: Prisma.IntNullableFilter<"Task"> | number | null
   durationMet?: Prisma.BoolFilter<"Task"> | boolean
   isExpired?: Prisma.BoolFilter<"Task"> | boolean
+  frequency?: Prisma.IntFilter<"Task"> | number
+  completedFrequency?: Prisma.IntFilter<"Task"> | number
   createdAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -491,6 +519,8 @@ export type TaskOrderByWithAggregationInput = {
   allocatedDuration?: Prisma.SortOrderInput | Prisma.SortOrder
   durationMet?: Prisma.SortOrder
   isExpired?: Prisma.SortOrder
+  frequency?: Prisma.SortOrder
+  completedFrequency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.TaskCountOrderByAggregateInput
@@ -528,6 +558,8 @@ export type TaskScalarWhereWithAggregatesInput = {
   allocatedDuration?: Prisma.IntNullableWithAggregatesFilter<"Task"> | number | null
   durationMet?: Prisma.BoolWithAggregatesFilter<"Task"> | boolean
   isExpired?: Prisma.BoolWithAggregatesFilter<"Task"> | boolean
+  frequency?: Prisma.IntWithAggregatesFilter<"Task"> | number
+  completedFrequency?: Prisma.IntWithAggregatesFilter<"Task"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Task"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Task"> | Date | string
 }
@@ -556,6 +588,8 @@ export type TaskCreateInput = {
   allocatedDuration?: number | null
   durationMet?: boolean
   isExpired?: boolean
+  frequency?: number
+  completedFrequency?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutTasksInput
@@ -586,6 +620,8 @@ export type TaskUncheckedCreateInput = {
   allocatedDuration?: number | null
   durationMet?: boolean
   isExpired?: boolean
+  frequency?: number
+  completedFrequency?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -614,6 +650,8 @@ export type TaskUpdateInput = {
   allocatedDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isExpired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  frequency?: Prisma.IntFieldUpdateOperationsInput | number
+  completedFrequency?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutTasksNestedInput
@@ -644,6 +682,8 @@ export type TaskUncheckedUpdateInput = {
   allocatedDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isExpired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  frequency?: Prisma.IntFieldUpdateOperationsInput | number
+  completedFrequency?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -673,6 +713,8 @@ export type TaskCreateManyInput = {
   allocatedDuration?: number | null
   durationMet?: boolean
   isExpired?: boolean
+  frequency?: number
+  completedFrequency?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -701,6 +743,8 @@ export type TaskUpdateManyMutationInput = {
   allocatedDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isExpired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  frequency?: Prisma.IntFieldUpdateOperationsInput | number
+  completedFrequency?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -730,6 +774,8 @@ export type TaskUncheckedUpdateManyInput = {
   allocatedDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isExpired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  frequency?: Prisma.IntFieldUpdateOperationsInput | number
+  completedFrequency?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -769,6 +815,8 @@ export type TaskCountOrderByAggregateInput = {
   allocatedDuration?: Prisma.SortOrder
   durationMet?: Prisma.SortOrder
   isExpired?: Prisma.SortOrder
+  frequency?: Prisma.SortOrder
+  completedFrequency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -779,6 +827,8 @@ export type TaskAvgOrderByAggregateInput = {
   timeBonus?: Prisma.SortOrder
   finalPoints?: Prisma.SortOrder
   allocatedDuration?: Prisma.SortOrder
+  frequency?: Prisma.SortOrder
+  completedFrequency?: Prisma.SortOrder
 }
 
 export type TaskMaxOrderByAggregateInput = {
@@ -806,6 +856,8 @@ export type TaskMaxOrderByAggregateInput = {
   allocatedDuration?: Prisma.SortOrder
   durationMet?: Prisma.SortOrder
   isExpired?: Prisma.SortOrder
+  frequency?: Prisma.SortOrder
+  completedFrequency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -835,6 +887,8 @@ export type TaskMinOrderByAggregateInput = {
   allocatedDuration?: Prisma.SortOrder
   durationMet?: Prisma.SortOrder
   isExpired?: Prisma.SortOrder
+  frequency?: Prisma.SortOrder
+  completedFrequency?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -845,6 +899,8 @@ export type TaskSumOrderByAggregateInput = {
   timeBonus?: Prisma.SortOrder
   finalPoints?: Prisma.SortOrder
   allocatedDuration?: Prisma.SortOrder
+  frequency?: Prisma.SortOrder
+  completedFrequency?: Prisma.SortOrder
 }
 
 export type TaskCreateNestedManyWithoutUserInput = {
@@ -937,6 +993,8 @@ export type TaskCreateWithoutUserInput = {
   allocatedDuration?: number | null
   durationMet?: boolean
   isExpired?: boolean
+  frequency?: number
+  completedFrequency?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -965,6 +1023,8 @@ export type TaskUncheckedCreateWithoutUserInput = {
   allocatedDuration?: number | null
   durationMet?: boolean
   isExpired?: boolean
+  frequency?: number
+  completedFrequency?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1023,6 +1083,8 @@ export type TaskScalarWhereInput = {
   allocatedDuration?: Prisma.IntNullableFilter<"Task"> | number | null
   durationMet?: Prisma.BoolFilter<"Task"> | boolean
   isExpired?: Prisma.BoolFilter<"Task"> | boolean
+  frequency?: Prisma.IntFilter<"Task"> | number
+  completedFrequency?: Prisma.IntFilter<"Task"> | number
   createdAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Task"> | Date | string
 }
@@ -1051,6 +1113,8 @@ export type TaskCreateManyUserInput = {
   allocatedDuration?: number | null
   durationMet?: boolean
   isExpired?: boolean
+  frequency?: number
+  completedFrequency?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1079,6 +1143,8 @@ export type TaskUpdateWithoutUserInput = {
   allocatedDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isExpired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  frequency?: Prisma.IntFieldUpdateOperationsInput | number
+  completedFrequency?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1107,6 +1173,8 @@ export type TaskUncheckedUpdateWithoutUserInput = {
   allocatedDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isExpired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  frequency?: Prisma.IntFieldUpdateOperationsInput | number
+  completedFrequency?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1135,6 +1203,8 @@ export type TaskUncheckedUpdateManyWithoutUserInput = {
   allocatedDuration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   durationMet?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isExpired?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  frequency?: Prisma.IntFieldUpdateOperationsInput | number
+  completedFrequency?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1166,6 +1236,8 @@ export type TaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   allocatedDuration?: boolean
   durationMet?: boolean
   isExpired?: boolean
+  frequency?: boolean
+  completedFrequency?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1196,6 +1268,8 @@ export type TaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   allocatedDuration?: boolean
   durationMet?: boolean
   isExpired?: boolean
+  frequency?: boolean
+  completedFrequency?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1226,6 +1300,8 @@ export type TaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   allocatedDuration?: boolean
   durationMet?: boolean
   isExpired?: boolean
+  frequency?: boolean
+  completedFrequency?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1256,11 +1332,13 @@ export type TaskSelectScalar = {
   allocatedDuration?: boolean
   durationMet?: boolean
   isExpired?: boolean
+  frequency?: boolean
+  completedFrequency?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "title" | "description" | "type" | "tier" | "category" | "plannedDate" | "plannedStartTime" | "plannedEndTime" | "deadline" | "scheduledDate" | "repeatDays" | "isCompleted" | "completedAt" | "basePoints" | "xpWorth" | "isBonus" | "timeBonus" | "finalPoints" | "deadlineTime" | "allocatedDuration" | "durationMet" | "isExpired" | "createdAt" | "updatedAt", ExtArgs["result"]["task"]>
+export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "title" | "description" | "type" | "tier" | "category" | "plannedDate" | "plannedStartTime" | "plannedEndTime" | "deadline" | "scheduledDate" | "repeatDays" | "isCompleted" | "completedAt" | "basePoints" | "xpWorth" | "isBonus" | "timeBonus" | "finalPoints" | "deadlineTime" | "allocatedDuration" | "durationMet" | "isExpired" | "frequency" | "completedFrequency" | "createdAt" | "updatedAt", ExtArgs["result"]["task"]>
 export type TaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -1301,6 +1379,8 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     allocatedDuration: number | null
     durationMet: boolean
     isExpired: boolean
+    frequency: number
+    completedFrequency: number
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["task"]>
@@ -1751,6 +1831,8 @@ export interface TaskFieldRefs {
   readonly allocatedDuration: Prisma.FieldRef<"Task", 'Int'>
   readonly durationMet: Prisma.FieldRef<"Task", 'Boolean'>
   readonly isExpired: Prisma.FieldRef<"Task", 'Boolean'>
+  readonly frequency: Prisma.FieldRef<"Task", 'Int'>
+  readonly completedFrequency: Prisma.FieldRef<"Task", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Task", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Task", 'DateTime'>
 }

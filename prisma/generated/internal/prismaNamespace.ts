@@ -1012,6 +1012,8 @@ export const TaskScalarFieldEnum = {
   allocatedDuration: 'allocatedDuration',
   durationMet: 'durationMet',
   isExpired: 'isExpired',
+  frequency: 'frequency',
+  completedFrequency: 'completedFrequency',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
