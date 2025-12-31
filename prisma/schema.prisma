@@ -106,6 +106,9 @@ model Task {
   durationMet       Boolean    @default(false)  // Did user complete within duration?
   isExpired         Boolean    @default(false)  // Task was cut at deadline
   
+  frequency         Int        @default(1)      // How many times to complete?
+  completedFrequency Int       @default(0)      // How many times completed so far?
+  
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
