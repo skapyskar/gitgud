@@ -41,8 +41,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ cha
     const opponentWon = nextOpponentProgress >= challenge.target;
     const winnerId = challengerWon ? challenge.challengerId : opponentWon ? challenge.opponentId : null;
 
-    await prisma.famChallenge.update({
-      where: { id: challengeId },
+    // Guard on status so two concurrent contributions can't both cross the
+    // finish line — only the request that actually flips ACTIVE -> COMPLETED
+    // pays out the reward.
+    const updated = await prisma.famChallenge.updateMany({
+      where: { id: challengeId, status: "ACTIVE" },
       data: {
         challengerProgress: nextChallengerProgress,
         opponentProgress: nextOpponentProgress,
@@ -51,6 +54,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ cha
         resolvedAt: winnerId ? new Date() : null,
       },
     });
+    if (updated.count === 0) {
+      return NextResponse.json({ error: "This challenge isn't active" }, { status: 409 });
+    }
 
     if (winnerId) {
       const winner = await prisma.user.update({

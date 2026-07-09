@@ -7,6 +7,11 @@ import { checkRateLimit, clientKeyFor } from "@/lib/rate-limit";
 const MAX_ATTEMPTS = 8;
 const WINDOW_MS = 5 * 60_000;
 
+// Compared against when the username doesn't exist, so both branches cost one
+// bcrypt verify and response timing can't be used to enumerate usernames.
+// (Hash of a random UUID; matches the cost factor used at signup.)
+const DUMMY_HASH = "$2b$10$2hQ3c7/Fk7p0npSM1HPRNexwlLDv18fi8FuKQUVmEEsdOFKY9hC8i";
+
 export async function POST(req: NextRequest) {
   const rateLimit = checkRateLimit(`login:${clientKeyFor(req)}`, MAX_ATTEMPTS, WINDOW_MS);
   if (!rateLimit.allowed) {
@@ -25,12 +30,9 @@ export async function POST(req: NextRequest) {
   }
 
   const user = await prisma.user.findUnique({ where: { username } });
-  if (!user?.password) {
-    return NextResponse.json({ error: "Invalid username or password" }, { status: 401 });
-  }
 
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) {
+  const valid = await bcrypt.compare(password, user?.password ?? DUMMY_HASH);
+  if (!user?.password || !valid) {
     return NextResponse.json({ error: "Invalid username or password" }, { status: 401 });
   }
 
