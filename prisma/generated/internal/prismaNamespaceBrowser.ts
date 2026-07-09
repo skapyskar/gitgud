@@ -55,6 +55,16 @@ export const ModelName = {
   Task: 'Task',
   DayLog: 'DayLog',
   InventoryItem: 'InventoryItem',
+  Fam: 'Fam',
+  FamMembership: 'FamMembership',
+  FamInvite: 'FamInvite',
+  FamGoal: 'FamGoal',
+  FamGoalVote: 'FamGoalVote',
+  FamAchievement: 'FamAchievement',
+  FamActivity: 'FamActivity',
+  FamChallenge: 'FamChallenge',
+  FamSeason: 'FamSeason',
+  FamDailyStat: 'FamDailyStat',
   Account: 'Account',
   Session: 'Session',
   VerificationToken: 'VerificationToken'
@@ -82,6 +92,8 @@ export const UserScalarFieldEnum = {
   email: 'email',
   emailVerified: 'emailVerified',
   image: 'image',
+  username: 'username',
+  password: 'password',
   xp: 'xp',
   level: 'level',
   coins: 'coins',
@@ -156,6 +168,135 @@ export const InventoryItemScalarFieldEnum = {
 } as const
 
 export type InventoryItemScalarFieldEnum = (typeof InventoryItemScalarFieldEnum)[keyof typeof InventoryItemScalarFieldEnum]
+
+
+export const FamScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  icon: 'icon',
+  ownerId: 'ownerId',
+  xp: 'xp',
+  level: 'level',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FamScalarFieldEnum = (typeof FamScalarFieldEnum)[keyof typeof FamScalarFieldEnum]
+
+
+export const FamMembershipScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  famId: 'famId',
+  role: 'role',
+  joinedAt: 'joinedAt'
+} as const
+
+export type FamMembershipScalarFieldEnum = (typeof FamMembershipScalarFieldEnum)[keyof typeof FamMembershipScalarFieldEnum]
+
+
+export const FamInviteScalarFieldEnum = {
+  id: 'id',
+  famId: 'famId',
+  invitedUserId: 'invitedUserId',
+  invitedUsername: 'invitedUsername',
+  invitedById: 'invitedById',
+  status: 'status',
+  code: 'code',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type FamInviteScalarFieldEnum = (typeof FamInviteScalarFieldEnum)[keyof typeof FamInviteScalarFieldEnum]
+
+
+export const FamGoalScalarFieldEnum = {
+  id: 'id',
+  famId: 'famId',
+  proposedById: 'proposedById',
+  description: 'description',
+  targetValue: 'targetValue',
+  currentValue: 'currentValue',
+  status: 'status',
+  createdAt: 'createdAt',
+  activatedAt: 'activatedAt',
+  completedAt: 'completedAt'
+} as const
+
+export type FamGoalScalarFieldEnum = (typeof FamGoalScalarFieldEnum)[keyof typeof FamGoalScalarFieldEnum]
+
+
+export const FamGoalVoteScalarFieldEnum = {
+  id: 'id',
+  goalId: 'goalId',
+  userId: 'userId',
+  approve: 'approve',
+  createdAt: 'createdAt'
+} as const
+
+export type FamGoalVoteScalarFieldEnum = (typeof FamGoalVoteScalarFieldEnum)[keyof typeof FamGoalVoteScalarFieldEnum]
+
+
+export const FamAchievementScalarFieldEnum = {
+  id: 'id',
+  famId: 'famId',
+  key: 'key',
+  unlockedAt: 'unlockedAt'
+} as const
+
+export type FamAchievementScalarFieldEnum = (typeof FamAchievementScalarFieldEnum)[keyof typeof FamAchievementScalarFieldEnum]
+
+
+export const FamActivityScalarFieldEnum = {
+  id: 'id',
+  famId: 'famId',
+  type: 'type',
+  actorId: 'actorId',
+  message: 'message',
+  createdAt: 'createdAt'
+} as const
+
+export type FamActivityScalarFieldEnum = (typeof FamActivityScalarFieldEnum)[keyof typeof FamActivityScalarFieldEnum]
+
+
+export const FamChallengeScalarFieldEnum = {
+  id: 'id',
+  famId: 'famId',
+  opponentFamId: 'opponentFamId',
+  challengerId: 'challengerId',
+  opponentId: 'opponentId',
+  metric: 'metric',
+  target: 'target',
+  status: 'status',
+  winnerId: 'winnerId',
+  createdAt: 'createdAt',
+  resolvedAt: 'resolvedAt'
+} as const
+
+export type FamChallengeScalarFieldEnum = (typeof FamChallengeScalarFieldEnum)[keyof typeof FamChallengeScalarFieldEnum]
+
+
+export const FamSeasonScalarFieldEnum = {
+  id: 'id',
+  label: 'label',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  createdAt: 'createdAt'
+} as const
+
+export type FamSeasonScalarFieldEnum = (typeof FamSeasonScalarFieldEnum)[keyof typeof FamSeasonScalarFieldEnum]
+
+
+export const FamDailyStatScalarFieldEnum = {
+  id: 'id',
+  famId: 'famId',
+  date: 'date',
+  totalXP: 'totalXP',
+  activeMemberCount: 'activeMemberCount'
+} as const
+
+export type FamDailyStatScalarFieldEnum = (typeof FamDailyStatScalarFieldEnum)[keyof typeof FamDailyStatScalarFieldEnum]
 
 
 export const AccountScalarFieldEnum = {

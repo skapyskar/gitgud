@@ -280,6 +280,91 @@ export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedIntNullableFilter<$PrismaModel>
 }
 
+export type EnumFamRoleFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamRole | Prisma.EnumFamRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.FamRole[] | Prisma.ListEnumFamRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamRole[] | Prisma.ListEnumFamRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamRoleFilter<$PrismaModel> | $Enums.FamRole
+}
+
+export type EnumFamRoleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamRole | Prisma.EnumFamRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.FamRole[] | Prisma.ListEnumFamRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamRole[] | Prisma.ListEnumFamRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamRoleWithAggregatesFilter<$PrismaModel> | $Enums.FamRole
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFamRoleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFamRoleFilter<$PrismaModel>
+}
+
+export type EnumFamInviteStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamInviteStatus | Prisma.EnumFamInviteStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FamInviteStatus[] | Prisma.ListEnumFamInviteStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamInviteStatus[] | Prisma.ListEnumFamInviteStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamInviteStatusFilter<$PrismaModel> | $Enums.FamInviteStatus
+}
+
+export type EnumFamInviteStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamInviteStatus | Prisma.EnumFamInviteStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FamInviteStatus[] | Prisma.ListEnumFamInviteStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamInviteStatus[] | Prisma.ListEnumFamInviteStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamInviteStatusWithAggregatesFilter<$PrismaModel> | $Enums.FamInviteStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFamInviteStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFamInviteStatusFilter<$PrismaModel>
+}
+
+export type EnumFamGoalStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamGoalStatus | Prisma.EnumFamGoalStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FamGoalStatus[] | Prisma.ListEnumFamGoalStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamGoalStatus[] | Prisma.ListEnumFamGoalStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamGoalStatusFilter<$PrismaModel> | $Enums.FamGoalStatus
+}
+
+export type EnumFamGoalStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamGoalStatus | Prisma.EnumFamGoalStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FamGoalStatus[] | Prisma.ListEnumFamGoalStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamGoalStatus[] | Prisma.ListEnumFamGoalStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamGoalStatusWithAggregatesFilter<$PrismaModel> | $Enums.FamGoalStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFamGoalStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFamGoalStatusFilter<$PrismaModel>
+}
+
+export type EnumFamActivityTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamActivityType | Prisma.EnumFamActivityTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.FamActivityType[] | Prisma.ListEnumFamActivityTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamActivityType[] | Prisma.ListEnumFamActivityTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamActivityTypeFilter<$PrismaModel> | $Enums.FamActivityType
+}
+
+export type EnumFamActivityTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamActivityType | Prisma.EnumFamActivityTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.FamActivityType[] | Prisma.ListEnumFamActivityTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamActivityType[] | Prisma.ListEnumFamActivityTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamActivityTypeWithAggregatesFilter<$PrismaModel> | $Enums.FamActivityType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFamActivityTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFamActivityTypeFilter<$PrismaModel>
+}
+
+export type EnumFamChallengeStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamChallengeStatus | Prisma.EnumFamChallengeStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FamChallengeStatus[] | Prisma.ListEnumFamChallengeStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamChallengeStatus[] | Prisma.ListEnumFamChallengeStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamChallengeStatusFilter<$PrismaModel> | $Enums.FamChallengeStatus
+}
+
+export type EnumFamChallengeStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamChallengeStatus | Prisma.EnumFamChallengeStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FamChallengeStatus[] | Prisma.ListEnumFamChallengeStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamChallengeStatus[] | Prisma.ListEnumFamChallengeStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamChallengeStatusWithAggregatesFilter<$PrismaModel> | $Enums.FamChallengeStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFamChallengeStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFamChallengeStatusFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -546,6 +631,91 @@ export type NestedFloatNullableFilter<$PrismaModel = never> = {
   gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   not?: Prisma.NestedFloatNullableFilter<$PrismaModel> | number | null
+}
+
+export type NestedEnumFamRoleFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamRole | Prisma.EnumFamRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.FamRole[] | Prisma.ListEnumFamRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamRole[] | Prisma.ListEnumFamRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamRoleFilter<$PrismaModel> | $Enums.FamRole
+}
+
+export type NestedEnumFamRoleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamRole | Prisma.EnumFamRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.FamRole[] | Prisma.ListEnumFamRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamRole[] | Prisma.ListEnumFamRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamRoleWithAggregatesFilter<$PrismaModel> | $Enums.FamRole
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFamRoleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFamRoleFilter<$PrismaModel>
+}
+
+export type NestedEnumFamInviteStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamInviteStatus | Prisma.EnumFamInviteStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FamInviteStatus[] | Prisma.ListEnumFamInviteStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamInviteStatus[] | Prisma.ListEnumFamInviteStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamInviteStatusFilter<$PrismaModel> | $Enums.FamInviteStatus
+}
+
+export type NestedEnumFamInviteStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamInviteStatus | Prisma.EnumFamInviteStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FamInviteStatus[] | Prisma.ListEnumFamInviteStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamInviteStatus[] | Prisma.ListEnumFamInviteStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamInviteStatusWithAggregatesFilter<$PrismaModel> | $Enums.FamInviteStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFamInviteStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFamInviteStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumFamGoalStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamGoalStatus | Prisma.EnumFamGoalStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FamGoalStatus[] | Prisma.ListEnumFamGoalStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamGoalStatus[] | Prisma.ListEnumFamGoalStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamGoalStatusFilter<$PrismaModel> | $Enums.FamGoalStatus
+}
+
+export type NestedEnumFamGoalStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamGoalStatus | Prisma.EnumFamGoalStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FamGoalStatus[] | Prisma.ListEnumFamGoalStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamGoalStatus[] | Prisma.ListEnumFamGoalStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamGoalStatusWithAggregatesFilter<$PrismaModel> | $Enums.FamGoalStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFamGoalStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFamGoalStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumFamActivityTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamActivityType | Prisma.EnumFamActivityTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.FamActivityType[] | Prisma.ListEnumFamActivityTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamActivityType[] | Prisma.ListEnumFamActivityTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamActivityTypeFilter<$PrismaModel> | $Enums.FamActivityType
+}
+
+export type NestedEnumFamActivityTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamActivityType | Prisma.EnumFamActivityTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.FamActivityType[] | Prisma.ListEnumFamActivityTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamActivityType[] | Prisma.ListEnumFamActivityTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamActivityTypeWithAggregatesFilter<$PrismaModel> | $Enums.FamActivityType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFamActivityTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFamActivityTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumFamChallengeStatusFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamChallengeStatus | Prisma.EnumFamChallengeStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FamChallengeStatus[] | Prisma.ListEnumFamChallengeStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamChallengeStatus[] | Prisma.ListEnumFamChallengeStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamChallengeStatusFilter<$PrismaModel> | $Enums.FamChallengeStatus
+}
+
+export type NestedEnumFamChallengeStatusWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FamChallengeStatus | Prisma.EnumFamChallengeStatusFieldRefInput<$PrismaModel>
+  in?: $Enums.FamChallengeStatus[] | Prisma.ListEnumFamChallengeStatusFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FamChallengeStatus[] | Prisma.ListEnumFamChallengeStatusFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFamChallengeStatusWithAggregatesFilter<$PrismaModel> | $Enums.FamChallengeStatus
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFamChallengeStatusFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFamChallengeStatusFilter<$PrismaModel>
 }
 
 

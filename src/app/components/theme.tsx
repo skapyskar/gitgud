@@ -26,6 +26,8 @@ export interface ThemePrefs {
   showSeconds: boolean;
   /** Only meaningful when skin === "custom" — the uploaded wallpaper. */
   customBg: CustomBg | null;
+  /** 0 (fully see-through) – 1 (opaque) opacity of glass/chip surfaces. */
+  glassOpacity: number;
 }
 
 export const THEME_DEFAULTS: ThemePrefs = {
@@ -34,6 +36,7 @@ export const THEME_DEFAULTS: ThemePrefs = {
   view: "board",
   showSeconds: true,
   customBg: null,
+  glassOpacity: 1,
 };
 
 export const SKIN_INFO: Record<Skin, { label: string; blurb: string; icon: string }> = {
@@ -64,6 +67,7 @@ function applyToDocument(prefs: ThemePrefs) {
   const el = document.documentElement;
   el.dataset.skin = tokenSkin(prefs.skin);
   el.dataset.mode = prefs.mode;
+  el.style.setProperty("--glass-opacity", String(prefs.glassOpacity ?? 1));
 }
 
 // Custom backgrounds can be sizeable data URLs — keep them out of the frequently
@@ -117,4 +121,4 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
 }
 
 /** Inline script source: applies persisted skin/mode before first paint. */
-export const THEME_BOOT_SCRIPT = `try{var p=JSON.parse(localStorage.getItem("gg-prefs")||"{}");var d=document.documentElement;var sk=p.skin==="custom"?"zen":(p.skin||"aurora");d.dataset.skin=sk;d.dataset.mode=p.mode||"dark";}catch(e){}`;
+export const THEME_BOOT_SCRIPT = `try{var p=JSON.parse(localStorage.getItem("gg-prefs")||"{}");var d=document.documentElement;var sk=p.skin==="custom"?"zen":(p.skin||"aurora");d.dataset.skin=sk;d.dataset.mode=p.mode||"dark";d.style.setProperty("--glass-opacity",String(p.glassOpacity==null?1:p.glassOpacity));}catch(e){}`;

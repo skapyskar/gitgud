@@ -1,16 +1,45 @@
 "use client";
 
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Github } from "lucide-react";
 import { GitGudLogo } from "./GitGudLogo";
+import { inputCls, labelCls, HudButton } from "./ui";
 
 export default function AuthGate() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [credError, setCredError] = useState<string | null>(null);
+  const [credBusy, setCredBusy] = useState(false);
 
   const handleLogin = (provider: "google" | "github") => {
     setIsLoading(provider);
     signIn(provider, { callbackUrl: "/dashboard" });
+  };
+
+  const handleCredentialsLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCredError(null);
+    setCredBusy(true);
+    try {
+      const res = await fetch("/api/auth/credentials-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCredError(data.error ?? "Invalid username or password");
+        return;
+      }
+      router.push("/dashboard");
+      router.refresh();
+    } finally {
+      setCredBusy(false);
+    }
   };
 
   return (
@@ -68,6 +97,40 @@ export default function AuthGate() {
         <p className="text-xs text-ink3">
           no account needed — your first login creates one
         </p>
+
+        <div className="flex items-center gap-3 text-ink3">
+          <div className="flex-1 h-px bg-line" />
+          <span className="text-[11px] tracking-wide">OR USERNAME + PASSWORD</span>
+          <div className="flex-1 h-px bg-line" />
+        </div>
+
+        <form onSubmit={handleCredentialsLogin} className="space-y-3 text-left">
+          <div>
+            <label className={labelCls}>Username</label>
+            <input
+              className={inputCls}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
+              required
+            />
+          </div>
+          <div>
+            <label className={labelCls}>Password</label>
+            <input
+              className={inputCls}
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              required
+            />
+          </div>
+          {credError && <div className="text-sm text-rose-400">{credError}</div>}
+          <HudButton type="submit" variant="ghost" disabled={credBusy} className="w-full py-2.5">
+            {credBusy ? "Signing in…" : "Log in"}
+          </HudButton>
+        </form>
       </div>
     </div>
   );

@@ -41,6 +41,7 @@
 
   --radius: 1rem;
   --blur: 24px;
+  --glass-opacity: 1;
 
   --font-body-active: var(--font-inter);
   --font-head-active: var(--font-sora);
@@ -341,14 +342,27 @@ html[data-mode="light"] .noise {
 /* ═══ 5. Component primitives ═══ */
 
 @layer utilities {
-  /* Card surface — the skin decides how "glassy" it is */
+  /* Card surface — the skin decides how "glassy" it is.
+     Background lives in a ::before layer so the opacity slider (--glass-opacity)
+     fades only the backdrop, never the text/icons sitting on top of it. */
   .glass {
-    background: var(--card-bg);
+    position: relative;
+    isolation: isolate;
     border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+    transition: border-color 0.4s ease;
+  }
+  .glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--card-bg);
     backdrop-filter: blur(var(--blur));
     -webkit-backdrop-filter: blur(var(--blur));
-    box-shadow: var(--card-shadow);
-    transition: background 0.4s ease, border-color 0.4s ease;
+    opacity: var(--glass-opacity);
+    transition: opacity 0.25s ease, background 0.4s ease;
   }
 
   .glass-hover {
@@ -360,12 +374,23 @@ html[data-mode="light"] .noise {
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25), 0 0 32px var(--glow);
   }
 
-  /* Small inner surfaces: rows, chips, inputs */
+  /* Small inner surfaces: rows, chips, inputs — same background-isolation trick */
   .chip {
-    background: var(--chip);
+    position: relative;
+    isolation: isolate;
     border: 1px solid var(--line);
   }
-  .chip-hover:hover {
+  .chip::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--chip);
+    opacity: var(--glass-opacity);
+    transition: opacity 0.25s ease, background 0.4s ease;
+  }
+  .chip-hover:hover::before {
     background: var(--chip-hover);
   }
 

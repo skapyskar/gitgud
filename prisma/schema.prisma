@@ -31,6 +31,44 @@ enum TaskType {
   BACKLOG  // The "Dump" area
 }
 
+enum FamRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum FamInviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum FamActivityType {
+  MEMBER_JOINED
+  MEMBER_LEFT
+  GOAL_PROPOSED
+  GOAL_ACTIVATED
+  GOAL_COMPLETED
+  ACHIEVEMENT_UNLOCKED
+}
+
+enum FamGoalStatus {
+  PROPOSED
+  ACTIVE
+  COMPLETED
+  REJECTED
+}
+
+// Base schema only for a future round — Challenges/Seasons/weighted Rankings
+// are deferred, but these models exist so that round doesn't start from zero.
+enum FamChallengeStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  DECLINED
+}
+
 // -------------------- MODELS --------------------
 
 model User {
@@ -39,7 +77,11 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
-  
+
+  // --- Username + Password auth (links to OAuth identity) ---
+  username      String?   @unique
+  password      String?
+
   // --- Gamification Stats ---
   xp           Int       @default(0)
   level        Int       @default(1)
@@ -55,13 +97,23 @@ model User {
   updatedAt    DateTime  @updatedAt
 
   // Relations
-  tasks        Task[]
-  dayLogs      DayLog[]
-  inventory    InventoryItem[]
-  accounts     Account[]
-  sessions     Session[]
+  tasks           Task[]
+  dayLogs         DayLog[]
+  inventory       InventoryItem[]
+  accounts        Account[]
+  sessions        Session[]
+  famMemberships  FamMembership[]
+  ownedFams       Fam[]           @relation("FamOwner")
+  sentInvites     FamInvite[]     @relation("InvitedBy")
+  proposedGoals   FamGoal[]       @relation("GoalProposedBy")
+  goalVotes       FamGoalVote[]
+  famActivities   FamActivity[]
+  challengesSent     FamChallenge[] @relation("ChallengeChallenger")
+  challengesReceived FamChallenge[] @relation("ChallengeOpponent")
+  wonChallenges      FamChallenge[] @relation("ChallengeWinner")
 
   @@index([email])
+  @@index([username])
 }
 
 model Task {
@@ -153,6 +205,175 @@ model InventoryItem {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+model Fam {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  icon        String?
+
+  ownerId     String
+  owner       User     @relation("FamOwner", fields: [ownerId], references: [id])
+
+  xp          Int      @default(0)
+  level       Int      @default(1)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  memberships  FamMembership[]
+  invites      FamInvite[]
+  goals        FamGoal[]
+  activities   FamActivity[]
+  achievements FamAchievement[]
+  challengesSent     FamChallenge[] @relation("ChallengeFrom")
+  challengesReceived FamChallenge[] @relation("ChallengeTo")
+  dailyStats   FamDailyStat[]
+
+  @@index([ownerId])
+}
+
+model FamMembership {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  famId    String
+  fam      Fam      @relation(fields: [famId], references: [id], onDelete: Cascade)
+
+  role     FamRole  @default(MEMBER)
+  joinedAt DateTime @default(now())
+
+  @@unique([userId, famId])
+  @@index([famId])
+}
+
+model FamInvite {
+  id              String          @id @default(cuid())
+  famId           String
+  fam             Fam             @relation(fields: [famId], references: [id], onDelete: Cascade)
+
+  invitedUserId   String?
+  invitedUsername String?
+
+  invitedById     String
+  invitedBy       User            @relation("InvitedBy", fields: [invitedById], references: [id])
+
+  status          FamInviteStatus @default(PENDING)
+  code            String          @unique @default(cuid())
+  expiresAt       DateTime
+  createdAt       DateTime        @default(now())
+
+  @@index([famId])
+  @@index([invitedUserId])
+  @@index([code])
+}
+
+model FamGoal {
+  id             String        @id @default(cuid())
+  famId          String
+  fam            Fam           @relation(fields: [famId], references: [id], onDelete: Cascade)
+
+  proposedById   String
+  proposedBy     User          @relation("GoalProposedBy", fields: [proposedById], references: [id])
+
+  description    String
+  targetValue    Int
+  currentValue   Int           @default(0)
+  status         FamGoalStatus @default(PROPOSED)
+
+  createdAt      DateTime      @default(now())
+  activatedAt    DateTime?
+  completedAt    DateTime?
+
+  votes          FamGoalVote[]
+
+  @@index([famId, status])
+}
+
+model FamGoalVote {
+  id       String  @id @default(cuid())
+  goalId   String
+  goal     FamGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  approve  Boolean
+
+  createdAt DateTime @default(now())
+
+  @@unique([goalId, userId])
+}
+
+model FamAchievement {
+  id         String   @id @default(cuid())
+  famId      String
+  fam        Fam      @relation(fields: [famId], references: [id], onDelete: Cascade)
+  key        String
+  unlockedAt DateTime @default(now())
+
+  @@unique([famId, key])
+}
+
+model FamActivity {
+  id        String          @id @default(cuid())
+  famId     String
+  fam       Fam             @relation(fields: [famId], references: [id], onDelete: Cascade)
+  type      FamActivityType
+  actorId   String?
+  actor     User?           @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  message   String
+  createdAt DateTime        @default(now())
+
+  @@index([famId, createdAt])
+}
+
+// --- Base schema for a future round (Challenges/Seasons/weighted Rankings).
+// No API routes or UI yet — these models just mean that work doesn't start
+// from an empty schema. ---
+
+model FamChallenge {
+  id            String              @id @default(cuid())
+  famId         String
+  fam           Fam                 @relation("ChallengeFrom", fields: [famId], references: [id], onDelete: Cascade)
+  opponentFamId String?
+  opponentFam   Fam?                @relation("ChallengeTo", fields: [opponentFamId], references: [id], onDelete: Cascade)
+
+  challengerId  String
+  challenger    User                @relation("ChallengeChallenger", fields: [challengerId], references: [id])
+  opponentId    String?
+  opponent      User?               @relation("ChallengeOpponent", fields: [opponentId], references: [id])
+
+  metric        String
+  target        Int
+  status        FamChallengeStatus  @default(PENDING)
+  winnerId      String?
+  winner        User?               @relation("ChallengeWinner", fields: [winnerId], references: [id])
+
+  createdAt     DateTime            @default(now())
+  resolvedAt    DateTime?
+
+  @@index([famId])
+}
+
+model FamSeason {
+  id        String   @id @default(cuid())
+  label     String
+  startsAt  DateTime
+  endsAt    DateTime
+  createdAt DateTime @default(now())
+}
+
+// Per-Fam per-day rollup — future base for Analytics charts and a weighted
+// global ranking algorithm (avg momentum, consistency %, etc. over time).
+model FamDailyStat {
+  id       String   @id @default(cuid())
+  famId    String
+  fam      Fam      @relation(fields: [famId], references: [id], onDelete: Cascade)
+  date     DateTime @db.Date
+  totalXP  Int      @default(0)
+  activeMemberCount Int @default(0)
+
+  @@unique([famId, date])
 }
 
 // --- NextAuth Models (Required) ---

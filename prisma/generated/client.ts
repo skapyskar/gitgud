@@ -60,6 +60,56 @@ export type DayLog = Prisma.DayLogModel
  */
 export type InventoryItem = Prisma.InventoryItemModel
 /**
+ * Model Fam
+ * 
+ */
+export type Fam = Prisma.FamModel
+/**
+ * Model FamMembership
+ * 
+ */
+export type FamMembership = Prisma.FamMembershipModel
+/**
+ * Model FamInvite
+ * 
+ */
+export type FamInvite = Prisma.FamInviteModel
+/**
+ * Model FamGoal
+ * 
+ */
+export type FamGoal = Prisma.FamGoalModel
+/**
+ * Model FamGoalVote
+ * 
+ */
+export type FamGoalVote = Prisma.FamGoalVoteModel
+/**
+ * Model FamAchievement
+ * 
+ */
+export type FamAchievement = Prisma.FamAchievementModel
+/**
+ * Model FamActivity
+ * 
+ */
+export type FamActivity = Prisma.FamActivityModel
+/**
+ * Model FamChallenge
+ * 
+ */
+export type FamChallenge = Prisma.FamChallengeModel
+/**
+ * Model FamSeason
+ * 
+ */
+export type FamSeason = Prisma.FamSeasonModel
+/**
+ * Model FamDailyStat
+ * 
+ */
+export type FamDailyStat = Prisma.FamDailyStatModel
+/**
  * Model Account
  * 
  */

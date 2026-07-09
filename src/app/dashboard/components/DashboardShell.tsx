@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { LayoutDashboard, Swords, Lightbulb } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { LayoutDashboard, Swords, Lightbulb, Users } from "lucide-react";
 import type { Task, DayLog } from "../../../../prisma/generated/client";
 import { useTheme } from "../../components/theme";
 import FlashToastProvider from "./FlashToast";
@@ -9,21 +10,24 @@ import CursorFx from "./CursorFx";
 import Overview from "./Overview";
 import TheGrind from "./TheGrind";
 import { levelFromXP } from "@/lib/gamification";
+import type { FamSummaryData } from "../../fam/components/FamSummaryCard";
 
 interface DashboardShellProps {
-  user: { name: string | null; email: string; xp: number; streakDays: number; coins: number };
+  user: { name: string | null; username: string | null; email: string; xp: number; streakDays: number; coins: number };
   dayLogs: DayLog[];
   backlogTasks: Task[];
   weeklyTemplates: Task[];
   dailyTasks: Task[];
   isGitHubLinked: boolean;
+  famSummary: FamSummaryData | null;
 }
 
 /**
  * Two-page snap-scroll dashboard: Overview (clock, missions, momentum,
  * profile, audio dock) flows straight into The Grind (habits, brain dump).
  */
-export default function DashboardShell({ user, dayLogs, backlogTasks, weeklyTemplates, dailyTasks }: DashboardShellProps) {
+export default function DashboardShell({ user, dayLogs, backlogTasks, weeklyTemplates, dailyTasks, famSummary }: DashboardShellProps) {
+  const router = useRouter();
   const { skin, customBg } = useTheme();
   const [activePage, setActivePage] = useState<0 | 1>(0);
 
@@ -40,7 +44,11 @@ export default function DashboardShell({ user, dayLogs, backlogTasks, weeklyTemp
     window.scrollTo({ top: ref.current.offsetTop - 6, behavior: "smooth" });
   };
 
-  const handleNav = (target: "dash" | "grind" | "dump") => {
+  const handleNav = (target: "dash" | "grind" | "dump" | "fam") => {
+    if (target === "fam") {
+      router.push("/fam");
+      return;
+    }
     scrollToRef(target === "dash" ? dashRef : target === "grind" ? grindRef : dumpRef);
   };
 
@@ -71,10 +79,11 @@ export default function DashboardShell({ user, dayLogs, backlogTasks, weeklyTemp
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const mobileNav: Array<{ label: string; icon: typeof Swords; active: boolean; target: "dash" | "grind" | "dump" }> = [
+  const mobileNav: Array<{ label: string; icon: typeof Swords; active: boolean; target: "dash" | "grind" | "dump" | "fam" }> = [
     { label: "Overview", icon: LayoutDashboard, active: activePage === 0, target: "dash" },
     { label: "Habits", icon: Swords, active: activePage === 1, target: "grind" },
     { label: "Dump", icon: Lightbulb, active: activePage === 1, target: "dump" },
+    { label: "Fam", icon: Users, active: false, target: "fam" },
   ];
 
   return (
@@ -86,11 +95,12 @@ export default function DashboardShell({ user, dayLogs, backlogTasks, weeklyTemp
 
         <div ref={dashRef}>
           <Overview
-            user={{ name: user.name, email: user.email, xp: user.xp, streakDays: user.streakDays }}
+            user={{ name: user.name, username: user.username, email: user.email, xp: user.xp, streakDays: user.streakDays }}
             dayLogs={dayLogs}
             dailyTasks={dailyTasks}
             weeklyTemplates={weeklyTemplates}
             backlogTasks={backlogTasks}
+            famSummary={famSummary}
             onNavGrind={() => scrollToRef(grindRef)}
             onNavDump={() => scrollToRef(dumpRef)}
           />

@@ -183,7 +183,7 @@ export default function TheGrind({ level, weeklyTemplates, backlogTasks, dailyTa
   };
 
   return (
-    <section className="min-h-screen relative z-10 px-4 sm:px-9 pt-9 sm:pt-14 pb-24 lg:pb-11 flex flex-col gap-5">
+    <section className="min-h-screen relative z-10 px-4 sm:px-9 pt-9 sm:pt-14 pb-24 lg:pb-11 flex flex-col gap-5" style={{ scrollSnapAlign: "start", scrollSnapStop: "always" }}>
       <div className="flex items-end gap-4 flex-wrap">
         <div>
           <div className="text-[11px] tracking-[0.26em] text-ink3 font-bold">PAGE 02</div>

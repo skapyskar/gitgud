@@ -50,6 +50,8 @@ export type UserMinAggregateOutputType = {
   email: string | null
   emailVerified: Date | null
   image: string | null
+  username: string | null
+  password: string | null
   xp: number | null
   level: number | null
   coins: number | null
@@ -67,6 +69,8 @@ export type UserMaxAggregateOutputType = {
   email: string | null
   emailVerified: Date | null
   image: string | null
+  username: string | null
+  password: string | null
   xp: number | null
   level: number | null
   coins: number | null
@@ -84,6 +88,8 @@ export type UserCountAggregateOutputType = {
   email: number
   emailVerified: number
   image: number
+  username: number
+  password: number
   xp: number
   level: number
   coins: number
@@ -121,6 +127,8 @@ export type UserMinAggregateInputType = {
   email?: true
   emailVerified?: true
   image?: true
+  username?: true
+  password?: true
   xp?: true
   level?: true
   coins?: true
@@ -138,6 +146,8 @@ export type UserMaxAggregateInputType = {
   email?: true
   emailVerified?: true
   image?: true
+  username?: true
+  password?: true
   xp?: true
   level?: true
   coins?: true
@@ -155,6 +165,8 @@ export type UserCountAggregateInputType = {
   email?: true
   emailVerified?: true
   image?: true
+  username?: true
+  password?: true
   xp?: true
   level?: true
   coins?: true
@@ -259,6 +271,8 @@ export type UserGroupByOutputType = {
   email: string
   emailVerified: Date | null
   image: string | null
+  username: string | null
+  password: string | null
   xp: number
   level: number
   coins: number
@@ -299,6 +313,8 @@ export type UserWhereInput = {
   email?: Prisma.StringFilter<"User"> | string
   emailVerified?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   image?: Prisma.StringNullableFilter<"User"> | string | null
+  username?: Prisma.StringNullableFilter<"User"> | string | null
+  password?: Prisma.StringNullableFilter<"User"> | string | null
   xp?: Prisma.IntFilter<"User"> | number
   level?: Prisma.IntFilter<"User"> | number
   coins?: Prisma.IntFilter<"User"> | number
@@ -313,6 +329,15 @@ export type UserWhereInput = {
   inventory?: Prisma.InventoryItemListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
+  famMemberships?: Prisma.FamMembershipListRelationFilter
+  ownedFams?: Prisma.FamListRelationFilter
+  sentInvites?: Prisma.FamInviteListRelationFilter
+  proposedGoals?: Prisma.FamGoalListRelationFilter
+  goalVotes?: Prisma.FamGoalVoteListRelationFilter
+  famActivities?: Prisma.FamActivityListRelationFilter
+  challengesSent?: Prisma.FamChallengeListRelationFilter
+  challengesReceived?: Prisma.FamChallengeListRelationFilter
+  wonChallenges?: Prisma.FamChallengeListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -321,6 +346,8 @@ export type UserOrderByWithRelationInput = {
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrderInput | Prisma.SortOrder
   image?: Prisma.SortOrderInput | Prisma.SortOrder
+  username?: Prisma.SortOrderInput | Prisma.SortOrder
+  password?: Prisma.SortOrderInput | Prisma.SortOrder
   xp?: Prisma.SortOrder
   level?: Prisma.SortOrder
   coins?: Prisma.SortOrder
@@ -335,17 +362,28 @@ export type UserOrderByWithRelationInput = {
   inventory?: Prisma.InventoryItemOrderByRelationAggregateInput
   accounts?: Prisma.AccountOrderByRelationAggregateInput
   sessions?: Prisma.SessionOrderByRelationAggregateInput
+  famMemberships?: Prisma.FamMembershipOrderByRelationAggregateInput
+  ownedFams?: Prisma.FamOrderByRelationAggregateInput
+  sentInvites?: Prisma.FamInviteOrderByRelationAggregateInput
+  proposedGoals?: Prisma.FamGoalOrderByRelationAggregateInput
+  goalVotes?: Prisma.FamGoalVoteOrderByRelationAggregateInput
+  famActivities?: Prisma.FamActivityOrderByRelationAggregateInput
+  challengesSent?: Prisma.FamChallengeOrderByRelationAggregateInput
+  challengesReceived?: Prisma.FamChallengeOrderByRelationAggregateInput
+  wonChallenges?: Prisma.FamChallengeOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   email?: string
+  username?: string
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   name?: Prisma.StringNullableFilter<"User"> | string | null
   emailVerified?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   image?: Prisma.StringNullableFilter<"User"> | string | null
+  password?: Prisma.StringNullableFilter<"User"> | string | null
   xp?: Prisma.IntFilter<"User"> | number
   level?: Prisma.IntFilter<"User"> | number
   coins?: Prisma.IntFilter<"User"> | number
@@ -360,7 +398,16 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   inventory?: Prisma.InventoryItemListRelationFilter
   accounts?: Prisma.AccountListRelationFilter
   sessions?: Prisma.SessionListRelationFilter
-}, "id" | "email">
+  famMemberships?: Prisma.FamMembershipListRelationFilter
+  ownedFams?: Prisma.FamListRelationFilter
+  sentInvites?: Prisma.FamInviteListRelationFilter
+  proposedGoals?: Prisma.FamGoalListRelationFilter
+  goalVotes?: Prisma.FamGoalVoteListRelationFilter
+  famActivities?: Prisma.FamActivityListRelationFilter
+  challengesSent?: Prisma.FamChallengeListRelationFilter
+  challengesReceived?: Prisma.FamChallengeListRelationFilter
+  wonChallenges?: Prisma.FamChallengeListRelationFilter
+}, "id" | "email" | "username">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -368,6 +415,8 @@ export type UserOrderByWithAggregationInput = {
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrderInput | Prisma.SortOrder
   image?: Prisma.SortOrderInput | Prisma.SortOrder
+  username?: Prisma.SortOrderInput | Prisma.SortOrder
+  password?: Prisma.SortOrderInput | Prisma.SortOrder
   xp?: Prisma.SortOrder
   level?: Prisma.SortOrder
   coins?: Prisma.SortOrder
@@ -393,6 +442,8 @@ export type UserScalarWhereWithAggregatesInput = {
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
   emailVerified?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   image?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  username?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  password?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   xp?: Prisma.IntWithAggregatesFilter<"User"> | number
   level?: Prisma.IntWithAggregatesFilter<"User"> | number
   coins?: Prisma.IntWithAggregatesFilter<"User"> | number
@@ -410,6 +461,8 @@ export type UserCreateInput = {
   email: string
   emailVerified?: Date | string | null
   image?: string | null
+  username?: string | null
+  password?: string | null
   xp?: number
   level?: number
   coins?: number
@@ -424,6 +477,15 @@ export type UserCreateInput = {
   inventory?: Prisma.InventoryItemCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeCreateNestedManyWithoutWinnerInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -432,6 +494,8 @@ export type UserUncheckedCreateInput = {
   email: string
   emailVerified?: Date | string | null
   image?: string | null
+  username?: string | null
+  password?: string | null
   xp?: number
   level?: number
   coins?: number
@@ -446,6 +510,15 @@ export type UserUncheckedCreateInput = {
   inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipUncheckedCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamUncheckedCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutWinnerInput
 }
 
 export type UserUpdateInput = {
@@ -454,6 +527,8 @@ export type UserUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   xp?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.IntFieldUpdateOperationsInput | number
   coins?: Prisma.IntFieldUpdateOperationsInput | number
@@ -468,6 +543,15 @@ export type UserUpdateInput = {
   inventory?: Prisma.InventoryItemUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUpdateManyWithoutWinnerNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -476,6 +560,8 @@ export type UserUncheckedUpdateInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   xp?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.IntFieldUpdateOperationsInput | number
   coins?: Prisma.IntFieldUpdateOperationsInput | number
@@ -490,6 +576,15 @@ export type UserUncheckedUpdateInput = {
   inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUncheckedUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUncheckedUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUncheckedUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutWinnerNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -498,6 +593,8 @@ export type UserCreateManyInput = {
   email: string
   emailVerified?: Date | string | null
   image?: string | null
+  username?: string | null
+  password?: string | null
   xp?: number
   level?: number
   coins?: number
@@ -515,6 +612,8 @@ export type UserUpdateManyMutationInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   xp?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.IntFieldUpdateOperationsInput | number
   coins?: Prisma.IntFieldUpdateOperationsInput | number
@@ -532,6 +631,8 @@ export type UserUncheckedUpdateManyInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   xp?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.IntFieldUpdateOperationsInput | number
   coins?: Prisma.IntFieldUpdateOperationsInput | number
@@ -549,6 +650,8 @@ export type UserCountOrderByAggregateInput = {
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   image?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   xp?: Prisma.SortOrder
   level?: Prisma.SortOrder
   coins?: Prisma.SortOrder
@@ -575,6 +678,8 @@ export type UserMaxOrderByAggregateInput = {
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   image?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   xp?: Prisma.SortOrder
   level?: Prisma.SortOrder
   coins?: Prisma.SortOrder
@@ -592,6 +697,8 @@ export type UserMinOrderByAggregateInput = {
   email?: Prisma.SortOrder
   emailVerified?: Prisma.SortOrder
   image?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  password?: Prisma.SortOrder
   xp?: Prisma.SortOrder
   level?: Prisma.SortOrder
   coins?: Prisma.SortOrder
@@ -615,6 +722,11 @@ export type UserSumOrderByAggregateInput = {
 export type UserScalarRelationFilter = {
   is?: Prisma.UserWhereInput
   isNot?: Prisma.UserWhereInput
+}
+
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -691,6 +803,138 @@ export type UserUpdateOneRequiredWithoutInventoryNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInventoryInput, Prisma.UserUpdateWithoutInventoryInput>, Prisma.UserUncheckedUpdateWithoutInventoryInput>
 }
 
+export type UserCreateNestedOneWithoutOwnedFamsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOwnedFamsInput, Prisma.UserUncheckedCreateWithoutOwnedFamsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOwnedFamsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutOwnedFamsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutOwnedFamsInput, Prisma.UserUncheckedCreateWithoutOwnedFamsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutOwnedFamsInput
+  upsert?: Prisma.UserUpsertWithoutOwnedFamsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutOwnedFamsInput, Prisma.UserUpdateWithoutOwnedFamsInput>, Prisma.UserUncheckedUpdateWithoutOwnedFamsInput>
+}
+
+export type UserCreateNestedOneWithoutFamMembershipsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFamMembershipsInput, Prisma.UserUncheckedCreateWithoutFamMembershipsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFamMembershipsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutFamMembershipsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFamMembershipsInput, Prisma.UserUncheckedCreateWithoutFamMembershipsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFamMembershipsInput
+  upsert?: Prisma.UserUpsertWithoutFamMembershipsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFamMembershipsInput, Prisma.UserUpdateWithoutFamMembershipsInput>, Prisma.UserUncheckedUpdateWithoutFamMembershipsInput>
+}
+
+export type UserCreateNestedOneWithoutSentInvitesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSentInvitesInput, Prisma.UserUncheckedCreateWithoutSentInvitesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentInvitesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutSentInvitesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutSentInvitesInput, Prisma.UserUncheckedCreateWithoutSentInvitesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutSentInvitesInput
+  upsert?: Prisma.UserUpsertWithoutSentInvitesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSentInvitesInput, Prisma.UserUpdateWithoutSentInvitesInput>, Prisma.UserUncheckedUpdateWithoutSentInvitesInput>
+}
+
+export type UserCreateNestedOneWithoutProposedGoalsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProposedGoalsInput, Prisma.UserUncheckedCreateWithoutProposedGoalsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProposedGoalsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutProposedGoalsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutProposedGoalsInput, Prisma.UserUncheckedCreateWithoutProposedGoalsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutProposedGoalsInput
+  upsert?: Prisma.UserUpsertWithoutProposedGoalsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutProposedGoalsInput, Prisma.UserUpdateWithoutProposedGoalsInput>, Prisma.UserUncheckedUpdateWithoutProposedGoalsInput>
+}
+
+export type UserCreateNestedOneWithoutGoalVotesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutGoalVotesInput, Prisma.UserUncheckedCreateWithoutGoalVotesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutGoalVotesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutGoalVotesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutGoalVotesInput, Prisma.UserUncheckedCreateWithoutGoalVotesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutGoalVotesInput
+  upsert?: Prisma.UserUpsertWithoutGoalVotesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutGoalVotesInput, Prisma.UserUpdateWithoutGoalVotesInput>, Prisma.UserUncheckedUpdateWithoutGoalVotesInput>
+}
+
+export type UserCreateNestedOneWithoutFamActivitiesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFamActivitiesInput, Prisma.UserUncheckedCreateWithoutFamActivitiesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFamActivitiesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutFamActivitiesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutFamActivitiesInput, Prisma.UserUncheckedCreateWithoutFamActivitiesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutFamActivitiesInput
+  upsert?: Prisma.UserUpsertWithoutFamActivitiesInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFamActivitiesInput, Prisma.UserUpdateWithoutFamActivitiesInput>, Prisma.UserUncheckedUpdateWithoutFamActivitiesInput>
+}
+
+export type UserCreateNestedOneWithoutChallengesSentInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutChallengesSentInput, Prisma.UserUncheckedCreateWithoutChallengesSentInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutChallengesSentInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutChallengesReceivedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutChallengesReceivedInput, Prisma.UserUncheckedCreateWithoutChallengesReceivedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutChallengesReceivedInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutWonChallengesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWonChallengesInput, Prisma.UserUncheckedCreateWithoutWonChallengesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWonChallengesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutChallengesSentNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutChallengesSentInput, Prisma.UserUncheckedCreateWithoutChallengesSentInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutChallengesSentInput
+  upsert?: Prisma.UserUpsertWithoutChallengesSentInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutChallengesSentInput, Prisma.UserUpdateWithoutChallengesSentInput>, Prisma.UserUncheckedUpdateWithoutChallengesSentInput>
+}
+
+export type UserUpdateOneWithoutChallengesReceivedNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutChallengesReceivedInput, Prisma.UserUncheckedCreateWithoutChallengesReceivedInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutChallengesReceivedInput
+  upsert?: Prisma.UserUpsertWithoutChallengesReceivedInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutChallengesReceivedInput, Prisma.UserUpdateWithoutChallengesReceivedInput>, Prisma.UserUncheckedUpdateWithoutChallengesReceivedInput>
+}
+
+export type UserUpdateOneWithoutWonChallengesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutWonChallengesInput, Prisma.UserUncheckedCreateWithoutWonChallengesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutWonChallengesInput
+  upsert?: Prisma.UserUpsertWithoutWonChallengesInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutWonChallengesInput, Prisma.UserUpdateWithoutWonChallengesInput>, Prisma.UserUncheckedUpdateWithoutWonChallengesInput>
+}
+
 export type UserCreateNestedOneWithoutAccountsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutAccountsInput, Prisma.UserUncheckedCreateWithoutAccountsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutAccountsInput
@@ -725,6 +969,8 @@ export type UserCreateWithoutTasksInput = {
   email: string
   emailVerified?: Date | string | null
   image?: string | null
+  username?: string | null
+  password?: string | null
   xp?: number
   level?: number
   coins?: number
@@ -738,6 +984,15 @@ export type UserCreateWithoutTasksInput = {
   inventory?: Prisma.InventoryItemCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeCreateNestedManyWithoutWinnerInput
 }
 
 export type UserUncheckedCreateWithoutTasksInput = {
@@ -746,6 +1001,8 @@ export type UserUncheckedCreateWithoutTasksInput = {
   email: string
   emailVerified?: Date | string | null
   image?: string | null
+  username?: string | null
+  password?: string | null
   xp?: number
   level?: number
   coins?: number
@@ -759,6 +1016,15 @@ export type UserUncheckedCreateWithoutTasksInput = {
   inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipUncheckedCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamUncheckedCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutWinnerInput
 }
 
 export type UserCreateOrConnectWithoutTasksInput = {
@@ -783,6 +1049,8 @@ export type UserUpdateWithoutTasksInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   xp?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.IntFieldUpdateOperationsInput | number
   coins?: Prisma.IntFieldUpdateOperationsInput | number
@@ -796,6 +1064,15 @@ export type UserUpdateWithoutTasksInput = {
   inventory?: Prisma.InventoryItemUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUpdateManyWithoutWinnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTasksInput = {
@@ -804,6 +1081,8 @@ export type UserUncheckedUpdateWithoutTasksInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   xp?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.IntFieldUpdateOperationsInput | number
   coins?: Prisma.IntFieldUpdateOperationsInput | number
@@ -817,6 +1096,15 @@ export type UserUncheckedUpdateWithoutTasksInput = {
   inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUncheckedUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUncheckedUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUncheckedUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutWinnerNestedInput
 }
 
 export type UserCreateWithoutDayLogsInput = {
@@ -825,6 +1113,8 @@ export type UserCreateWithoutDayLogsInput = {
   email: string
   emailVerified?: Date | string | null
   image?: string | null
+  username?: string | null
+  password?: string | null
   xp?: number
   level?: number
   coins?: number
@@ -838,6 +1128,15 @@ export type UserCreateWithoutDayLogsInput = {
   inventory?: Prisma.InventoryItemCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeCreateNestedManyWithoutWinnerInput
 }
 
 export type UserUncheckedCreateWithoutDayLogsInput = {
@@ -846,6 +1145,8 @@ export type UserUncheckedCreateWithoutDayLogsInput = {
   email: string
   emailVerified?: Date | string | null
   image?: string | null
+  username?: string | null
+  password?: string | null
   xp?: number
   level?: number
   coins?: number
@@ -859,6 +1160,15 @@ export type UserUncheckedCreateWithoutDayLogsInput = {
   inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipUncheckedCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamUncheckedCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutWinnerInput
 }
 
 export type UserCreateOrConnectWithoutDayLogsInput = {
@@ -883,6 +1193,8 @@ export type UserUpdateWithoutDayLogsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   xp?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.IntFieldUpdateOperationsInput | number
   coins?: Prisma.IntFieldUpdateOperationsInput | number
@@ -896,6 +1208,15 @@ export type UserUpdateWithoutDayLogsInput = {
   inventory?: Prisma.InventoryItemUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUpdateManyWithoutWinnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutDayLogsInput = {
@@ -904,6 +1225,8 @@ export type UserUncheckedUpdateWithoutDayLogsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   xp?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.IntFieldUpdateOperationsInput | number
   coins?: Prisma.IntFieldUpdateOperationsInput | number
@@ -917,6 +1240,15 @@ export type UserUncheckedUpdateWithoutDayLogsInput = {
   inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUncheckedUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUncheckedUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUncheckedUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutWinnerNestedInput
 }
 
 export type UserCreateWithoutInventoryInput = {
@@ -925,6 +1257,8 @@ export type UserCreateWithoutInventoryInput = {
   email: string
   emailVerified?: Date | string | null
   image?: string | null
+  username?: string | null
+  password?: string | null
   xp?: number
   level?: number
   coins?: number
@@ -938,6 +1272,15 @@ export type UserCreateWithoutInventoryInput = {
   dayLogs?: Prisma.DayLogCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeCreateNestedManyWithoutWinnerInput
 }
 
 export type UserUncheckedCreateWithoutInventoryInput = {
@@ -946,6 +1289,8 @@ export type UserUncheckedCreateWithoutInventoryInput = {
   email: string
   emailVerified?: Date | string | null
   image?: string | null
+  username?: string | null
+  password?: string | null
   xp?: number
   level?: number
   coins?: number
@@ -959,6 +1304,15 @@ export type UserUncheckedCreateWithoutInventoryInput = {
   dayLogs?: Prisma.DayLogUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipUncheckedCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamUncheckedCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutWinnerInput
 }
 
 export type UserCreateOrConnectWithoutInventoryInput = {
@@ -983,6 +1337,8 @@ export type UserUpdateWithoutInventoryInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   xp?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.IntFieldUpdateOperationsInput | number
   coins?: Prisma.IntFieldUpdateOperationsInput | number
@@ -996,6 +1352,15 @@ export type UserUpdateWithoutInventoryInput = {
   dayLogs?: Prisma.DayLogUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUpdateManyWithoutWinnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInventoryInput = {
@@ -1004,6 +1369,8 @@ export type UserUncheckedUpdateWithoutInventoryInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   xp?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.IntFieldUpdateOperationsInput | number
   coins?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1017,6 +1384,1311 @@ export type UserUncheckedUpdateWithoutInventoryInput = {
   dayLogs?: Prisma.DayLogUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUncheckedUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUncheckedUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUncheckedUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserCreateWithoutOwnedFamsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipCreateNestedManyWithoutUserInput
+  sentInvites?: Prisma.FamInviteCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeCreateNestedManyWithoutWinnerInput
+}
+
+export type UserUncheckedCreateWithoutOwnedFamsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogUncheckedCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipUncheckedCreateNestedManyWithoutUserInput
+  sentInvites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutWinnerInput
+}
+
+export type UserCreateOrConnectWithoutOwnedFamsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutOwnedFamsInput, Prisma.UserUncheckedCreateWithoutOwnedFamsInput>
+}
+
+export type UserUpsertWithoutOwnedFamsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutOwnedFamsInput, Prisma.UserUncheckedUpdateWithoutOwnedFamsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutOwnedFamsInput, Prisma.UserUncheckedCreateWithoutOwnedFamsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutOwnedFamsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutOwnedFamsInput, Prisma.UserUncheckedUpdateWithoutOwnedFamsInput>
+}
+
+export type UserUpdateWithoutOwnedFamsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUpdateManyWithoutUserNestedInput
+  sentInvites?: Prisma.FamInviteUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutOwnedFamsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUncheckedUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUncheckedUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  sentInvites?: Prisma.FamInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUncheckedUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUncheckedUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserCreateWithoutFamMembershipsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeCreateNestedManyWithoutWinnerInput
+}
+
+export type UserUncheckedCreateWithoutFamMembershipsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogUncheckedCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamUncheckedCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutWinnerInput
+}
+
+export type UserCreateOrConnectWithoutFamMembershipsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutFamMembershipsInput, Prisma.UserUncheckedCreateWithoutFamMembershipsInput>
+}
+
+export type UserUpsertWithoutFamMembershipsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutFamMembershipsInput, Prisma.UserUncheckedUpdateWithoutFamMembershipsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutFamMembershipsInput, Prisma.UserUncheckedCreateWithoutFamMembershipsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutFamMembershipsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutFamMembershipsInput, Prisma.UserUncheckedUpdateWithoutFamMembershipsInput>
+}
+
+export type UserUpdateWithoutFamMembershipsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutFamMembershipsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUncheckedUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUncheckedUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUncheckedUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUncheckedUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUncheckedUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserCreateWithoutSentInvitesInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamCreateNestedManyWithoutOwnerInput
+  proposedGoals?: Prisma.FamGoalCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeCreateNestedManyWithoutWinnerInput
+}
+
+export type UserUncheckedCreateWithoutSentInvitesInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogUncheckedCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipUncheckedCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamUncheckedCreateNestedManyWithoutOwnerInput
+  proposedGoals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutWinnerInput
+}
+
+export type UserCreateOrConnectWithoutSentInvitesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutSentInvitesInput, Prisma.UserUncheckedCreateWithoutSentInvitesInput>
+}
+
+export type UserUpsertWithoutSentInvitesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutSentInvitesInput, Prisma.UserUncheckedUpdateWithoutSentInvitesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutSentInvitesInput, Prisma.UserUncheckedCreateWithoutSentInvitesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutSentInvitesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutSentInvitesInput, Prisma.UserUncheckedUpdateWithoutSentInvitesInput>
+}
+
+export type UserUpdateWithoutSentInvitesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUpdateManyWithoutOwnerNestedInput
+  proposedGoals?: Prisma.FamGoalUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutSentInvitesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUncheckedUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUncheckedUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUncheckedUpdateManyWithoutOwnerNestedInput
+  proposedGoals?: Prisma.FamGoalUncheckedUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUncheckedUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserCreateWithoutProposedGoalsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteCreateNestedManyWithoutInvitedByInput
+  goalVotes?: Prisma.FamGoalVoteCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeCreateNestedManyWithoutWinnerInput
+}
+
+export type UserUncheckedCreateWithoutProposedGoalsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogUncheckedCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipUncheckedCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamUncheckedCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutWinnerInput
+}
+
+export type UserCreateOrConnectWithoutProposedGoalsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutProposedGoalsInput, Prisma.UserUncheckedCreateWithoutProposedGoalsInput>
+}
+
+export type UserUpsertWithoutProposedGoalsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutProposedGoalsInput, Prisma.UserUncheckedUpdateWithoutProposedGoalsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutProposedGoalsInput, Prisma.UserUncheckedCreateWithoutProposedGoalsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutProposedGoalsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutProposedGoalsInput, Prisma.UserUncheckedUpdateWithoutProposedGoalsInput>
+}
+
+export type UserUpdateWithoutProposedGoalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUpdateManyWithoutInvitedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutProposedGoalsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUncheckedUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUncheckedUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUncheckedUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUncheckedUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserCreateWithoutGoalVotesInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalCreateNestedManyWithoutProposedByInput
+  famActivities?: Prisma.FamActivityCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeCreateNestedManyWithoutWinnerInput
+}
+
+export type UserUncheckedCreateWithoutGoalVotesInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogUncheckedCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipUncheckedCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamUncheckedCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutProposedByInput
+  famActivities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutWinnerInput
+}
+
+export type UserCreateOrConnectWithoutGoalVotesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutGoalVotesInput, Prisma.UserUncheckedCreateWithoutGoalVotesInput>
+}
+
+export type UserUpsertWithoutGoalVotesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutGoalVotesInput, Prisma.UserUncheckedUpdateWithoutGoalVotesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutGoalVotesInput, Prisma.UserUncheckedCreateWithoutGoalVotesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutGoalVotesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutGoalVotesInput, Prisma.UserUncheckedUpdateWithoutGoalVotesInput>
+}
+
+export type UserUpdateWithoutGoalVotesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUpdateManyWithoutProposedByNestedInput
+  famActivities?: Prisma.FamActivityUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutGoalVotesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUncheckedUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUncheckedUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUncheckedUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUncheckedUpdateManyWithoutProposedByNestedInput
+  famActivities?: Prisma.FamActivityUncheckedUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserCreateWithoutFamActivitiesInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteCreateNestedManyWithoutUserInput
+  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeCreateNestedManyWithoutWinnerInput
+}
+
+export type UserUncheckedCreateWithoutFamActivitiesInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogUncheckedCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipUncheckedCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamUncheckedCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedCreateNestedManyWithoutUserInput
+  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutWinnerInput
+}
+
+export type UserCreateOrConnectWithoutFamActivitiesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutFamActivitiesInput, Prisma.UserUncheckedCreateWithoutFamActivitiesInput>
+}
+
+export type UserUpsertWithoutFamActivitiesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutFamActivitiesInput, Prisma.UserUncheckedUpdateWithoutFamActivitiesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutFamActivitiesInput, Prisma.UserUncheckedCreateWithoutFamActivitiesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutFamActivitiesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutFamActivitiesInput, Prisma.UserUncheckedUpdateWithoutFamActivitiesInput>
+}
+
+export type UserUpdateWithoutFamActivitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUpdateManyWithoutUserNestedInput
+  challengesSent?: Prisma.FamChallengeUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutFamActivitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUncheckedUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUncheckedUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUncheckedUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUncheckedUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedUpdateManyWithoutUserNestedInput
+  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserCreateWithoutChallengesSentInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityCreateNestedManyWithoutActorInput
+  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeCreateNestedManyWithoutWinnerInput
+}
+
+export type UserUncheckedCreateWithoutChallengesSentInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogUncheckedCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipUncheckedCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamUncheckedCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutActorInput
+  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutWinnerInput
+}
+
+export type UserCreateOrConnectWithoutChallengesSentInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutChallengesSentInput, Prisma.UserUncheckedCreateWithoutChallengesSentInput>
+}
+
+export type UserCreateWithoutChallengesReceivedInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutChallengerInput
+  wonChallenges?: Prisma.FamChallengeCreateNestedManyWithoutWinnerInput
+}
+
+export type UserUncheckedCreateWithoutChallengesReceivedInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogUncheckedCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipUncheckedCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamUncheckedCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutChallengerInput
+  wonChallenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutWinnerInput
+}
+
+export type UserCreateOrConnectWithoutChallengesReceivedInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutChallengesReceivedInput, Prisma.UserUncheckedCreateWithoutChallengesReceivedInput>
+}
+
+export type UserCreateWithoutWonChallengesInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentInput
+}
+
+export type UserUncheckedCreateWithoutWonChallengesInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  image?: string | null
+  username?: string | null
+  password?: string | null
+  xp?: number
+  level?: number
+  coins?: number
+  honestyScore?: number
+  streakDays?: number
+  multiplier?: number
+  lastTaskDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutUserInput
+  dayLogs?: Prisma.DayLogUncheckedCreateNestedManyWithoutUserInput
+  inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipUncheckedCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamUncheckedCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentInput
+}
+
+export type UserCreateOrConnectWithoutWonChallengesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutWonChallengesInput, Prisma.UserUncheckedCreateWithoutWonChallengesInput>
+}
+
+export type UserUpsertWithoutChallengesSentInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutChallengesSentInput, Prisma.UserUncheckedUpdateWithoutChallengesSentInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutChallengesSentInput, Prisma.UserUncheckedCreateWithoutChallengesSentInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutChallengesSentInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutChallengesSentInput, Prisma.UserUncheckedUpdateWithoutChallengesSentInput>
+}
+
+export type UserUpdateWithoutChallengesSentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUpdateManyWithoutActorNestedInput
+  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutChallengesSentInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUncheckedUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUncheckedUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUncheckedUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUncheckedUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUncheckedUpdateManyWithoutActorNestedInput
+  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserUpsertWithoutChallengesReceivedInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutChallengesReceivedInput, Prisma.UserUncheckedUpdateWithoutChallengesReceivedInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutChallengesReceivedInput, Prisma.UserUncheckedCreateWithoutChallengesReceivedInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutChallengesReceivedInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutChallengesReceivedInput, Prisma.UserUncheckedUpdateWithoutChallengesReceivedInput>
+}
+
+export type UserUpdateWithoutChallengesReceivedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUpdateManyWithoutChallengerNestedInput
+  wonChallenges?: Prisma.FamChallengeUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutChallengesReceivedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUncheckedUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUncheckedUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUncheckedUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUncheckedUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUncheckedUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutChallengerNestedInput
+  wonChallenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutWinnerNestedInput
+}
+
+export type UserUpsertWithoutWonChallengesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutWonChallengesInput, Prisma.UserUncheckedUpdateWithoutWonChallengesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutWonChallengesInput, Prisma.UserUncheckedCreateWithoutWonChallengesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutWonChallengesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutWonChallengesInput, Prisma.UserUncheckedUpdateWithoutWonChallengesInput>
+}
+
+export type UserUpdateWithoutWonChallengesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutWonChallengesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  xp?: Prisma.IntFieldUpdateOperationsInput | number
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  coins?: Prisma.IntFieldUpdateOperationsInput | number
+  honestyScore?: Prisma.IntFieldUpdateOperationsInput | number
+  streakDays?: Prisma.IntFieldUpdateOperationsInput | number
+  multiplier?: Prisma.FloatFieldUpdateOperationsInput | number
+  lastTaskDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tasks?: Prisma.TaskUncheckedUpdateManyWithoutUserNestedInput
+  dayLogs?: Prisma.DayLogUncheckedUpdateManyWithoutUserNestedInput
+  inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUncheckedUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUncheckedUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUncheckedUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -1025,6 +2697,8 @@ export type UserCreateWithoutAccountsInput = {
   email: string
   emailVerified?: Date | string | null
   image?: string | null
+  username?: string | null
+  password?: string | null
   xp?: number
   level?: number
   coins?: number
@@ -1038,6 +2712,15 @@ export type UserCreateWithoutAccountsInput = {
   dayLogs?: Prisma.DayLogCreateNestedManyWithoutUserInput
   inventory?: Prisma.InventoryItemCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeCreateNestedManyWithoutWinnerInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -1046,6 +2729,8 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   email: string
   emailVerified?: Date | string | null
   image?: string | null
+  username?: string | null
+  password?: string | null
   xp?: number
   level?: number
   coins?: number
@@ -1059,6 +2744,15 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   dayLogs?: Prisma.DayLogUncheckedCreateNestedManyWithoutUserInput
   inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutUserInput
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipUncheckedCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamUncheckedCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutWinnerInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -1083,6 +2777,8 @@ export type UserUpdateWithoutAccountsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   xp?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.IntFieldUpdateOperationsInput | number
   coins?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1096,6 +2792,15 @@ export type UserUpdateWithoutAccountsInput = {
   dayLogs?: Prisma.DayLogUpdateManyWithoutUserNestedInput
   inventory?: Prisma.InventoryItemUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUpdateManyWithoutWinnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -1104,6 +2809,8 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   xp?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.IntFieldUpdateOperationsInput | number
   coins?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1117,6 +2824,15 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   dayLogs?: Prisma.DayLogUncheckedUpdateManyWithoutUserNestedInput
   inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutUserNestedInput
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUncheckedUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUncheckedUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUncheckedUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutWinnerNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -1125,6 +2841,8 @@ export type UserCreateWithoutSessionsInput = {
   email: string
   emailVerified?: Date | string | null
   image?: string | null
+  username?: string | null
+  password?: string | null
   xp?: number
   level?: number
   coins?: number
@@ -1138,6 +2856,15 @@ export type UserCreateWithoutSessionsInput = {
   dayLogs?: Prisma.DayLogCreateNestedManyWithoutUserInput
   inventory?: Prisma.InventoryItemCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeCreateNestedManyWithoutWinnerInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -1146,6 +2873,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   email: string
   emailVerified?: Date | string | null
   image?: string | null
+  username?: string | null
+  password?: string | null
   xp?: number
   level?: number
   coins?: number
@@ -1159,6 +2888,15 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   dayLogs?: Prisma.DayLogUncheckedCreateNestedManyWithoutUserInput
   inventory?: Prisma.InventoryItemUncheckedCreateNestedManyWithoutUserInput
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  famMemberships?: Prisma.FamMembershipUncheckedCreateNestedManyWithoutUserInput
+  ownedFams?: Prisma.FamUncheckedCreateNestedManyWithoutOwnerInput
+  sentInvites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutInvitedByInput
+  proposedGoals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutProposedByInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedCreateNestedManyWithoutUserInput
+  famActivities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutActorInput
+  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutChallengerInput
+  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentInput
+  wonChallenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutWinnerInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -1183,6 +2921,8 @@ export type UserUpdateWithoutSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   xp?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.IntFieldUpdateOperationsInput | number
   coins?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1196,6 +2936,15 @@ export type UserUpdateWithoutSessionsInput = {
   dayLogs?: Prisma.DayLogUpdateManyWithoutUserNestedInput
   inventory?: Prisma.InventoryItemUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUpdateManyWithoutWinnerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -1204,6 +2953,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   email?: Prisma.StringFieldUpdateOperationsInput | string
   emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   xp?: Prisma.IntFieldUpdateOperationsInput | number
   level?: Prisma.IntFieldUpdateOperationsInput | number
   coins?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1217,6 +2968,15 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   dayLogs?: Prisma.DayLogUncheckedUpdateManyWithoutUserNestedInput
   inventory?: Prisma.InventoryItemUncheckedUpdateManyWithoutUserNestedInput
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  famMemberships?: Prisma.FamMembershipUncheckedUpdateManyWithoutUserNestedInput
+  ownedFams?: Prisma.FamUncheckedUpdateManyWithoutOwnerNestedInput
+  sentInvites?: Prisma.FamInviteUncheckedUpdateManyWithoutInvitedByNestedInput
+  proposedGoals?: Prisma.FamGoalUncheckedUpdateManyWithoutProposedByNestedInput
+  goalVotes?: Prisma.FamGoalVoteUncheckedUpdateManyWithoutUserNestedInput
+  famActivities?: Prisma.FamActivityUncheckedUpdateManyWithoutActorNestedInput
+  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutChallengerNestedInput
+  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentNestedInput
+  wonChallenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutWinnerNestedInput
 }
 
 
@@ -1230,6 +2990,15 @@ export type UserCountOutputType = {
   inventory: number
   accounts: number
   sessions: number
+  famMemberships: number
+  ownedFams: number
+  sentInvites: number
+  proposedGoals: number
+  goalVotes: number
+  famActivities: number
+  challengesSent: number
+  challengesReceived: number
+  wonChallenges: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1238,6 +3007,15 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   inventory?: boolean | UserCountOutputTypeCountInventoryArgs
   accounts?: boolean | UserCountOutputTypeCountAccountsArgs
   sessions?: boolean | UserCountOutputTypeCountSessionsArgs
+  famMemberships?: boolean | UserCountOutputTypeCountFamMembershipsArgs
+  ownedFams?: boolean | UserCountOutputTypeCountOwnedFamsArgs
+  sentInvites?: boolean | UserCountOutputTypeCountSentInvitesArgs
+  proposedGoals?: boolean | UserCountOutputTypeCountProposedGoalsArgs
+  goalVotes?: boolean | UserCountOutputTypeCountGoalVotesArgs
+  famActivities?: boolean | UserCountOutputTypeCountFamActivitiesArgs
+  challengesSent?: boolean | UserCountOutputTypeCountChallengesSentArgs
+  challengesReceived?: boolean | UserCountOutputTypeCountChallengesReceivedArgs
+  wonChallenges?: boolean | UserCountOutputTypeCountWonChallengesArgs
 }
 
 /**
@@ -1285,6 +3063,69 @@ export type UserCountOutputTypeCountSessionsArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.SessionWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountFamMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FamMembershipWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountOwnedFamsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FamWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountSentInvitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FamInviteWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountProposedGoalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FamGoalWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountGoalVotesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FamGoalVoteWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountFamActivitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FamActivityWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountChallengesSentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FamChallengeWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountChallengesReceivedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FamChallengeWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountWonChallengesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FamChallengeWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1292,6 +3133,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   email?: boolean
   emailVerified?: boolean
   image?: boolean
+  username?: boolean
+  password?: boolean
   xp?: boolean
   level?: boolean
   coins?: boolean
@@ -1306,6 +3149,15 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   inventory?: boolean | Prisma.User$inventoryArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  famMemberships?: boolean | Prisma.User$famMembershipsArgs<ExtArgs>
+  ownedFams?: boolean | Prisma.User$ownedFamsArgs<ExtArgs>
+  sentInvites?: boolean | Prisma.User$sentInvitesArgs<ExtArgs>
+  proposedGoals?: boolean | Prisma.User$proposedGoalsArgs<ExtArgs>
+  goalVotes?: boolean | Prisma.User$goalVotesArgs<ExtArgs>
+  famActivities?: boolean | Prisma.User$famActivitiesArgs<ExtArgs>
+  challengesSent?: boolean | Prisma.User$challengesSentArgs<ExtArgs>
+  challengesReceived?: boolean | Prisma.User$challengesReceivedArgs<ExtArgs>
+  wonChallenges?: boolean | Prisma.User$wonChallengesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1315,6 +3167,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   emailVerified?: boolean
   image?: boolean
+  username?: boolean
+  password?: boolean
   xp?: boolean
   level?: boolean
   coins?: boolean
@@ -1332,6 +3186,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   email?: boolean
   emailVerified?: boolean
   image?: boolean
+  username?: boolean
+  password?: boolean
   xp?: boolean
   level?: boolean
   coins?: boolean
@@ -1349,6 +3205,8 @@ export type UserSelectScalar = {
   email?: boolean
   emailVerified?: boolean
   image?: boolean
+  username?: boolean
+  password?: boolean
   xp?: boolean
   level?: boolean
   coins?: boolean
@@ -1360,13 +3218,22 @@ export type UserSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "xp" | "level" | "coins" | "honestyScore" | "streakDays" | "multiplier" | "lastTaskDate" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "email" | "emailVerified" | "image" | "username" | "password" | "xp" | "level" | "coins" | "honestyScore" | "streakDays" | "multiplier" | "lastTaskDate" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tasks?: boolean | Prisma.User$tasksArgs<ExtArgs>
   dayLogs?: boolean | Prisma.User$dayLogsArgs<ExtArgs>
   inventory?: boolean | Prisma.User$inventoryArgs<ExtArgs>
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>
+  famMemberships?: boolean | Prisma.User$famMembershipsArgs<ExtArgs>
+  ownedFams?: boolean | Prisma.User$ownedFamsArgs<ExtArgs>
+  sentInvites?: boolean | Prisma.User$sentInvitesArgs<ExtArgs>
+  proposedGoals?: boolean | Prisma.User$proposedGoalsArgs<ExtArgs>
+  goalVotes?: boolean | Prisma.User$goalVotesArgs<ExtArgs>
+  famActivities?: boolean | Prisma.User$famActivitiesArgs<ExtArgs>
+  challengesSent?: boolean | Prisma.User$challengesSentArgs<ExtArgs>
+  challengesReceived?: boolean | Prisma.User$challengesReceivedArgs<ExtArgs>
+  wonChallenges?: boolean | Prisma.User$wonChallengesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1380,6 +3247,15 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     inventory: Prisma.$InventoryItemPayload<ExtArgs>[]
     accounts: Prisma.$AccountPayload<ExtArgs>[]
     sessions: Prisma.$SessionPayload<ExtArgs>[]
+    famMemberships: Prisma.$FamMembershipPayload<ExtArgs>[]
+    ownedFams: Prisma.$FamPayload<ExtArgs>[]
+    sentInvites: Prisma.$FamInvitePayload<ExtArgs>[]
+    proposedGoals: Prisma.$FamGoalPayload<ExtArgs>[]
+    goalVotes: Prisma.$FamGoalVotePayload<ExtArgs>[]
+    famActivities: Prisma.$FamActivityPayload<ExtArgs>[]
+    challengesSent: Prisma.$FamChallengePayload<ExtArgs>[]
+    challengesReceived: Prisma.$FamChallengePayload<ExtArgs>[]
+    wonChallenges: Prisma.$FamChallengePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1387,6 +3263,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     email: string
     emailVerified: Date | null
     image: string | null
+    username: string | null
+    password: string | null
     xp: number
     level: number
     coins: number
@@ -1795,6 +3673,15 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   inventory<T extends Prisma.User$inventoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$inventoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InventoryItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   accounts<T extends Prisma.User$accountsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$accountsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessions<T extends Prisma.User$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  famMemberships<T extends Prisma.User$famMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$famMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ownedFams<T extends Prisma.User$ownedFamsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ownedFamsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sentInvites<T extends Prisma.User$sentInvitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentInvitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  proposedGoals<T extends Prisma.User$proposedGoalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$proposedGoalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamGoalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  goalVotes<T extends Prisma.User$goalVotesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$goalVotesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamGoalVotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  famActivities<T extends Prisma.User$famActivitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$famActivitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamActivityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  challengesSent<T extends Prisma.User$challengesSentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$challengesSentArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamChallengePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  challengesReceived<T extends Prisma.User$challengesReceivedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$challengesReceivedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamChallengePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  wonChallenges<T extends Prisma.User$wonChallengesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$wonChallengesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamChallengePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1829,6 +3716,8 @@ export interface UserFieldRefs {
   readonly email: Prisma.FieldRef<"User", 'String'>
   readonly emailVerified: Prisma.FieldRef<"User", 'DateTime'>
   readonly image: Prisma.FieldRef<"User", 'String'>
+  readonly username: Prisma.FieldRef<"User", 'String'>
+  readonly password: Prisma.FieldRef<"User", 'String'>
   readonly xp: Prisma.FieldRef<"User", 'Int'>
   readonly level: Prisma.FieldRef<"User", 'Int'>
   readonly coins: Prisma.FieldRef<"User", 'Int'>
@@ -2343,6 +4232,222 @@ export type User$sessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.SessionScalarFieldEnum | Prisma.SessionScalarFieldEnum[]
+}
+
+/**
+ * User.famMemberships
+ */
+export type User$famMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FamMembership
+   */
+  select?: Prisma.FamMembershipSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FamMembership
+   */
+  omit?: Prisma.FamMembershipOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FamMembershipInclude<ExtArgs> | null
+  where?: Prisma.FamMembershipWhereInput
+  orderBy?: Prisma.FamMembershipOrderByWithRelationInput | Prisma.FamMembershipOrderByWithRelationInput[]
+  cursor?: Prisma.FamMembershipWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FamMembershipScalarFieldEnum | Prisma.FamMembershipScalarFieldEnum[]
+}
+
+/**
+ * User.ownedFams
+ */
+export type User$ownedFamsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Fam
+   */
+  select?: Prisma.FamSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Fam
+   */
+  omit?: Prisma.FamOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FamInclude<ExtArgs> | null
+  where?: Prisma.FamWhereInput
+  orderBy?: Prisma.FamOrderByWithRelationInput | Prisma.FamOrderByWithRelationInput[]
+  cursor?: Prisma.FamWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FamScalarFieldEnum | Prisma.FamScalarFieldEnum[]
+}
+
+/**
+ * User.sentInvites
+ */
+export type User$sentInvitesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FamInvite
+   */
+  select?: Prisma.FamInviteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FamInvite
+   */
+  omit?: Prisma.FamInviteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FamInviteInclude<ExtArgs> | null
+  where?: Prisma.FamInviteWhereInput
+  orderBy?: Prisma.FamInviteOrderByWithRelationInput | Prisma.FamInviteOrderByWithRelationInput[]
+  cursor?: Prisma.FamInviteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FamInviteScalarFieldEnum | Prisma.FamInviteScalarFieldEnum[]
+}
+
+/**
+ * User.proposedGoals
+ */
+export type User$proposedGoalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FamGoal
+   */
+  select?: Prisma.FamGoalSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FamGoal
+   */
+  omit?: Prisma.FamGoalOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FamGoalInclude<ExtArgs> | null
+  where?: Prisma.FamGoalWhereInput
+  orderBy?: Prisma.FamGoalOrderByWithRelationInput | Prisma.FamGoalOrderByWithRelationInput[]
+  cursor?: Prisma.FamGoalWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FamGoalScalarFieldEnum | Prisma.FamGoalScalarFieldEnum[]
+}
+
+/**
+ * User.goalVotes
+ */
+export type User$goalVotesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FamGoalVote
+   */
+  select?: Prisma.FamGoalVoteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FamGoalVote
+   */
+  omit?: Prisma.FamGoalVoteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FamGoalVoteInclude<ExtArgs> | null
+  where?: Prisma.FamGoalVoteWhereInput
+  orderBy?: Prisma.FamGoalVoteOrderByWithRelationInput | Prisma.FamGoalVoteOrderByWithRelationInput[]
+  cursor?: Prisma.FamGoalVoteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FamGoalVoteScalarFieldEnum | Prisma.FamGoalVoteScalarFieldEnum[]
+}
+
+/**
+ * User.famActivities
+ */
+export type User$famActivitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FamActivity
+   */
+  select?: Prisma.FamActivitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FamActivity
+   */
+  omit?: Prisma.FamActivityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FamActivityInclude<ExtArgs> | null
+  where?: Prisma.FamActivityWhereInput
+  orderBy?: Prisma.FamActivityOrderByWithRelationInput | Prisma.FamActivityOrderByWithRelationInput[]
+  cursor?: Prisma.FamActivityWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FamActivityScalarFieldEnum | Prisma.FamActivityScalarFieldEnum[]
+}
+
+/**
+ * User.challengesSent
+ */
+export type User$challengesSentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FamChallenge
+   */
+  select?: Prisma.FamChallengeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FamChallenge
+   */
+  omit?: Prisma.FamChallengeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FamChallengeInclude<ExtArgs> | null
+  where?: Prisma.FamChallengeWhereInput
+  orderBy?: Prisma.FamChallengeOrderByWithRelationInput | Prisma.FamChallengeOrderByWithRelationInput[]
+  cursor?: Prisma.FamChallengeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FamChallengeScalarFieldEnum | Prisma.FamChallengeScalarFieldEnum[]
+}
+
+/**
+ * User.challengesReceived
+ */
+export type User$challengesReceivedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FamChallenge
+   */
+  select?: Prisma.FamChallengeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FamChallenge
+   */
+  omit?: Prisma.FamChallengeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FamChallengeInclude<ExtArgs> | null
+  where?: Prisma.FamChallengeWhereInput
+  orderBy?: Prisma.FamChallengeOrderByWithRelationInput | Prisma.FamChallengeOrderByWithRelationInput[]
+  cursor?: Prisma.FamChallengeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FamChallengeScalarFieldEnum | Prisma.FamChallengeScalarFieldEnum[]
+}
+
+/**
+ * User.wonChallenges
+ */
+export type User$wonChallengesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FamChallenge
+   */
+  select?: Prisma.FamChallengeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FamChallenge
+   */
+  omit?: Prisma.FamChallengeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FamChallengeInclude<ExtArgs> | null
+  where?: Prisma.FamChallengeWhereInput
+  orderBy?: Prisma.FamChallengeOrderByWithRelationInput | Prisma.FamChallengeOrderByWithRelationInput[]
+  cursor?: Prisma.FamChallengeWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FamChallengeScalarFieldEnum | Prisma.FamChallengeScalarFieldEnum[]
 }
 
 /**

@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Flame, Target, TrendingUp, ChevronDown, Plus, Sun, Moon, Upload, X } from "lucide-react";
+import { Flame, Target, TrendingUp, ChevronDown, Plus, Sun, Moon, Upload, X, Droplets } from "lucide-react";
 import type { Task, DayLog } from "../../../../prisma/generated/client";
 import { GitGudLogo } from "../../components/GitGudLogo";
 import LogoutButton from "../../components/LogoutButton";
@@ -16,13 +16,16 @@ import { completeTask, createTask } from "./taskApi";
 import { levelProgress, rankForLevel, tierBaseXP } from "@/lib/gamification";
 import { dayKey, todayAt, todayDayIndex } from "@/lib/dates";
 import { buildDayMap, trailingDays, smoothPath } from "./momentum";
+import FamSummaryCard, { type FamSummaryData } from "../../fam/components/FamSummaryCard";
+import Link from "next/link";
 
 interface OverviewProps {
-  user: { name: string | null; email: string; xp: number; streakDays: number };
+  user: { name: string | null; username: string | null; email: string; xp: number; streakDays: number };
   dayLogs: DayLog[];
   dailyTasks: Task[];
   weeklyTemplates: Task[];
   backlogTasks: Task[];
+  famSummary: FamSummaryData | null;
   onNavGrind: () => void;
   onNavDump: () => void;
 }
@@ -56,12 +59,13 @@ export default function Overview({
   dailyTasks,
   weeklyTemplates,
   backlogTasks,
+  famSummary,
   onNavGrind,
   onNavDump,
 }: OverviewProps) {
   const router = useRouter();
   const { celebrate } = useRewards();
-  const { skin, mode, customBg, update } = useTheme();
+  const { skin, mode, customBg, glassOpacity, update } = useTheme();
   const { flash } = useFlashToast();
 
   const [now, setNow] = useState<Date | null>(null);
@@ -230,7 +234,7 @@ export default function Overview({
     <section className="min-h-screen relative z-10 flex flex-col" style={{ scrollSnapAlign: "start", scrollSnapStop: "always" }}>
       {/* Custom background layer */}
       {hasCustomBg && customBg && (
-        <div className="fixed inset-0 z-0 overflow-hidden">
+        <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
           {customBg.type === "video" ? (
             <video
               src={customBg.url}
@@ -273,6 +277,9 @@ export default function Overview({
           <button onClick={onNavDump} className="text-[12.5px] font-semibold text-ink2 hover:text-ink hover:bg-[var(--chip-hover)] px-3.5 py-2 rounded-[calc(var(--radius)*.7)] transition-colors">
             Brain dump
           </button>
+          <Link href="/fam" className="text-[12.5px] font-semibold text-ink2 hover:text-ink hover:bg-[var(--chip-hover)] px-3.5 py-2 rounded-[calc(var(--radius)*.7)] transition-colors">
+            Fam
+          </Link>
         </nav>
 
         <div className="flex-1" />
@@ -313,6 +320,19 @@ export default function Overview({
               <X className="w-3.5 h-3.5" />
             </button>
           )}
+        </div>
+
+        <div className="chip r-lg hidden sm:flex items-center gap-2 py-1.5 px-2.5" title="Board transparency">
+          <Droplets className="w-3.5 h-3.5 text-ink3 shrink-0" />
+          <input
+            type="range"
+            min={0.15}
+            max={1}
+            step={0.01}
+            value={glassOpacity}
+            onChange={(e) => update({ glassOpacity: Number(e.target.value) })}
+            className="w-20 accent-[var(--acc)]"
+          />
         </div>
 
         <button
@@ -369,6 +389,12 @@ export default function Overview({
               <span className="font-display text-[27px] font-extrabold text-acc3">{openCount}</span>
             </div>
           </Reveal>
+
+          {famSummary && (
+            <Reveal delay={150}>
+              <FamSummaryCard fam={famSummary} />
+            </Reveal>
+          )}
 
           <div className="flex flex-wrap gap-[18px] w-full flex-1 items-stretch">
             {/* Missions */}
@@ -486,6 +512,9 @@ export default function Overview({
               </span>
               <div className="flex-1 min-w-0">
                 <div className="font-display text-xl font-extrabold truncate">{name}</div>
+                {user.username && (
+                  <div className="text-[12px] text-acc font-semibold truncate">@{user.username}</div>
+                )}
                 <div className="text-[13px] text-ink2">
                   {rank.title} · {user.xp.toLocaleString()} XP lifetime
                 </div>

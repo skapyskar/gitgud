@@ -36,3 +36,54 @@ export const TaskType = {
 } as const
 
 export type TaskType = (typeof TaskType)[keyof typeof TaskType]
+
+
+export const FamRole = {
+  OWNER: 'OWNER',
+  ADMIN: 'ADMIN',
+  MEMBER: 'MEMBER'
+} as const
+
+export type FamRole = (typeof FamRole)[keyof typeof FamRole]
+
+
+export const FamInviteStatus = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  DECLINED: 'DECLINED',
+  EXPIRED: 'EXPIRED'
+} as const
+
+export type FamInviteStatus = (typeof FamInviteStatus)[keyof typeof FamInviteStatus]
+
+
+export const FamActivityType = {
+  MEMBER_JOINED: 'MEMBER_JOINED',
+  MEMBER_LEFT: 'MEMBER_LEFT',
+  GOAL_PROPOSED: 'GOAL_PROPOSED',
+  GOAL_ACTIVATED: 'GOAL_ACTIVATED',
+  GOAL_COMPLETED: 'GOAL_COMPLETED',
+  ACHIEVEMENT_UNLOCKED: 'ACHIEVEMENT_UNLOCKED'
+} as const
+
+export type FamActivityType = (typeof FamActivityType)[keyof typeof FamActivityType]
+
+
+export const FamGoalStatus = {
+  PROPOSED: 'PROPOSED',
+  ACTIVE: 'ACTIVE',
+  COMPLETED: 'COMPLETED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type FamGoalStatus = (typeof FamGoalStatus)[keyof typeof FamGoalStatus]
+
+
+export const FamChallengeStatus = {
+  PENDING: 'PENDING',
+  ACTIVE: 'ACTIVE',
+  COMPLETED: 'COMPLETED',
+  DECLINED: 'DECLINED'
+} as const
+
+export type FamChallengeStatus = (typeof FamChallengeStatus)[keyof typeof FamChallengeStatus]
