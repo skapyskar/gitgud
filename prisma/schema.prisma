@@ -51,6 +51,8 @@ enum FamActivityType {
   GOAL_ACTIVATED
   GOAL_COMPLETED
   ACHIEVEMENT_UNLOCKED
+  CHALLENGE_STARTED
+  CHALLENGE_WON
 }
 
 enum FamGoalStatus {
@@ -227,8 +229,7 @@ model Fam {
   goals        FamGoal[]
   activities   FamActivity[]
   achievements FamAchievement[]
-  challengesSent     FamChallenge[] @relation("ChallengeFrom")
-  challengesReceived FamChallenge[] @relation("ChallengeTo")
+  challenges   FamChallenge[]
   dailyStats   FamDailyStat[]
 
   @@index([ownerId])
@@ -334,14 +335,15 @@ model FamActivity {
 model FamChallenge {
   id            String              @id @default(cuid())
   famId         String
-  fam           Fam                 @relation("ChallengeFrom", fields: [famId], references: [id], onDelete: Cascade)
-  opponentFamId String?
-  opponentFam   Fam?                @relation("ChallengeTo", fields: [opponentFamId], references: [id], onDelete: Cascade)
+  fam           Fam                 @relation(fields: [famId], references: [id], onDelete: Cascade)
 
-  challengerId  String
-  challenger    User                @relation("ChallengeChallenger", fields: [challengerId], references: [id])
-  opponentId    String?
-  opponent      User?               @relation("ChallengeOpponent", fields: [opponentId], references: [id])
+  challengerId       String
+  challenger         User           @relation("ChallengeChallenger", fields: [challengerId], references: [id])
+  challengerProgress Int            @default(0)
+
+  opponentId         String
+  opponent           User           @relation("ChallengeOpponent", fields: [opponentId], references: [id])
+  opponentProgress   Int            @default(0)
 
   metric        String
   target        Int

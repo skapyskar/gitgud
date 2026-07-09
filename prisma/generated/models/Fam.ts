@@ -258,8 +258,7 @@ export type FamWhereInput = {
   goals?: Prisma.FamGoalListRelationFilter
   activities?: Prisma.FamActivityListRelationFilter
   achievements?: Prisma.FamAchievementListRelationFilter
-  challengesSent?: Prisma.FamChallengeListRelationFilter
-  challengesReceived?: Prisma.FamChallengeListRelationFilter
+  challenges?: Prisma.FamChallengeListRelationFilter
   dailyStats?: Prisma.FamDailyStatListRelationFilter
 }
 
@@ -279,8 +278,7 @@ export type FamOrderByWithRelationInput = {
   goals?: Prisma.FamGoalOrderByRelationAggregateInput
   activities?: Prisma.FamActivityOrderByRelationAggregateInput
   achievements?: Prisma.FamAchievementOrderByRelationAggregateInput
-  challengesSent?: Prisma.FamChallengeOrderByRelationAggregateInput
-  challengesReceived?: Prisma.FamChallengeOrderByRelationAggregateInput
+  challenges?: Prisma.FamChallengeOrderByRelationAggregateInput
   dailyStats?: Prisma.FamDailyStatOrderByRelationAggregateInput
 }
 
@@ -303,8 +301,7 @@ export type FamWhereUniqueInput = Prisma.AtLeast<{
   goals?: Prisma.FamGoalListRelationFilter
   activities?: Prisma.FamActivityListRelationFilter
   achievements?: Prisma.FamAchievementListRelationFilter
-  challengesSent?: Prisma.FamChallengeListRelationFilter
-  challengesReceived?: Prisma.FamChallengeListRelationFilter
+  challenges?: Prisma.FamChallengeListRelationFilter
   dailyStats?: Prisma.FamDailyStatListRelationFilter
 }, "id">
 
@@ -355,8 +352,7 @@ export type FamCreateInput = {
   goals?: Prisma.FamGoalCreateNestedManyWithoutFamInput
   activities?: Prisma.FamActivityCreateNestedManyWithoutFamInput
   achievements?: Prisma.FamAchievementCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentFamInput
+  challenges?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
   dailyStats?: Prisma.FamDailyStatCreateNestedManyWithoutFamInput
 }
 
@@ -375,8 +371,7 @@ export type FamUncheckedCreateInput = {
   goals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutFamInput
   activities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutFamInput
   achievements?: Prisma.FamAchievementUncheckedCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentFamInput
+  challenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
   dailyStats?: Prisma.FamDailyStatUncheckedCreateNestedManyWithoutFamInput
 }
 
@@ -395,8 +390,7 @@ export type FamUpdateInput = {
   goals?: Prisma.FamGoalUpdateManyWithoutFamNestedInput
   activities?: Prisma.FamActivityUpdateManyWithoutFamNestedInput
   achievements?: Prisma.FamAchievementUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentFamNestedInput
+  challenges?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
   dailyStats?: Prisma.FamDailyStatUpdateManyWithoutFamNestedInput
 }
 
@@ -415,8 +409,7 @@ export type FamUncheckedUpdateInput = {
   goals?: Prisma.FamGoalUncheckedUpdateManyWithoutFamNestedInput
   activities?: Prisma.FamActivityUncheckedUpdateManyWithoutFamNestedInput
   achievements?: Prisma.FamAchievementUncheckedUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentFamNestedInput
+  challenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
   dailyStats?: Prisma.FamDailyStatUncheckedUpdateManyWithoutFamNestedInput
 }
 
@@ -514,11 +507,6 @@ export type FamSumOrderByAggregateInput = {
 export type FamScalarRelationFilter = {
   is?: Prisma.FamWhereInput
   isNot?: Prisma.FamWhereInput
-}
-
-export type FamNullableScalarRelationFilter = {
-  is?: Prisma.FamWhereInput | null
-  isNot?: Prisma.FamWhereInput | null
 }
 
 export type FamCreateNestedManyWithoutOwnerInput = {
@@ -633,34 +621,18 @@ export type FamUpdateOneRequiredWithoutActivitiesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.FamUpdateToOneWithWhereWithoutActivitiesInput, Prisma.FamUpdateWithoutActivitiesInput>, Prisma.FamUncheckedUpdateWithoutActivitiesInput>
 }
 
-export type FamCreateNestedOneWithoutChallengesSentInput = {
-  create?: Prisma.XOR<Prisma.FamCreateWithoutChallengesSentInput, Prisma.FamUncheckedCreateWithoutChallengesSentInput>
-  connectOrCreate?: Prisma.FamCreateOrConnectWithoutChallengesSentInput
+export type FamCreateNestedOneWithoutChallengesInput = {
+  create?: Prisma.XOR<Prisma.FamCreateWithoutChallengesInput, Prisma.FamUncheckedCreateWithoutChallengesInput>
+  connectOrCreate?: Prisma.FamCreateOrConnectWithoutChallengesInput
   connect?: Prisma.FamWhereUniqueInput
 }
 
-export type FamCreateNestedOneWithoutChallengesReceivedInput = {
-  create?: Prisma.XOR<Prisma.FamCreateWithoutChallengesReceivedInput, Prisma.FamUncheckedCreateWithoutChallengesReceivedInput>
-  connectOrCreate?: Prisma.FamCreateOrConnectWithoutChallengesReceivedInput
+export type FamUpdateOneRequiredWithoutChallengesNestedInput = {
+  create?: Prisma.XOR<Prisma.FamCreateWithoutChallengesInput, Prisma.FamUncheckedCreateWithoutChallengesInput>
+  connectOrCreate?: Prisma.FamCreateOrConnectWithoutChallengesInput
+  upsert?: Prisma.FamUpsertWithoutChallengesInput
   connect?: Prisma.FamWhereUniqueInput
-}
-
-export type FamUpdateOneRequiredWithoutChallengesSentNestedInput = {
-  create?: Prisma.XOR<Prisma.FamCreateWithoutChallengesSentInput, Prisma.FamUncheckedCreateWithoutChallengesSentInput>
-  connectOrCreate?: Prisma.FamCreateOrConnectWithoutChallengesSentInput
-  upsert?: Prisma.FamUpsertWithoutChallengesSentInput
-  connect?: Prisma.FamWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.FamUpdateToOneWithWhereWithoutChallengesSentInput, Prisma.FamUpdateWithoutChallengesSentInput>, Prisma.FamUncheckedUpdateWithoutChallengesSentInput>
-}
-
-export type FamUpdateOneWithoutChallengesReceivedNestedInput = {
-  create?: Prisma.XOR<Prisma.FamCreateWithoutChallengesReceivedInput, Prisma.FamUncheckedCreateWithoutChallengesReceivedInput>
-  connectOrCreate?: Prisma.FamCreateOrConnectWithoutChallengesReceivedInput
-  upsert?: Prisma.FamUpsertWithoutChallengesReceivedInput
-  disconnect?: Prisma.FamWhereInput | boolean
-  delete?: Prisma.FamWhereInput | boolean
-  connect?: Prisma.FamWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.FamUpdateToOneWithWhereWithoutChallengesReceivedInput, Prisma.FamUpdateWithoutChallengesReceivedInput>, Prisma.FamUncheckedUpdateWithoutChallengesReceivedInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FamUpdateToOneWithWhereWithoutChallengesInput, Prisma.FamUpdateWithoutChallengesInput>, Prisma.FamUncheckedUpdateWithoutChallengesInput>
 }
 
 export type FamCreateNestedOneWithoutDailyStatsInput = {
@@ -691,8 +663,7 @@ export type FamCreateWithoutOwnerInput = {
   goals?: Prisma.FamGoalCreateNestedManyWithoutFamInput
   activities?: Prisma.FamActivityCreateNestedManyWithoutFamInput
   achievements?: Prisma.FamAchievementCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentFamInput
+  challenges?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
   dailyStats?: Prisma.FamDailyStatCreateNestedManyWithoutFamInput
 }
 
@@ -710,8 +681,7 @@ export type FamUncheckedCreateWithoutOwnerInput = {
   goals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutFamInput
   activities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutFamInput
   achievements?: Prisma.FamAchievementUncheckedCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentFamInput
+  challenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
   dailyStats?: Prisma.FamDailyStatUncheckedCreateNestedManyWithoutFamInput
 }
 
@@ -770,8 +740,7 @@ export type FamCreateWithoutMembershipsInput = {
   goals?: Prisma.FamGoalCreateNestedManyWithoutFamInput
   activities?: Prisma.FamActivityCreateNestedManyWithoutFamInput
   achievements?: Prisma.FamAchievementCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentFamInput
+  challenges?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
   dailyStats?: Prisma.FamDailyStatCreateNestedManyWithoutFamInput
 }
 
@@ -789,8 +758,7 @@ export type FamUncheckedCreateWithoutMembershipsInput = {
   goals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutFamInput
   activities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutFamInput
   achievements?: Prisma.FamAchievementUncheckedCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentFamInput
+  challenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
   dailyStats?: Prisma.FamDailyStatUncheckedCreateNestedManyWithoutFamInput
 }
 
@@ -824,8 +792,7 @@ export type FamUpdateWithoutMembershipsInput = {
   goals?: Prisma.FamGoalUpdateManyWithoutFamNestedInput
   activities?: Prisma.FamActivityUpdateManyWithoutFamNestedInput
   achievements?: Prisma.FamAchievementUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentFamNestedInput
+  challenges?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
   dailyStats?: Prisma.FamDailyStatUpdateManyWithoutFamNestedInput
 }
 
@@ -843,8 +810,7 @@ export type FamUncheckedUpdateWithoutMembershipsInput = {
   goals?: Prisma.FamGoalUncheckedUpdateManyWithoutFamNestedInput
   activities?: Prisma.FamActivityUncheckedUpdateManyWithoutFamNestedInput
   achievements?: Prisma.FamAchievementUncheckedUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentFamNestedInput
+  challenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
   dailyStats?: Prisma.FamDailyStatUncheckedUpdateManyWithoutFamNestedInput
 }
 
@@ -862,8 +828,7 @@ export type FamCreateWithoutInvitesInput = {
   goals?: Prisma.FamGoalCreateNestedManyWithoutFamInput
   activities?: Prisma.FamActivityCreateNestedManyWithoutFamInput
   achievements?: Prisma.FamAchievementCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentFamInput
+  challenges?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
   dailyStats?: Prisma.FamDailyStatCreateNestedManyWithoutFamInput
 }
 
@@ -881,8 +846,7 @@ export type FamUncheckedCreateWithoutInvitesInput = {
   goals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutFamInput
   activities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutFamInput
   achievements?: Prisma.FamAchievementUncheckedCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentFamInput
+  challenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
   dailyStats?: Prisma.FamDailyStatUncheckedCreateNestedManyWithoutFamInput
 }
 
@@ -916,8 +880,7 @@ export type FamUpdateWithoutInvitesInput = {
   goals?: Prisma.FamGoalUpdateManyWithoutFamNestedInput
   activities?: Prisma.FamActivityUpdateManyWithoutFamNestedInput
   achievements?: Prisma.FamAchievementUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentFamNestedInput
+  challenges?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
   dailyStats?: Prisma.FamDailyStatUpdateManyWithoutFamNestedInput
 }
 
@@ -935,8 +898,7 @@ export type FamUncheckedUpdateWithoutInvitesInput = {
   goals?: Prisma.FamGoalUncheckedUpdateManyWithoutFamNestedInput
   activities?: Prisma.FamActivityUncheckedUpdateManyWithoutFamNestedInput
   achievements?: Prisma.FamAchievementUncheckedUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentFamNestedInput
+  challenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
   dailyStats?: Prisma.FamDailyStatUncheckedUpdateManyWithoutFamNestedInput
 }
 
@@ -954,8 +916,7 @@ export type FamCreateWithoutGoalsInput = {
   invites?: Prisma.FamInviteCreateNestedManyWithoutFamInput
   activities?: Prisma.FamActivityCreateNestedManyWithoutFamInput
   achievements?: Prisma.FamAchievementCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentFamInput
+  challenges?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
   dailyStats?: Prisma.FamDailyStatCreateNestedManyWithoutFamInput
 }
 
@@ -973,8 +934,7 @@ export type FamUncheckedCreateWithoutGoalsInput = {
   invites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutFamInput
   activities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutFamInput
   achievements?: Prisma.FamAchievementUncheckedCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentFamInput
+  challenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
   dailyStats?: Prisma.FamDailyStatUncheckedCreateNestedManyWithoutFamInput
 }
 
@@ -1008,8 +968,7 @@ export type FamUpdateWithoutGoalsInput = {
   invites?: Prisma.FamInviteUpdateManyWithoutFamNestedInput
   activities?: Prisma.FamActivityUpdateManyWithoutFamNestedInput
   achievements?: Prisma.FamAchievementUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentFamNestedInput
+  challenges?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
   dailyStats?: Prisma.FamDailyStatUpdateManyWithoutFamNestedInput
 }
 
@@ -1027,8 +986,7 @@ export type FamUncheckedUpdateWithoutGoalsInput = {
   invites?: Prisma.FamInviteUncheckedUpdateManyWithoutFamNestedInput
   activities?: Prisma.FamActivityUncheckedUpdateManyWithoutFamNestedInput
   achievements?: Prisma.FamAchievementUncheckedUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentFamNestedInput
+  challenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
   dailyStats?: Prisma.FamDailyStatUncheckedUpdateManyWithoutFamNestedInput
 }
 
@@ -1046,8 +1004,7 @@ export type FamCreateWithoutAchievementsInput = {
   invites?: Prisma.FamInviteCreateNestedManyWithoutFamInput
   goals?: Prisma.FamGoalCreateNestedManyWithoutFamInput
   activities?: Prisma.FamActivityCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentFamInput
+  challenges?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
   dailyStats?: Prisma.FamDailyStatCreateNestedManyWithoutFamInput
 }
 
@@ -1065,8 +1022,7 @@ export type FamUncheckedCreateWithoutAchievementsInput = {
   invites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutFamInput
   goals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutFamInput
   activities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentFamInput
+  challenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
   dailyStats?: Prisma.FamDailyStatUncheckedCreateNestedManyWithoutFamInput
 }
 
@@ -1100,8 +1056,7 @@ export type FamUpdateWithoutAchievementsInput = {
   invites?: Prisma.FamInviteUpdateManyWithoutFamNestedInput
   goals?: Prisma.FamGoalUpdateManyWithoutFamNestedInput
   activities?: Prisma.FamActivityUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentFamNestedInput
+  challenges?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
   dailyStats?: Prisma.FamDailyStatUpdateManyWithoutFamNestedInput
 }
 
@@ -1119,8 +1074,7 @@ export type FamUncheckedUpdateWithoutAchievementsInput = {
   invites?: Prisma.FamInviteUncheckedUpdateManyWithoutFamNestedInput
   goals?: Prisma.FamGoalUncheckedUpdateManyWithoutFamNestedInput
   activities?: Prisma.FamActivityUncheckedUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentFamNestedInput
+  challenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
   dailyStats?: Prisma.FamDailyStatUncheckedUpdateManyWithoutFamNestedInput
 }
 
@@ -1138,8 +1092,7 @@ export type FamCreateWithoutActivitiesInput = {
   invites?: Prisma.FamInviteCreateNestedManyWithoutFamInput
   goals?: Prisma.FamGoalCreateNestedManyWithoutFamInput
   achievements?: Prisma.FamAchievementCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentFamInput
+  challenges?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
   dailyStats?: Prisma.FamDailyStatCreateNestedManyWithoutFamInput
 }
 
@@ -1157,8 +1110,7 @@ export type FamUncheckedCreateWithoutActivitiesInput = {
   invites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutFamInput
   goals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutFamInput
   achievements?: Prisma.FamAchievementUncheckedCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentFamInput
+  challenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
   dailyStats?: Prisma.FamDailyStatUncheckedCreateNestedManyWithoutFamInput
 }
 
@@ -1192,8 +1144,7 @@ export type FamUpdateWithoutActivitiesInput = {
   invites?: Prisma.FamInviteUpdateManyWithoutFamNestedInput
   goals?: Prisma.FamGoalUpdateManyWithoutFamNestedInput
   achievements?: Prisma.FamAchievementUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentFamNestedInput
+  challenges?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
   dailyStats?: Prisma.FamDailyStatUpdateManyWithoutFamNestedInput
 }
 
@@ -1211,12 +1162,11 @@ export type FamUncheckedUpdateWithoutActivitiesInput = {
   invites?: Prisma.FamInviteUncheckedUpdateManyWithoutFamNestedInput
   goals?: Prisma.FamGoalUncheckedUpdateManyWithoutFamNestedInput
   achievements?: Prisma.FamAchievementUncheckedUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentFamNestedInput
+  challenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
   dailyStats?: Prisma.FamDailyStatUncheckedUpdateManyWithoutFamNestedInput
 }
 
-export type FamCreateWithoutChallengesSentInput = {
+export type FamCreateWithoutChallengesInput = {
   id?: string
   name: string
   description?: string | null
@@ -1231,11 +1181,10 @@ export type FamCreateWithoutChallengesSentInput = {
   goals?: Prisma.FamGoalCreateNestedManyWithoutFamInput
   activities?: Prisma.FamActivityCreateNestedManyWithoutFamInput
   achievements?: Prisma.FamAchievementCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentFamInput
   dailyStats?: Prisma.FamDailyStatCreateNestedManyWithoutFamInput
 }
 
-export type FamUncheckedCreateWithoutChallengesSentInput = {
+export type FamUncheckedCreateWithoutChallengesInput = {
   id?: string
   name: string
   description?: string | null
@@ -1250,70 +1199,26 @@ export type FamUncheckedCreateWithoutChallengesSentInput = {
   goals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutFamInput
   activities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutFamInput
   achievements?: Prisma.FamAchievementUncheckedCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentFamInput
   dailyStats?: Prisma.FamDailyStatUncheckedCreateNestedManyWithoutFamInput
 }
 
-export type FamCreateOrConnectWithoutChallengesSentInput = {
+export type FamCreateOrConnectWithoutChallengesInput = {
   where: Prisma.FamWhereUniqueInput
-  create: Prisma.XOR<Prisma.FamCreateWithoutChallengesSentInput, Prisma.FamUncheckedCreateWithoutChallengesSentInput>
+  create: Prisma.XOR<Prisma.FamCreateWithoutChallengesInput, Prisma.FamUncheckedCreateWithoutChallengesInput>
 }
 
-export type FamCreateWithoutChallengesReceivedInput = {
-  id?: string
-  name: string
-  description?: string | null
-  icon?: string | null
-  xp?: number
-  level?: number
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  owner: Prisma.UserCreateNestedOneWithoutOwnedFamsInput
-  memberships?: Prisma.FamMembershipCreateNestedManyWithoutFamInput
-  invites?: Prisma.FamInviteCreateNestedManyWithoutFamInput
-  goals?: Prisma.FamGoalCreateNestedManyWithoutFamInput
-  activities?: Prisma.FamActivityCreateNestedManyWithoutFamInput
-  achievements?: Prisma.FamAchievementCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
-  dailyStats?: Prisma.FamDailyStatCreateNestedManyWithoutFamInput
-}
-
-export type FamUncheckedCreateWithoutChallengesReceivedInput = {
-  id?: string
-  name: string
-  description?: string | null
-  icon?: string | null
-  ownerId: string
-  xp?: number
-  level?: number
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  memberships?: Prisma.FamMembershipUncheckedCreateNestedManyWithoutFamInput
-  invites?: Prisma.FamInviteUncheckedCreateNestedManyWithoutFamInput
-  goals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutFamInput
-  activities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutFamInput
-  achievements?: Prisma.FamAchievementUncheckedCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
-  dailyStats?: Prisma.FamDailyStatUncheckedCreateNestedManyWithoutFamInput
-}
-
-export type FamCreateOrConnectWithoutChallengesReceivedInput = {
-  where: Prisma.FamWhereUniqueInput
-  create: Prisma.XOR<Prisma.FamCreateWithoutChallengesReceivedInput, Prisma.FamUncheckedCreateWithoutChallengesReceivedInput>
-}
-
-export type FamUpsertWithoutChallengesSentInput = {
-  update: Prisma.XOR<Prisma.FamUpdateWithoutChallengesSentInput, Prisma.FamUncheckedUpdateWithoutChallengesSentInput>
-  create: Prisma.XOR<Prisma.FamCreateWithoutChallengesSentInput, Prisma.FamUncheckedCreateWithoutChallengesSentInput>
+export type FamUpsertWithoutChallengesInput = {
+  update: Prisma.XOR<Prisma.FamUpdateWithoutChallengesInput, Prisma.FamUncheckedUpdateWithoutChallengesInput>
+  create: Prisma.XOR<Prisma.FamCreateWithoutChallengesInput, Prisma.FamUncheckedCreateWithoutChallengesInput>
   where?: Prisma.FamWhereInput
 }
 
-export type FamUpdateToOneWithWhereWithoutChallengesSentInput = {
+export type FamUpdateToOneWithWhereWithoutChallengesInput = {
   where?: Prisma.FamWhereInput
-  data: Prisma.XOR<Prisma.FamUpdateWithoutChallengesSentInput, Prisma.FamUncheckedUpdateWithoutChallengesSentInput>
+  data: Prisma.XOR<Prisma.FamUpdateWithoutChallengesInput, Prisma.FamUncheckedUpdateWithoutChallengesInput>
 }
 
-export type FamUpdateWithoutChallengesSentInput = {
+export type FamUpdateWithoutChallengesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1328,11 +1233,10 @@ export type FamUpdateWithoutChallengesSentInput = {
   goals?: Prisma.FamGoalUpdateManyWithoutFamNestedInput
   activities?: Prisma.FamActivityUpdateManyWithoutFamNestedInput
   achievements?: Prisma.FamAchievementUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentFamNestedInput
   dailyStats?: Prisma.FamDailyStatUpdateManyWithoutFamNestedInput
 }
 
-export type FamUncheckedUpdateWithoutChallengesSentInput = {
+export type FamUncheckedUpdateWithoutChallengesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1347,56 +1251,6 @@ export type FamUncheckedUpdateWithoutChallengesSentInput = {
   goals?: Prisma.FamGoalUncheckedUpdateManyWithoutFamNestedInput
   activities?: Prisma.FamActivityUncheckedUpdateManyWithoutFamNestedInput
   achievements?: Prisma.FamAchievementUncheckedUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentFamNestedInput
-  dailyStats?: Prisma.FamDailyStatUncheckedUpdateManyWithoutFamNestedInput
-}
-
-export type FamUpsertWithoutChallengesReceivedInput = {
-  update: Prisma.XOR<Prisma.FamUpdateWithoutChallengesReceivedInput, Prisma.FamUncheckedUpdateWithoutChallengesReceivedInput>
-  create: Prisma.XOR<Prisma.FamCreateWithoutChallengesReceivedInput, Prisma.FamUncheckedCreateWithoutChallengesReceivedInput>
-  where?: Prisma.FamWhereInput
-}
-
-export type FamUpdateToOneWithWhereWithoutChallengesReceivedInput = {
-  where?: Prisma.FamWhereInput
-  data: Prisma.XOR<Prisma.FamUpdateWithoutChallengesReceivedInput, Prisma.FamUncheckedUpdateWithoutChallengesReceivedInput>
-}
-
-export type FamUpdateWithoutChallengesReceivedInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  xp?: Prisma.IntFieldUpdateOperationsInput | number
-  level?: Prisma.IntFieldUpdateOperationsInput | number
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  owner?: Prisma.UserUpdateOneRequiredWithoutOwnedFamsNestedInput
-  memberships?: Prisma.FamMembershipUpdateManyWithoutFamNestedInput
-  invites?: Prisma.FamInviteUpdateManyWithoutFamNestedInput
-  goals?: Prisma.FamGoalUpdateManyWithoutFamNestedInput
-  activities?: Prisma.FamActivityUpdateManyWithoutFamNestedInput
-  achievements?: Prisma.FamAchievementUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
-  dailyStats?: Prisma.FamDailyStatUpdateManyWithoutFamNestedInput
-}
-
-export type FamUncheckedUpdateWithoutChallengesReceivedInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
-  xp?: Prisma.IntFieldUpdateOperationsInput | number
-  level?: Prisma.IntFieldUpdateOperationsInput | number
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  memberships?: Prisma.FamMembershipUncheckedUpdateManyWithoutFamNestedInput
-  invites?: Prisma.FamInviteUncheckedUpdateManyWithoutFamNestedInput
-  goals?: Prisma.FamGoalUncheckedUpdateManyWithoutFamNestedInput
-  activities?: Prisma.FamActivityUncheckedUpdateManyWithoutFamNestedInput
-  achievements?: Prisma.FamAchievementUncheckedUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
   dailyStats?: Prisma.FamDailyStatUncheckedUpdateManyWithoutFamNestedInput
 }
 
@@ -1415,8 +1269,7 @@ export type FamCreateWithoutDailyStatsInput = {
   goals?: Prisma.FamGoalCreateNestedManyWithoutFamInput
   activities?: Prisma.FamActivityCreateNestedManyWithoutFamInput
   achievements?: Prisma.FamAchievementCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeCreateNestedManyWithoutOpponentFamInput
+  challenges?: Prisma.FamChallengeCreateNestedManyWithoutFamInput
 }
 
 export type FamUncheckedCreateWithoutDailyStatsInput = {
@@ -1434,8 +1287,7 @@ export type FamUncheckedCreateWithoutDailyStatsInput = {
   goals?: Prisma.FamGoalUncheckedCreateNestedManyWithoutFamInput
   activities?: Prisma.FamActivityUncheckedCreateNestedManyWithoutFamInput
   achievements?: Prisma.FamAchievementUncheckedCreateNestedManyWithoutFamInput
-  challengesSent?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
-  challengesReceived?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutOpponentFamInput
+  challenges?: Prisma.FamChallengeUncheckedCreateNestedManyWithoutFamInput
 }
 
 export type FamCreateOrConnectWithoutDailyStatsInput = {
@@ -1469,8 +1321,7 @@ export type FamUpdateWithoutDailyStatsInput = {
   goals?: Prisma.FamGoalUpdateManyWithoutFamNestedInput
   activities?: Prisma.FamActivityUpdateManyWithoutFamNestedInput
   achievements?: Prisma.FamAchievementUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentFamNestedInput
+  challenges?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
 }
 
 export type FamUncheckedUpdateWithoutDailyStatsInput = {
@@ -1488,8 +1339,7 @@ export type FamUncheckedUpdateWithoutDailyStatsInput = {
   goals?: Prisma.FamGoalUncheckedUpdateManyWithoutFamNestedInput
   activities?: Prisma.FamActivityUncheckedUpdateManyWithoutFamNestedInput
   achievements?: Prisma.FamAchievementUncheckedUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentFamNestedInput
+  challenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
 }
 
 export type FamCreateManyOwnerInput = {
@@ -1517,8 +1367,7 @@ export type FamUpdateWithoutOwnerInput = {
   goals?: Prisma.FamGoalUpdateManyWithoutFamNestedInput
   activities?: Prisma.FamActivityUpdateManyWithoutFamNestedInput
   achievements?: Prisma.FamAchievementUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUpdateManyWithoutOpponentFamNestedInput
+  challenges?: Prisma.FamChallengeUpdateManyWithoutFamNestedInput
   dailyStats?: Prisma.FamDailyStatUpdateManyWithoutFamNestedInput
 }
 
@@ -1536,8 +1385,7 @@ export type FamUncheckedUpdateWithoutOwnerInput = {
   goals?: Prisma.FamGoalUncheckedUpdateManyWithoutFamNestedInput
   activities?: Prisma.FamActivityUncheckedUpdateManyWithoutFamNestedInput
   achievements?: Prisma.FamAchievementUncheckedUpdateManyWithoutFamNestedInput
-  challengesSent?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
-  challengesReceived?: Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentFamNestedInput
+  challenges?: Prisma.FamChallengeUncheckedUpdateManyWithoutFamNestedInput
   dailyStats?: Prisma.FamDailyStatUncheckedUpdateManyWithoutFamNestedInput
 }
 
@@ -1563,8 +1411,7 @@ export type FamCountOutputType = {
   goals: number
   activities: number
   achievements: number
-  challengesSent: number
-  challengesReceived: number
+  challenges: number
   dailyStats: number
 }
 
@@ -1574,8 +1421,7 @@ export type FamCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.In
   goals?: boolean | FamCountOutputTypeCountGoalsArgs
   activities?: boolean | FamCountOutputTypeCountActivitiesArgs
   achievements?: boolean | FamCountOutputTypeCountAchievementsArgs
-  challengesSent?: boolean | FamCountOutputTypeCountChallengesSentArgs
-  challengesReceived?: boolean | FamCountOutputTypeCountChallengesReceivedArgs
+  challenges?: boolean | FamCountOutputTypeCountChallengesArgs
   dailyStats?: boolean | FamCountOutputTypeCountDailyStatsArgs
 }
 
@@ -1627,14 +1473,7 @@ export type FamCountOutputTypeCountAchievementsArgs<ExtArgs extends runtime.Type
 /**
  * FamCountOutputType without action
  */
-export type FamCountOutputTypeCountChallengesSentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.FamChallengeWhereInput
-}
-
-/**
- * FamCountOutputType without action
- */
-export type FamCountOutputTypeCountChallengesReceivedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type FamCountOutputTypeCountChallengesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.FamChallengeWhereInput
 }
 
@@ -1662,8 +1501,7 @@ export type FamSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   goals?: boolean | Prisma.Fam$goalsArgs<ExtArgs>
   activities?: boolean | Prisma.Fam$activitiesArgs<ExtArgs>
   achievements?: boolean | Prisma.Fam$achievementsArgs<ExtArgs>
-  challengesSent?: boolean | Prisma.Fam$challengesSentArgs<ExtArgs>
-  challengesReceived?: boolean | Prisma.Fam$challengesReceivedArgs<ExtArgs>
+  challenges?: boolean | Prisma.Fam$challengesArgs<ExtArgs>
   dailyStats?: boolean | Prisma.Fam$dailyStatsArgs<ExtArgs>
   _count?: boolean | Prisma.FamCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["fam"]>
@@ -1714,8 +1552,7 @@ export type FamInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   goals?: boolean | Prisma.Fam$goalsArgs<ExtArgs>
   activities?: boolean | Prisma.Fam$activitiesArgs<ExtArgs>
   achievements?: boolean | Prisma.Fam$achievementsArgs<ExtArgs>
-  challengesSent?: boolean | Prisma.Fam$challengesSentArgs<ExtArgs>
-  challengesReceived?: boolean | Prisma.Fam$challengesReceivedArgs<ExtArgs>
+  challenges?: boolean | Prisma.Fam$challengesArgs<ExtArgs>
   dailyStats?: boolean | Prisma.Fam$dailyStatsArgs<ExtArgs>
   _count?: boolean | Prisma.FamCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1735,8 +1572,7 @@ export type $FamPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     goals: Prisma.$FamGoalPayload<ExtArgs>[]
     activities: Prisma.$FamActivityPayload<ExtArgs>[]
     achievements: Prisma.$FamAchievementPayload<ExtArgs>[]
-    challengesSent: Prisma.$FamChallengePayload<ExtArgs>[]
-    challengesReceived: Prisma.$FamChallengePayload<ExtArgs>[]
+    challenges: Prisma.$FamChallengePayload<ExtArgs>[]
     dailyStats: Prisma.$FamDailyStatPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -2149,8 +1985,7 @@ export interface Prisma__FamClient<T, Null = never, ExtArgs extends runtime.Type
   goals<T extends Prisma.Fam$goalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Fam$goalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamGoalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   activities<T extends Prisma.Fam$activitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Fam$activitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamActivityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   achievements<T extends Prisma.Fam$achievementsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Fam$achievementsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamAchievementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  challengesSent<T extends Prisma.Fam$challengesSentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Fam$challengesSentArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamChallengePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  challengesReceived<T extends Prisma.Fam$challengesReceivedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Fam$challengesReceivedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamChallengePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  challenges<T extends Prisma.Fam$challengesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Fam$challengesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamChallengePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   dailyStats<T extends Prisma.Fam$dailyStatsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Fam$dailyStatsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamDailyStatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2706,33 +2541,9 @@ export type Fam$achievementsArgs<ExtArgs extends runtime.Types.Extensions.Intern
 }
 
 /**
- * Fam.challengesSent
+ * Fam.challenges
  */
-export type Fam$challengesSentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the FamChallenge
-   */
-  select?: Prisma.FamChallengeSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the FamChallenge
-   */
-  omit?: Prisma.FamChallengeOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.FamChallengeInclude<ExtArgs> | null
-  where?: Prisma.FamChallengeWhereInput
-  orderBy?: Prisma.FamChallengeOrderByWithRelationInput | Prisma.FamChallengeOrderByWithRelationInput[]
-  cursor?: Prisma.FamChallengeWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.FamChallengeScalarFieldEnum | Prisma.FamChallengeScalarFieldEnum[]
-}
-
-/**
- * Fam.challengesReceived
- */
-export type Fam$challengesReceivedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Fam$challengesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the FamChallenge
    */

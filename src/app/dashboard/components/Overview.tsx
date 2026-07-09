@@ -388,6 +388,18 @@ export default function Overview({
               <span className="text-[10.5px] tracking-widest text-ink3 font-bold">OPEN QUESTS</span>
               <span className="font-display text-[27px] font-extrabold text-acc3">{openCount}</span>
             </div>
+            {famSummary && (
+              <>
+                <div className="glass glass-hover r-xl p-4 flex flex-col gap-1">
+                  <span className="text-[10.5px] tracking-widest text-ink3 font-bold">FAM XP</span>
+                  <span className="font-display text-[27px] font-extrabold text-acc">{famSummary.xp.toLocaleString()}</span>
+                </div>
+                <div className="glass glass-hover r-xl p-4 flex flex-col gap-1">
+                  <span className="text-[10.5px] tracking-widest text-ink3 font-bold">FAM SCORE</span>
+                  <span className="font-display text-[27px] font-extrabold grad-text">{famSummary.score.toLocaleString()}</span>
+                </div>
+              </>
+            )}
           </Reveal>
 
           {famSummary && (

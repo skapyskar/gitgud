@@ -915,12 +915,10 @@ export type UserUpdateOneRequiredWithoutChallengesSentNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutChallengesSentInput, Prisma.UserUpdateWithoutChallengesSentInput>, Prisma.UserUncheckedUpdateWithoutChallengesSentInput>
 }
 
-export type UserUpdateOneWithoutChallengesReceivedNestedInput = {
+export type UserUpdateOneRequiredWithoutChallengesReceivedNestedInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutChallengesReceivedInput, Prisma.UserUncheckedCreateWithoutChallengesReceivedInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutChallengesReceivedInput
   upsert?: Prisma.UserUpsertWithoutChallengesReceivedInput
-  disconnect?: Prisma.UserWhereInput | boolean
-  delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutChallengesReceivedInput, Prisma.UserUpdateWithoutChallengesReceivedInput>, Prisma.UserUncheckedUpdateWithoutChallengesReceivedInput>
 }

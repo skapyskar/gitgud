@@ -27,19 +27,24 @@ export type AggregateFamChallenge = {
 }
 
 export type FamChallengeAvgAggregateOutputType = {
+  challengerProgress: number | null
+  opponentProgress: number | null
   target: number | null
 }
 
 export type FamChallengeSumAggregateOutputType = {
+  challengerProgress: number | null
+  opponentProgress: number | null
   target: number | null
 }
 
 export type FamChallengeMinAggregateOutputType = {
   id: string | null
   famId: string | null
-  opponentFamId: string | null
   challengerId: string | null
+  challengerProgress: number | null
   opponentId: string | null
+  opponentProgress: number | null
   metric: string | null
   target: number | null
   status: $Enums.FamChallengeStatus | null
@@ -51,9 +56,10 @@ export type FamChallengeMinAggregateOutputType = {
 export type FamChallengeMaxAggregateOutputType = {
   id: string | null
   famId: string | null
-  opponentFamId: string | null
   challengerId: string | null
+  challengerProgress: number | null
   opponentId: string | null
+  opponentProgress: number | null
   metric: string | null
   target: number | null
   status: $Enums.FamChallengeStatus | null
@@ -65,9 +71,10 @@ export type FamChallengeMaxAggregateOutputType = {
 export type FamChallengeCountAggregateOutputType = {
   id: number
   famId: number
-  opponentFamId: number
   challengerId: number
+  challengerProgress: number
   opponentId: number
+  opponentProgress: number
   metric: number
   target: number
   status: number
@@ -79,19 +86,24 @@ export type FamChallengeCountAggregateOutputType = {
 
 
 export type FamChallengeAvgAggregateInputType = {
+  challengerProgress?: true
+  opponentProgress?: true
   target?: true
 }
 
 export type FamChallengeSumAggregateInputType = {
+  challengerProgress?: true
+  opponentProgress?: true
   target?: true
 }
 
 export type FamChallengeMinAggregateInputType = {
   id?: true
   famId?: true
-  opponentFamId?: true
   challengerId?: true
+  challengerProgress?: true
   opponentId?: true
+  opponentProgress?: true
   metric?: true
   target?: true
   status?: true
@@ -103,9 +115,10 @@ export type FamChallengeMinAggregateInputType = {
 export type FamChallengeMaxAggregateInputType = {
   id?: true
   famId?: true
-  opponentFamId?: true
   challengerId?: true
+  challengerProgress?: true
   opponentId?: true
+  opponentProgress?: true
   metric?: true
   target?: true
   status?: true
@@ -117,9 +130,10 @@ export type FamChallengeMaxAggregateInputType = {
 export type FamChallengeCountAggregateInputType = {
   id?: true
   famId?: true
-  opponentFamId?: true
   challengerId?: true
+  challengerProgress?: true
   opponentId?: true
+  opponentProgress?: true
   metric?: true
   target?: true
   status?: true
@@ -218,9 +232,10 @@ export type FamChallengeGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 export type FamChallengeGroupByOutputType = {
   id: string
   famId: string
-  opponentFamId: string | null
   challengerId: string
-  opponentId: string | null
+  challengerProgress: number
+  opponentId: string
+  opponentProgress: number
   metric: string
   target: number
   status: $Enums.FamChallengeStatus
@@ -255,9 +270,10 @@ export type FamChallengeWhereInput = {
   NOT?: Prisma.FamChallengeWhereInput | Prisma.FamChallengeWhereInput[]
   id?: Prisma.StringFilter<"FamChallenge"> | string
   famId?: Prisma.StringFilter<"FamChallenge"> | string
-  opponentFamId?: Prisma.StringNullableFilter<"FamChallenge"> | string | null
   challengerId?: Prisma.StringFilter<"FamChallenge"> | string
-  opponentId?: Prisma.StringNullableFilter<"FamChallenge"> | string | null
+  challengerProgress?: Prisma.IntFilter<"FamChallenge"> | number
+  opponentId?: Prisma.StringFilter<"FamChallenge"> | string
+  opponentProgress?: Prisma.IntFilter<"FamChallenge"> | number
   metric?: Prisma.StringFilter<"FamChallenge"> | string
   target?: Prisma.IntFilter<"FamChallenge"> | number
   status?: Prisma.EnumFamChallengeStatusFilter<"FamChallenge"> | $Enums.FamChallengeStatus
@@ -265,18 +281,18 @@ export type FamChallengeWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"FamChallenge"> | Date | string
   resolvedAt?: Prisma.DateTimeNullableFilter<"FamChallenge"> | Date | string | null
   fam?: Prisma.XOR<Prisma.FamScalarRelationFilter, Prisma.FamWhereInput>
-  opponentFam?: Prisma.XOR<Prisma.FamNullableScalarRelationFilter, Prisma.FamWhereInput> | null
   challenger?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  opponent?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  opponent?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   winner?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }
 
 export type FamChallengeOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   famId?: Prisma.SortOrder
-  opponentFamId?: Prisma.SortOrderInput | Prisma.SortOrder
   challengerId?: Prisma.SortOrder
-  opponentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  challengerProgress?: Prisma.SortOrder
+  opponentId?: Prisma.SortOrder
+  opponentProgress?: Prisma.SortOrder
   metric?: Prisma.SortOrder
   target?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -284,7 +300,6 @@ export type FamChallengeOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   resolvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   fam?: Prisma.FamOrderByWithRelationInput
-  opponentFam?: Prisma.FamOrderByWithRelationInput
   challenger?: Prisma.UserOrderByWithRelationInput
   opponent?: Prisma.UserOrderByWithRelationInput
   winner?: Prisma.UserOrderByWithRelationInput
@@ -296,9 +311,10 @@ export type FamChallengeWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.FamChallengeWhereInput[]
   NOT?: Prisma.FamChallengeWhereInput | Prisma.FamChallengeWhereInput[]
   famId?: Prisma.StringFilter<"FamChallenge"> | string
-  opponentFamId?: Prisma.StringNullableFilter<"FamChallenge"> | string | null
   challengerId?: Prisma.StringFilter<"FamChallenge"> | string
-  opponentId?: Prisma.StringNullableFilter<"FamChallenge"> | string | null
+  challengerProgress?: Prisma.IntFilter<"FamChallenge"> | number
+  opponentId?: Prisma.StringFilter<"FamChallenge"> | string
+  opponentProgress?: Prisma.IntFilter<"FamChallenge"> | number
   metric?: Prisma.StringFilter<"FamChallenge"> | string
   target?: Prisma.IntFilter<"FamChallenge"> | number
   status?: Prisma.EnumFamChallengeStatusFilter<"FamChallenge"> | $Enums.FamChallengeStatus
@@ -306,18 +322,18 @@ export type FamChallengeWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"FamChallenge"> | Date | string
   resolvedAt?: Prisma.DateTimeNullableFilter<"FamChallenge"> | Date | string | null
   fam?: Prisma.XOR<Prisma.FamScalarRelationFilter, Prisma.FamWhereInput>
-  opponentFam?: Prisma.XOR<Prisma.FamNullableScalarRelationFilter, Prisma.FamWhereInput> | null
   challenger?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  opponent?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  opponent?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   winner?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
 }, "id">
 
 export type FamChallengeOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   famId?: Prisma.SortOrder
-  opponentFamId?: Prisma.SortOrderInput | Prisma.SortOrder
   challengerId?: Prisma.SortOrder
-  opponentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  challengerProgress?: Prisma.SortOrder
+  opponentId?: Prisma.SortOrder
+  opponentProgress?: Prisma.SortOrder
   metric?: Prisma.SortOrder
   target?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -337,9 +353,10 @@ export type FamChallengeScalarWhereWithAggregatesInput = {
   NOT?: Prisma.FamChallengeScalarWhereWithAggregatesInput | Prisma.FamChallengeScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"FamChallenge"> | string
   famId?: Prisma.StringWithAggregatesFilter<"FamChallenge"> | string
-  opponentFamId?: Prisma.StringNullableWithAggregatesFilter<"FamChallenge"> | string | null
   challengerId?: Prisma.StringWithAggregatesFilter<"FamChallenge"> | string
-  opponentId?: Prisma.StringNullableWithAggregatesFilter<"FamChallenge"> | string | null
+  challengerProgress?: Prisma.IntWithAggregatesFilter<"FamChallenge"> | number
+  opponentId?: Prisma.StringWithAggregatesFilter<"FamChallenge"> | string
+  opponentProgress?: Prisma.IntWithAggregatesFilter<"FamChallenge"> | number
   metric?: Prisma.StringWithAggregatesFilter<"FamChallenge"> | string
   target?: Prisma.IntWithAggregatesFilter<"FamChallenge"> | number
   status?: Prisma.EnumFamChallengeStatusWithAggregatesFilter<"FamChallenge"> | $Enums.FamChallengeStatus
@@ -350,24 +367,26 @@ export type FamChallengeScalarWhereWithAggregatesInput = {
 
 export type FamChallengeCreateInput = {
   id?: string
+  challengerProgress?: number
+  opponentProgress?: number
   metric: string
   target: number
   status?: $Enums.FamChallengeStatus
   createdAt?: Date | string
   resolvedAt?: Date | string | null
-  fam: Prisma.FamCreateNestedOneWithoutChallengesSentInput
-  opponentFam?: Prisma.FamCreateNestedOneWithoutChallengesReceivedInput
+  fam: Prisma.FamCreateNestedOneWithoutChallengesInput
   challenger: Prisma.UserCreateNestedOneWithoutChallengesSentInput
-  opponent?: Prisma.UserCreateNestedOneWithoutChallengesReceivedInput
+  opponent: Prisma.UserCreateNestedOneWithoutChallengesReceivedInput
   winner?: Prisma.UserCreateNestedOneWithoutWonChallengesInput
 }
 
 export type FamChallengeUncheckedCreateInput = {
   id?: string
   famId: string
-  opponentFamId?: string | null
   challengerId: string
-  opponentId?: string | null
+  challengerProgress?: number
+  opponentId: string
+  opponentProgress?: number
   metric: string
   target: number
   status?: $Enums.FamChallengeStatus
@@ -378,24 +397,26 @@ export type FamChallengeUncheckedCreateInput = {
 
 export type FamChallengeUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  challengerProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  opponentProgress?: Prisma.IntFieldUpdateOperationsInput | number
   metric?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  fam?: Prisma.FamUpdateOneRequiredWithoutChallengesSentNestedInput
-  opponentFam?: Prisma.FamUpdateOneWithoutChallengesReceivedNestedInput
+  fam?: Prisma.FamUpdateOneRequiredWithoutChallengesNestedInput
   challenger?: Prisma.UserUpdateOneRequiredWithoutChallengesSentNestedInput
-  opponent?: Prisma.UserUpdateOneWithoutChallengesReceivedNestedInput
+  opponent?: Prisma.UserUpdateOneRequiredWithoutChallengesReceivedNestedInput
   winner?: Prisma.UserUpdateOneWithoutWonChallengesNestedInput
 }
 
 export type FamChallengeUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   famId?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentFamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   challengerId?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  challengerProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  opponentId?: Prisma.StringFieldUpdateOperationsInput | string
+  opponentProgress?: Prisma.IntFieldUpdateOperationsInput | number
   metric?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
@@ -407,9 +428,10 @@ export type FamChallengeUncheckedUpdateInput = {
 export type FamChallengeCreateManyInput = {
   id?: string
   famId: string
-  opponentFamId?: string | null
   challengerId: string
-  opponentId?: string | null
+  challengerProgress?: number
+  opponentId: string
+  opponentProgress?: number
   metric: string
   target: number
   status?: $Enums.FamChallengeStatus
@@ -420,6 +442,8 @@ export type FamChallengeCreateManyInput = {
 
 export type FamChallengeUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  challengerProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  opponentProgress?: Prisma.IntFieldUpdateOperationsInput | number
   metric?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
@@ -430,9 +454,10 @@ export type FamChallengeUpdateManyMutationInput = {
 export type FamChallengeUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   famId?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentFamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   challengerId?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  challengerProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  opponentId?: Prisma.StringFieldUpdateOperationsInput | string
+  opponentProgress?: Prisma.IntFieldUpdateOperationsInput | number
   metric?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
@@ -454,9 +479,10 @@ export type FamChallengeOrderByRelationAggregateInput = {
 export type FamChallengeCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   famId?: Prisma.SortOrder
-  opponentFamId?: Prisma.SortOrder
   challengerId?: Prisma.SortOrder
+  challengerProgress?: Prisma.SortOrder
   opponentId?: Prisma.SortOrder
+  opponentProgress?: Prisma.SortOrder
   metric?: Prisma.SortOrder
   target?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -466,15 +492,18 @@ export type FamChallengeCountOrderByAggregateInput = {
 }
 
 export type FamChallengeAvgOrderByAggregateInput = {
+  challengerProgress?: Prisma.SortOrder
+  opponentProgress?: Prisma.SortOrder
   target?: Prisma.SortOrder
 }
 
 export type FamChallengeMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   famId?: Prisma.SortOrder
-  opponentFamId?: Prisma.SortOrder
   challengerId?: Prisma.SortOrder
+  challengerProgress?: Prisma.SortOrder
   opponentId?: Prisma.SortOrder
+  opponentProgress?: Prisma.SortOrder
   metric?: Prisma.SortOrder
   target?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -486,9 +515,10 @@ export type FamChallengeMaxOrderByAggregateInput = {
 export type FamChallengeMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   famId?: Prisma.SortOrder
-  opponentFamId?: Prisma.SortOrder
   challengerId?: Prisma.SortOrder
+  challengerProgress?: Prisma.SortOrder
   opponentId?: Prisma.SortOrder
+  opponentProgress?: Prisma.SortOrder
   metric?: Prisma.SortOrder
   target?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -498,6 +528,8 @@ export type FamChallengeMinOrderByAggregateInput = {
 }
 
 export type FamChallengeSumOrderByAggregateInput = {
+  challengerProgress?: Prisma.SortOrder
+  opponentProgress?: Prisma.SortOrder
   target?: Prisma.SortOrder
 }
 
@@ -634,24 +666,10 @@ export type FamChallengeCreateNestedManyWithoutFamInput = {
   connect?: Prisma.FamChallengeWhereUniqueInput | Prisma.FamChallengeWhereUniqueInput[]
 }
 
-export type FamChallengeCreateNestedManyWithoutOpponentFamInput = {
-  create?: Prisma.XOR<Prisma.FamChallengeCreateWithoutOpponentFamInput, Prisma.FamChallengeUncheckedCreateWithoutOpponentFamInput> | Prisma.FamChallengeCreateWithoutOpponentFamInput[] | Prisma.FamChallengeUncheckedCreateWithoutOpponentFamInput[]
-  connectOrCreate?: Prisma.FamChallengeCreateOrConnectWithoutOpponentFamInput | Prisma.FamChallengeCreateOrConnectWithoutOpponentFamInput[]
-  createMany?: Prisma.FamChallengeCreateManyOpponentFamInputEnvelope
-  connect?: Prisma.FamChallengeWhereUniqueInput | Prisma.FamChallengeWhereUniqueInput[]
-}
-
 export type FamChallengeUncheckedCreateNestedManyWithoutFamInput = {
   create?: Prisma.XOR<Prisma.FamChallengeCreateWithoutFamInput, Prisma.FamChallengeUncheckedCreateWithoutFamInput> | Prisma.FamChallengeCreateWithoutFamInput[] | Prisma.FamChallengeUncheckedCreateWithoutFamInput[]
   connectOrCreate?: Prisma.FamChallengeCreateOrConnectWithoutFamInput | Prisma.FamChallengeCreateOrConnectWithoutFamInput[]
   createMany?: Prisma.FamChallengeCreateManyFamInputEnvelope
-  connect?: Prisma.FamChallengeWhereUniqueInput | Prisma.FamChallengeWhereUniqueInput[]
-}
-
-export type FamChallengeUncheckedCreateNestedManyWithoutOpponentFamInput = {
-  create?: Prisma.XOR<Prisma.FamChallengeCreateWithoutOpponentFamInput, Prisma.FamChallengeUncheckedCreateWithoutOpponentFamInput> | Prisma.FamChallengeCreateWithoutOpponentFamInput[] | Prisma.FamChallengeUncheckedCreateWithoutOpponentFamInput[]
-  connectOrCreate?: Prisma.FamChallengeCreateOrConnectWithoutOpponentFamInput | Prisma.FamChallengeCreateOrConnectWithoutOpponentFamInput[]
-  createMany?: Prisma.FamChallengeCreateManyOpponentFamInputEnvelope
   connect?: Prisma.FamChallengeWhereUniqueInput | Prisma.FamChallengeWhereUniqueInput[]
 }
 
@@ -669,20 +687,6 @@ export type FamChallengeUpdateManyWithoutFamNestedInput = {
   deleteMany?: Prisma.FamChallengeScalarWhereInput | Prisma.FamChallengeScalarWhereInput[]
 }
 
-export type FamChallengeUpdateManyWithoutOpponentFamNestedInput = {
-  create?: Prisma.XOR<Prisma.FamChallengeCreateWithoutOpponentFamInput, Prisma.FamChallengeUncheckedCreateWithoutOpponentFamInput> | Prisma.FamChallengeCreateWithoutOpponentFamInput[] | Prisma.FamChallengeUncheckedCreateWithoutOpponentFamInput[]
-  connectOrCreate?: Prisma.FamChallengeCreateOrConnectWithoutOpponentFamInput | Prisma.FamChallengeCreateOrConnectWithoutOpponentFamInput[]
-  upsert?: Prisma.FamChallengeUpsertWithWhereUniqueWithoutOpponentFamInput | Prisma.FamChallengeUpsertWithWhereUniqueWithoutOpponentFamInput[]
-  createMany?: Prisma.FamChallengeCreateManyOpponentFamInputEnvelope
-  set?: Prisma.FamChallengeWhereUniqueInput | Prisma.FamChallengeWhereUniqueInput[]
-  disconnect?: Prisma.FamChallengeWhereUniqueInput | Prisma.FamChallengeWhereUniqueInput[]
-  delete?: Prisma.FamChallengeWhereUniqueInput | Prisma.FamChallengeWhereUniqueInput[]
-  connect?: Prisma.FamChallengeWhereUniqueInput | Prisma.FamChallengeWhereUniqueInput[]
-  update?: Prisma.FamChallengeUpdateWithWhereUniqueWithoutOpponentFamInput | Prisma.FamChallengeUpdateWithWhereUniqueWithoutOpponentFamInput[]
-  updateMany?: Prisma.FamChallengeUpdateManyWithWhereWithoutOpponentFamInput | Prisma.FamChallengeUpdateManyWithWhereWithoutOpponentFamInput[]
-  deleteMany?: Prisma.FamChallengeScalarWhereInput | Prisma.FamChallengeScalarWhereInput[]
-}
-
 export type FamChallengeUncheckedUpdateManyWithoutFamNestedInput = {
   create?: Prisma.XOR<Prisma.FamChallengeCreateWithoutFamInput, Prisma.FamChallengeUncheckedCreateWithoutFamInput> | Prisma.FamChallengeCreateWithoutFamInput[] | Prisma.FamChallengeUncheckedCreateWithoutFamInput[]
   connectOrCreate?: Prisma.FamChallengeCreateOrConnectWithoutFamInput | Prisma.FamChallengeCreateOrConnectWithoutFamInput[]
@@ -697,42 +701,30 @@ export type FamChallengeUncheckedUpdateManyWithoutFamNestedInput = {
   deleteMany?: Prisma.FamChallengeScalarWhereInput | Prisma.FamChallengeScalarWhereInput[]
 }
 
-export type FamChallengeUncheckedUpdateManyWithoutOpponentFamNestedInput = {
-  create?: Prisma.XOR<Prisma.FamChallengeCreateWithoutOpponentFamInput, Prisma.FamChallengeUncheckedCreateWithoutOpponentFamInput> | Prisma.FamChallengeCreateWithoutOpponentFamInput[] | Prisma.FamChallengeUncheckedCreateWithoutOpponentFamInput[]
-  connectOrCreate?: Prisma.FamChallengeCreateOrConnectWithoutOpponentFamInput | Prisma.FamChallengeCreateOrConnectWithoutOpponentFamInput[]
-  upsert?: Prisma.FamChallengeUpsertWithWhereUniqueWithoutOpponentFamInput | Prisma.FamChallengeUpsertWithWhereUniqueWithoutOpponentFamInput[]
-  createMany?: Prisma.FamChallengeCreateManyOpponentFamInputEnvelope
-  set?: Prisma.FamChallengeWhereUniqueInput | Prisma.FamChallengeWhereUniqueInput[]
-  disconnect?: Prisma.FamChallengeWhereUniqueInput | Prisma.FamChallengeWhereUniqueInput[]
-  delete?: Prisma.FamChallengeWhereUniqueInput | Prisma.FamChallengeWhereUniqueInput[]
-  connect?: Prisma.FamChallengeWhereUniqueInput | Prisma.FamChallengeWhereUniqueInput[]
-  update?: Prisma.FamChallengeUpdateWithWhereUniqueWithoutOpponentFamInput | Prisma.FamChallengeUpdateWithWhereUniqueWithoutOpponentFamInput[]
-  updateMany?: Prisma.FamChallengeUpdateManyWithWhereWithoutOpponentFamInput | Prisma.FamChallengeUpdateManyWithWhereWithoutOpponentFamInput[]
-  deleteMany?: Prisma.FamChallengeScalarWhereInput | Prisma.FamChallengeScalarWhereInput[]
-}
-
 export type EnumFamChallengeStatusFieldUpdateOperationsInput = {
   set?: $Enums.FamChallengeStatus
 }
 
 export type FamChallengeCreateWithoutChallengerInput = {
   id?: string
+  challengerProgress?: number
+  opponentProgress?: number
   metric: string
   target: number
   status?: $Enums.FamChallengeStatus
   createdAt?: Date | string
   resolvedAt?: Date | string | null
-  fam: Prisma.FamCreateNestedOneWithoutChallengesSentInput
-  opponentFam?: Prisma.FamCreateNestedOneWithoutChallengesReceivedInput
-  opponent?: Prisma.UserCreateNestedOneWithoutChallengesReceivedInput
+  fam: Prisma.FamCreateNestedOneWithoutChallengesInput
+  opponent: Prisma.UserCreateNestedOneWithoutChallengesReceivedInput
   winner?: Prisma.UserCreateNestedOneWithoutWonChallengesInput
 }
 
 export type FamChallengeUncheckedCreateWithoutChallengerInput = {
   id?: string
   famId: string
-  opponentFamId?: string | null
-  opponentId?: string | null
+  challengerProgress?: number
+  opponentId: string
+  opponentProgress?: number
   metric: string
   target: number
   status?: $Enums.FamChallengeStatus
@@ -753,13 +745,14 @@ export type FamChallengeCreateManyChallengerInputEnvelope = {
 
 export type FamChallengeCreateWithoutOpponentInput = {
   id?: string
+  challengerProgress?: number
+  opponentProgress?: number
   metric: string
   target: number
   status?: $Enums.FamChallengeStatus
   createdAt?: Date | string
   resolvedAt?: Date | string | null
-  fam: Prisma.FamCreateNestedOneWithoutChallengesSentInput
-  opponentFam?: Prisma.FamCreateNestedOneWithoutChallengesReceivedInput
+  fam: Prisma.FamCreateNestedOneWithoutChallengesInput
   challenger: Prisma.UserCreateNestedOneWithoutChallengesSentInput
   winner?: Prisma.UserCreateNestedOneWithoutWonChallengesInput
 }
@@ -767,8 +760,9 @@ export type FamChallengeCreateWithoutOpponentInput = {
 export type FamChallengeUncheckedCreateWithoutOpponentInput = {
   id?: string
   famId: string
-  opponentFamId?: string | null
   challengerId: string
+  challengerProgress?: number
+  opponentProgress?: number
   metric: string
   target: number
   status?: $Enums.FamChallengeStatus
@@ -789,23 +783,25 @@ export type FamChallengeCreateManyOpponentInputEnvelope = {
 
 export type FamChallengeCreateWithoutWinnerInput = {
   id?: string
+  challengerProgress?: number
+  opponentProgress?: number
   metric: string
   target: number
   status?: $Enums.FamChallengeStatus
   createdAt?: Date | string
   resolvedAt?: Date | string | null
-  fam: Prisma.FamCreateNestedOneWithoutChallengesSentInput
-  opponentFam?: Prisma.FamCreateNestedOneWithoutChallengesReceivedInput
+  fam: Prisma.FamCreateNestedOneWithoutChallengesInput
   challenger: Prisma.UserCreateNestedOneWithoutChallengesSentInput
-  opponent?: Prisma.UserCreateNestedOneWithoutChallengesReceivedInput
+  opponent: Prisma.UserCreateNestedOneWithoutChallengesReceivedInput
 }
 
 export type FamChallengeUncheckedCreateWithoutWinnerInput = {
   id?: string
   famId: string
-  opponentFamId?: string | null
   challengerId: string
-  opponentId?: string | null
+  challengerProgress?: number
+  opponentId: string
+  opponentProgress?: number
   metric: string
   target: number
   status?: $Enums.FamChallengeStatus
@@ -845,9 +841,10 @@ export type FamChallengeScalarWhereInput = {
   NOT?: Prisma.FamChallengeScalarWhereInput | Prisma.FamChallengeScalarWhereInput[]
   id?: Prisma.StringFilter<"FamChallenge"> | string
   famId?: Prisma.StringFilter<"FamChallenge"> | string
-  opponentFamId?: Prisma.StringNullableFilter<"FamChallenge"> | string | null
   challengerId?: Prisma.StringFilter<"FamChallenge"> | string
-  opponentId?: Prisma.StringNullableFilter<"FamChallenge"> | string | null
+  challengerProgress?: Prisma.IntFilter<"FamChallenge"> | number
+  opponentId?: Prisma.StringFilter<"FamChallenge"> | string
+  opponentProgress?: Prisma.IntFilter<"FamChallenge"> | number
   metric?: Prisma.StringFilter<"FamChallenge"> | string
   target?: Prisma.IntFilter<"FamChallenge"> | number
   status?: Prisma.EnumFamChallengeStatusFilter<"FamChallenge"> | $Enums.FamChallengeStatus
@@ -890,22 +887,24 @@ export type FamChallengeUpdateManyWithWhereWithoutWinnerInput = {
 
 export type FamChallengeCreateWithoutFamInput = {
   id?: string
+  challengerProgress?: number
+  opponentProgress?: number
   metric: string
   target: number
   status?: $Enums.FamChallengeStatus
   createdAt?: Date | string
   resolvedAt?: Date | string | null
-  opponentFam?: Prisma.FamCreateNestedOneWithoutChallengesReceivedInput
   challenger: Prisma.UserCreateNestedOneWithoutChallengesSentInput
-  opponent?: Prisma.UserCreateNestedOneWithoutChallengesReceivedInput
+  opponent: Prisma.UserCreateNestedOneWithoutChallengesReceivedInput
   winner?: Prisma.UserCreateNestedOneWithoutWonChallengesInput
 }
 
 export type FamChallengeUncheckedCreateWithoutFamInput = {
   id?: string
-  opponentFamId?: string | null
   challengerId: string
-  opponentId?: string | null
+  challengerProgress?: number
+  opponentId: string
+  opponentProgress?: number
   metric: string
   target: number
   status?: $Enums.FamChallengeStatus
@@ -921,42 +920,6 @@ export type FamChallengeCreateOrConnectWithoutFamInput = {
 
 export type FamChallengeCreateManyFamInputEnvelope = {
   data: Prisma.FamChallengeCreateManyFamInput | Prisma.FamChallengeCreateManyFamInput[]
-  skipDuplicates?: boolean
-}
-
-export type FamChallengeCreateWithoutOpponentFamInput = {
-  id?: string
-  metric: string
-  target: number
-  status?: $Enums.FamChallengeStatus
-  createdAt?: Date | string
-  resolvedAt?: Date | string | null
-  fam: Prisma.FamCreateNestedOneWithoutChallengesSentInput
-  challenger: Prisma.UserCreateNestedOneWithoutChallengesSentInput
-  opponent?: Prisma.UserCreateNestedOneWithoutChallengesReceivedInput
-  winner?: Prisma.UserCreateNestedOneWithoutWonChallengesInput
-}
-
-export type FamChallengeUncheckedCreateWithoutOpponentFamInput = {
-  id?: string
-  famId: string
-  challengerId: string
-  opponentId?: string | null
-  metric: string
-  target: number
-  status?: $Enums.FamChallengeStatus
-  winnerId?: string | null
-  createdAt?: Date | string
-  resolvedAt?: Date | string | null
-}
-
-export type FamChallengeCreateOrConnectWithoutOpponentFamInput = {
-  where: Prisma.FamChallengeWhereUniqueInput
-  create: Prisma.XOR<Prisma.FamChallengeCreateWithoutOpponentFamInput, Prisma.FamChallengeUncheckedCreateWithoutOpponentFamInput>
-}
-
-export type FamChallengeCreateManyOpponentFamInputEnvelope = {
-  data: Prisma.FamChallengeCreateManyOpponentFamInput | Prisma.FamChallengeCreateManyOpponentFamInput[]
   skipDuplicates?: boolean
 }
 
@@ -976,27 +939,12 @@ export type FamChallengeUpdateManyWithWhereWithoutFamInput = {
   data: Prisma.XOR<Prisma.FamChallengeUpdateManyMutationInput, Prisma.FamChallengeUncheckedUpdateManyWithoutFamInput>
 }
 
-export type FamChallengeUpsertWithWhereUniqueWithoutOpponentFamInput = {
-  where: Prisma.FamChallengeWhereUniqueInput
-  update: Prisma.XOR<Prisma.FamChallengeUpdateWithoutOpponentFamInput, Prisma.FamChallengeUncheckedUpdateWithoutOpponentFamInput>
-  create: Prisma.XOR<Prisma.FamChallengeCreateWithoutOpponentFamInput, Prisma.FamChallengeUncheckedCreateWithoutOpponentFamInput>
-}
-
-export type FamChallengeUpdateWithWhereUniqueWithoutOpponentFamInput = {
-  where: Prisma.FamChallengeWhereUniqueInput
-  data: Prisma.XOR<Prisma.FamChallengeUpdateWithoutOpponentFamInput, Prisma.FamChallengeUncheckedUpdateWithoutOpponentFamInput>
-}
-
-export type FamChallengeUpdateManyWithWhereWithoutOpponentFamInput = {
-  where: Prisma.FamChallengeScalarWhereInput
-  data: Prisma.XOR<Prisma.FamChallengeUpdateManyMutationInput, Prisma.FamChallengeUncheckedUpdateManyWithoutOpponentFamInput>
-}
-
 export type FamChallengeCreateManyChallengerInput = {
   id?: string
   famId: string
-  opponentFamId?: string | null
-  opponentId?: string | null
+  challengerProgress?: number
+  opponentId: string
+  opponentProgress?: number
   metric: string
   target: number
   status?: $Enums.FamChallengeStatus
@@ -1008,8 +956,9 @@ export type FamChallengeCreateManyChallengerInput = {
 export type FamChallengeCreateManyOpponentInput = {
   id?: string
   famId: string
-  opponentFamId?: string | null
   challengerId: string
+  challengerProgress?: number
+  opponentProgress?: number
   metric: string
   target: number
   status?: $Enums.FamChallengeStatus
@@ -1021,9 +970,10 @@ export type FamChallengeCreateManyOpponentInput = {
 export type FamChallengeCreateManyWinnerInput = {
   id?: string
   famId: string
-  opponentFamId?: string | null
   challengerId: string
-  opponentId?: string | null
+  challengerProgress?: number
+  opponentId: string
+  opponentProgress?: number
   metric: string
   target: number
   status?: $Enums.FamChallengeStatus
@@ -1033,22 +983,24 @@ export type FamChallengeCreateManyWinnerInput = {
 
 export type FamChallengeUpdateWithoutChallengerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  challengerProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  opponentProgress?: Prisma.IntFieldUpdateOperationsInput | number
   metric?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  fam?: Prisma.FamUpdateOneRequiredWithoutChallengesSentNestedInput
-  opponentFam?: Prisma.FamUpdateOneWithoutChallengesReceivedNestedInput
-  opponent?: Prisma.UserUpdateOneWithoutChallengesReceivedNestedInput
+  fam?: Prisma.FamUpdateOneRequiredWithoutChallengesNestedInput
+  opponent?: Prisma.UserUpdateOneRequiredWithoutChallengesReceivedNestedInput
   winner?: Prisma.UserUpdateOneWithoutWonChallengesNestedInput
 }
 
 export type FamChallengeUncheckedUpdateWithoutChallengerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   famId?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentFamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  opponentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  challengerProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  opponentId?: Prisma.StringFieldUpdateOperationsInput | string
+  opponentProgress?: Prisma.IntFieldUpdateOperationsInput | number
   metric?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
@@ -1060,8 +1012,9 @@ export type FamChallengeUncheckedUpdateWithoutChallengerInput = {
 export type FamChallengeUncheckedUpdateManyWithoutChallengerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   famId?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentFamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  opponentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  challengerProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  opponentId?: Prisma.StringFieldUpdateOperationsInput | string
+  opponentProgress?: Prisma.IntFieldUpdateOperationsInput | number
   metric?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
@@ -1072,13 +1025,14 @@ export type FamChallengeUncheckedUpdateManyWithoutChallengerInput = {
 
 export type FamChallengeUpdateWithoutOpponentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  challengerProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  opponentProgress?: Prisma.IntFieldUpdateOperationsInput | number
   metric?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  fam?: Prisma.FamUpdateOneRequiredWithoutChallengesSentNestedInput
-  opponentFam?: Prisma.FamUpdateOneWithoutChallengesReceivedNestedInput
+  fam?: Prisma.FamUpdateOneRequiredWithoutChallengesNestedInput
   challenger?: Prisma.UserUpdateOneRequiredWithoutChallengesSentNestedInput
   winner?: Prisma.UserUpdateOneWithoutWonChallengesNestedInput
 }
@@ -1086,8 +1040,9 @@ export type FamChallengeUpdateWithoutOpponentInput = {
 export type FamChallengeUncheckedUpdateWithoutOpponentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   famId?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentFamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   challengerId?: Prisma.StringFieldUpdateOperationsInput | string
+  challengerProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  opponentProgress?: Prisma.IntFieldUpdateOperationsInput | number
   metric?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
@@ -1099,8 +1054,9 @@ export type FamChallengeUncheckedUpdateWithoutOpponentInput = {
 export type FamChallengeUncheckedUpdateManyWithoutOpponentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   famId?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentFamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   challengerId?: Prisma.StringFieldUpdateOperationsInput | string
+  challengerProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  opponentProgress?: Prisma.IntFieldUpdateOperationsInput | number
   metric?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
@@ -1111,23 +1067,25 @@ export type FamChallengeUncheckedUpdateManyWithoutOpponentInput = {
 
 export type FamChallengeUpdateWithoutWinnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  challengerProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  opponentProgress?: Prisma.IntFieldUpdateOperationsInput | number
   metric?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  fam?: Prisma.FamUpdateOneRequiredWithoutChallengesSentNestedInput
-  opponentFam?: Prisma.FamUpdateOneWithoutChallengesReceivedNestedInput
+  fam?: Prisma.FamUpdateOneRequiredWithoutChallengesNestedInput
   challenger?: Prisma.UserUpdateOneRequiredWithoutChallengesSentNestedInput
-  opponent?: Prisma.UserUpdateOneWithoutChallengesReceivedNestedInput
+  opponent?: Prisma.UserUpdateOneRequiredWithoutChallengesReceivedNestedInput
 }
 
 export type FamChallengeUncheckedUpdateWithoutWinnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   famId?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentFamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   challengerId?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  challengerProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  opponentId?: Prisma.StringFieldUpdateOperationsInput | string
+  opponentProgress?: Prisma.IntFieldUpdateOperationsInput | number
   metric?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
@@ -1138,9 +1096,10 @@ export type FamChallengeUncheckedUpdateWithoutWinnerInput = {
 export type FamChallengeUncheckedUpdateManyWithoutWinnerInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   famId?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentFamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   challengerId?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  challengerProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  opponentId?: Prisma.StringFieldUpdateOperationsInput | string
+  opponentProgress?: Prisma.IntFieldUpdateOperationsInput | number
   metric?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
@@ -1150,22 +1109,10 @@ export type FamChallengeUncheckedUpdateManyWithoutWinnerInput = {
 
 export type FamChallengeCreateManyFamInput = {
   id?: string
-  opponentFamId?: string | null
   challengerId: string
-  opponentId?: string | null
-  metric: string
-  target: number
-  status?: $Enums.FamChallengeStatus
-  winnerId?: string | null
-  createdAt?: Date | string
-  resolvedAt?: Date | string | null
-}
-
-export type FamChallengeCreateManyOpponentFamInput = {
-  id?: string
-  famId: string
-  challengerId: string
-  opponentId?: string | null
+  challengerProgress?: number
+  opponentId: string
+  opponentProgress?: number
   metric: string
   target: number
   status?: $Enums.FamChallengeStatus
@@ -1176,22 +1123,24 @@ export type FamChallengeCreateManyOpponentFamInput = {
 
 export type FamChallengeUpdateWithoutFamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  challengerProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  opponentProgress?: Prisma.IntFieldUpdateOperationsInput | number
   metric?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  opponentFam?: Prisma.FamUpdateOneWithoutChallengesReceivedNestedInput
   challenger?: Prisma.UserUpdateOneRequiredWithoutChallengesSentNestedInput
-  opponent?: Prisma.UserUpdateOneWithoutChallengesReceivedNestedInput
+  opponent?: Prisma.UserUpdateOneRequiredWithoutChallengesReceivedNestedInput
   winner?: Prisma.UserUpdateOneWithoutWonChallengesNestedInput
 }
 
 export type FamChallengeUncheckedUpdateWithoutFamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentFamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   challengerId?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  challengerProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  opponentId?: Prisma.StringFieldUpdateOperationsInput | string
+  opponentProgress?: Prisma.IntFieldUpdateOperationsInput | number
   metric?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
@@ -1202,48 +1151,10 @@ export type FamChallengeUncheckedUpdateWithoutFamInput = {
 
 export type FamChallengeUncheckedUpdateManyWithoutFamInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentFamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   challengerId?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metric?: Prisma.StringFieldUpdateOperationsInput | string
-  target?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
-  winnerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-}
-
-export type FamChallengeUpdateWithoutOpponentFamInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  metric?: Prisma.StringFieldUpdateOperationsInput | string
-  target?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  fam?: Prisma.FamUpdateOneRequiredWithoutChallengesSentNestedInput
-  challenger?: Prisma.UserUpdateOneRequiredWithoutChallengesSentNestedInput
-  opponent?: Prisma.UserUpdateOneWithoutChallengesReceivedNestedInput
-  winner?: Prisma.UserUpdateOneWithoutWonChallengesNestedInput
-}
-
-export type FamChallengeUncheckedUpdateWithoutOpponentFamInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  famId?: Prisma.StringFieldUpdateOperationsInput | string
-  challengerId?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  metric?: Prisma.StringFieldUpdateOperationsInput | string
-  target?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
-  winnerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  resolvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-}
-
-export type FamChallengeUncheckedUpdateManyWithoutOpponentFamInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  famId?: Prisma.StringFieldUpdateOperationsInput | string
-  challengerId?: Prisma.StringFieldUpdateOperationsInput | string
-  opponentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  challengerProgress?: Prisma.IntFieldUpdateOperationsInput | number
+  opponentId?: Prisma.StringFieldUpdateOperationsInput | string
+  opponentProgress?: Prisma.IntFieldUpdateOperationsInput | number
   metric?: Prisma.StringFieldUpdateOperationsInput | string
   target?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumFamChallengeStatusFieldUpdateOperationsInput | $Enums.FamChallengeStatus
@@ -1257,9 +1168,10 @@ export type FamChallengeUncheckedUpdateManyWithoutOpponentFamInput = {
 export type FamChallengeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   famId?: boolean
-  opponentFamId?: boolean
   challengerId?: boolean
+  challengerProgress?: boolean
   opponentId?: boolean
+  opponentProgress?: boolean
   metric?: boolean
   target?: boolean
   status?: boolean
@@ -1267,18 +1179,18 @@ export type FamChallengeSelect<ExtArgs extends runtime.Types.Extensions.Internal
   createdAt?: boolean
   resolvedAt?: boolean
   fam?: boolean | Prisma.FamDefaultArgs<ExtArgs>
-  opponentFam?: boolean | Prisma.FamChallenge$opponentFamArgs<ExtArgs>
   challenger?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  opponent?: boolean | Prisma.FamChallenge$opponentArgs<ExtArgs>
+  opponent?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   winner?: boolean | Prisma.FamChallenge$winnerArgs<ExtArgs>
 }, ExtArgs["result"]["famChallenge"]>
 
 export type FamChallengeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   famId?: boolean
-  opponentFamId?: boolean
   challengerId?: boolean
+  challengerProgress?: boolean
   opponentId?: boolean
+  opponentProgress?: boolean
   metric?: boolean
   target?: boolean
   status?: boolean
@@ -1286,18 +1198,18 @@ export type FamChallengeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   createdAt?: boolean
   resolvedAt?: boolean
   fam?: boolean | Prisma.FamDefaultArgs<ExtArgs>
-  opponentFam?: boolean | Prisma.FamChallenge$opponentFamArgs<ExtArgs>
   challenger?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  opponent?: boolean | Prisma.FamChallenge$opponentArgs<ExtArgs>
+  opponent?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   winner?: boolean | Prisma.FamChallenge$winnerArgs<ExtArgs>
 }, ExtArgs["result"]["famChallenge"]>
 
 export type FamChallengeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   famId?: boolean
-  opponentFamId?: boolean
   challengerId?: boolean
+  challengerProgress?: boolean
   opponentId?: boolean
+  opponentProgress?: boolean
   metric?: boolean
   target?: boolean
   status?: boolean
@@ -1305,18 +1217,18 @@ export type FamChallengeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   createdAt?: boolean
   resolvedAt?: boolean
   fam?: boolean | Prisma.FamDefaultArgs<ExtArgs>
-  opponentFam?: boolean | Prisma.FamChallenge$opponentFamArgs<ExtArgs>
   challenger?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  opponent?: boolean | Prisma.FamChallenge$opponentArgs<ExtArgs>
+  opponent?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   winner?: boolean | Prisma.FamChallenge$winnerArgs<ExtArgs>
 }, ExtArgs["result"]["famChallenge"]>
 
 export type FamChallengeSelectScalar = {
   id?: boolean
   famId?: boolean
-  opponentFamId?: boolean
   challengerId?: boolean
+  challengerProgress?: boolean
   opponentId?: boolean
+  opponentProgress?: boolean
   metric?: boolean
   target?: boolean
   status?: boolean
@@ -1325,26 +1237,23 @@ export type FamChallengeSelectScalar = {
   resolvedAt?: boolean
 }
 
-export type FamChallengeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "famId" | "opponentFamId" | "challengerId" | "opponentId" | "metric" | "target" | "status" | "winnerId" | "createdAt" | "resolvedAt", ExtArgs["result"]["famChallenge"]>
+export type FamChallengeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "famId" | "challengerId" | "challengerProgress" | "opponentId" | "opponentProgress" | "metric" | "target" | "status" | "winnerId" | "createdAt" | "resolvedAt", ExtArgs["result"]["famChallenge"]>
 export type FamChallengeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   fam?: boolean | Prisma.FamDefaultArgs<ExtArgs>
-  opponentFam?: boolean | Prisma.FamChallenge$opponentFamArgs<ExtArgs>
   challenger?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  opponent?: boolean | Prisma.FamChallenge$opponentArgs<ExtArgs>
+  opponent?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   winner?: boolean | Prisma.FamChallenge$winnerArgs<ExtArgs>
 }
 export type FamChallengeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   fam?: boolean | Prisma.FamDefaultArgs<ExtArgs>
-  opponentFam?: boolean | Prisma.FamChallenge$opponentFamArgs<ExtArgs>
   challenger?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  opponent?: boolean | Prisma.FamChallenge$opponentArgs<ExtArgs>
+  opponent?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   winner?: boolean | Prisma.FamChallenge$winnerArgs<ExtArgs>
 }
 export type FamChallengeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   fam?: boolean | Prisma.FamDefaultArgs<ExtArgs>
-  opponentFam?: boolean | Prisma.FamChallenge$opponentFamArgs<ExtArgs>
   challenger?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  opponent?: boolean | Prisma.FamChallenge$opponentArgs<ExtArgs>
+  opponent?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   winner?: boolean | Prisma.FamChallenge$winnerArgs<ExtArgs>
 }
 
@@ -1352,17 +1261,17 @@ export type $FamChallengePayload<ExtArgs extends runtime.Types.Extensions.Intern
   name: "FamChallenge"
   objects: {
     fam: Prisma.$FamPayload<ExtArgs>
-    opponentFam: Prisma.$FamPayload<ExtArgs> | null
     challenger: Prisma.$UserPayload<ExtArgs>
-    opponent: Prisma.$UserPayload<ExtArgs> | null
+    opponent: Prisma.$UserPayload<ExtArgs>
     winner: Prisma.$UserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     famId: string
-    opponentFamId: string | null
     challengerId: string
-    opponentId: string | null
+    challengerProgress: number
+    opponentId: string
+    opponentProgress: number
     metric: string
     target: number
     status: $Enums.FamChallengeStatus
@@ -1764,9 +1673,8 @@ readonly fields: FamChallengeFieldRefs;
 export interface Prisma__FamChallengeClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   fam<T extends Prisma.FamDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FamDefaultArgs<ExtArgs>>): Prisma.Prisma__FamClient<runtime.Types.Result.GetResult<Prisma.$FamPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  opponentFam<T extends Prisma.FamChallenge$opponentFamArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FamChallenge$opponentFamArgs<ExtArgs>>): Prisma.Prisma__FamClient<runtime.Types.Result.GetResult<Prisma.$FamPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   challenger<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  opponent<T extends Prisma.FamChallenge$opponentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FamChallenge$opponentArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  opponent<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   winner<T extends Prisma.FamChallenge$winnerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FamChallenge$winnerArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1799,9 +1707,10 @@ export interface Prisma__FamChallengeClient<T, Null = never, ExtArgs extends run
 export interface FamChallengeFieldRefs {
   readonly id: Prisma.FieldRef<"FamChallenge", 'String'>
   readonly famId: Prisma.FieldRef<"FamChallenge", 'String'>
-  readonly opponentFamId: Prisma.FieldRef<"FamChallenge", 'String'>
   readonly challengerId: Prisma.FieldRef<"FamChallenge", 'String'>
+  readonly challengerProgress: Prisma.FieldRef<"FamChallenge", 'Int'>
   readonly opponentId: Prisma.FieldRef<"FamChallenge", 'String'>
+  readonly opponentProgress: Prisma.FieldRef<"FamChallenge", 'Int'>
   readonly metric: Prisma.FieldRef<"FamChallenge", 'String'>
   readonly target: Prisma.FieldRef<"FamChallenge", 'Int'>
   readonly status: Prisma.FieldRef<"FamChallenge", 'FamChallengeStatus'>
@@ -2201,44 +2110,6 @@ export type FamChallengeDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many FamChallenges to delete.
    */
   limit?: number
-}
-
-/**
- * FamChallenge.opponentFam
- */
-export type FamChallenge$opponentFamArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Fam
-   */
-  select?: Prisma.FamSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Fam
-   */
-  omit?: Prisma.FamOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.FamInclude<ExtArgs> | null
-  where?: Prisma.FamWhereInput
-}
-
-/**
- * FamChallenge.opponent
- */
-export type FamChallenge$opponentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the User
-   */
-  select?: Prisma.UserSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the User
-   */
-  omit?: Prisma.UserOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UserInclude<ExtArgs> | null
-  where?: Prisma.UserWhereInput
 }
 
 /**

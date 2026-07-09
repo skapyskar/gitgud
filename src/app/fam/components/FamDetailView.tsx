@@ -8,6 +8,9 @@ import SearchByUsernamePanel from "./SearchByUsernamePanel";
 import FamGoalsPanel from "./FamGoalsPanel";
 import FamActivityFeed from "./FamActivityFeed";
 import FamAchievementsPanel from "./FamAchievementsPanel";
+import ChallengesPanel from "./ChallengesPanel";
+import SeasonBadge from "./SeasonBadge";
+import FamAnalyticsPanel from "./FamAnalyticsPanel";
 
 const ROLE_RANK = { OWNER: 0, ADMIN: 1, MEMBER: 2 } as const;
 
@@ -53,7 +56,8 @@ export default function FamDetailView({
         title={fam.name}
         subtitle={fam.description ?? undefined}
         right={
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <SeasonBadge famId={fam.id} />
             {myRole === "OWNER" ? (
               <HudButton variant="danger" onClick={() => setConfirmDelete(true)}>
                 Delete Fam
@@ -98,7 +102,12 @@ export default function FamDetailView({
         <FamActivityFeed famId={fam.id} />
       </div>
 
-      <FamAchievementsPanel famId={fam.id} />
+      <div className="grid gap-4 lg:grid-cols-2">
+        <ChallengesPanel famId={fam.id} currentUserId={currentUserId} members={members} />
+        <FamAchievementsPanel famId={fam.id} />
+      </div>
+
+      <FamAnalyticsPanel famId={fam.id} />
 
       {canManage && <SearchByUsernamePanel famId={fam.id} />}
 

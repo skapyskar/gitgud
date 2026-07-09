@@ -83,10 +83,6 @@ export function fetchFamDetail(famId: string) {
   return call<{ success: boolean; fam: FamSummary; members: FamMemberDetail[] }>(`/api/fam/${famId}`, "GET");
 }
 
-export function browseFams() {
-  return call<{ success: boolean; fams: FamSummary[] }>("/api/fam/browse", "GET");
-}
-
 export function searchUsername(username: string) {
   return call<{ success: boolean; user: { id: string; username: string; name: string | null } | null }>(
     `/api/fam/user-search?username=${encodeURIComponent(username)}`,
@@ -161,4 +157,74 @@ export interface FamAchievementRow {
 
 export function fetchAchievements(famId: string) {
   return call<{ success: boolean; achievements: FamAchievementRow[] }>(`/api/fam/${famId}/achievements`, "GET");
+}
+
+export interface FamChallenge {
+  id: string;
+  metric: string;
+  target: number;
+  status: "PENDING" | "ACTIVE" | "COMPLETED" | "DECLINED";
+  challengerId: string;
+  challengerProgress: number;
+  challenger: { id: string; username: string | null; name: string | null };
+  opponentId: string;
+  opponentProgress: number;
+  opponent: { id: string; username: string | null; name: string | null };
+  winnerId: string | null;
+}
+
+export function fetchChallenges(famId: string) {
+  return call<{ success: boolean; challenges: FamChallenge[] }>(`/api/fam/${famId}/challenges`, "GET");
+}
+
+export function proposeChallenge(famId: string, payload: { opponentId: string; metric: string; target: number }) {
+  return call<{ success: boolean; challenge: FamChallenge }>(`/api/fam/${famId}/challenges`, "POST", payload);
+}
+
+export function respondToChallenge(challengeId: string, action: "accept" | "decline") {
+  return call<{ success: boolean }>(`/api/fam/challenges/${challengeId}/respond`, "POST", { action });
+}
+
+export function contributeToChallenge(challengeId: string, amount: number) {
+  return call<{ success: boolean; challengerProgress: number; opponentProgress: number; winnerId: string | null }>(
+    `/api/fam/challenges/${challengeId}/contribute`,
+    "POST",
+    { amount }
+  );
+}
+
+export interface FamSeasonInfo {
+  season: { id: string; label: string; startsAt: string; endsAt: string };
+  score: number;
+  history: Array<{ id: string; label: string; startsAt: string; endsAt: string; score: number }>;
+}
+
+export function fetchSeason(famId: string) {
+  return call<{ success: boolean } & FamSeasonInfo>(`/api/fam/${famId}/season`, "GET");
+}
+
+export interface RankingRow {
+  famId: string;
+  name: string;
+  icon: string | null;
+  score: number;
+  avgMomentum: number;
+  consistencyPct: number;
+  participationPct: number;
+  stabilityPct: number;
+}
+
+export function fetchRankings(scope: "global" | "monthly" | "all-time") {
+  return call<{ success: boolean; rankings: RankingRow[] }>(`/api/fam/rankings?scope=${scope}`, "GET");
+}
+
+export interface FamAnalytics {
+  weeklyMomentum: number[];
+  monthlyMomentum: number[];
+  memberContribution: Array<{ userId: string; label: string; total: number }>;
+  habitDistribution: Array<{ category: string; count: number }>;
+}
+
+export function fetchAnalytics(famId: string) {
+  return call<{ success: boolean } & FamAnalytics>(`/api/fam/${famId}/analytics`, "GET");
 }

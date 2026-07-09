@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { ensureTodayLog } from "@/lib/api";
 import { dayStart } from "@/lib/dates";
+import { computeFamRankingScore } from "@/lib/fam";
+import { levelFromXP } from "@/lib/gamification";
 import RewardProvider from "../components/RewardLayer";
 import DashboardShell from "./components/DashboardShell";
 import type { FamSummaryData } from "../fam/components/FamSummaryCard";
@@ -64,11 +66,17 @@ export default async function DashboardPage() {
             id: true,
             name: true,
             username: true,
+            xp: true,
             dayLogs: { where: { date: today }, take: 1 },
           },
         },
       },
     });
+
+    // Fam.xp/Fam.level in the schema are never incremented anywhere (task
+    // completion isn't coupled to Fam membership) — lifetime Fam XP is
+    // computed live as the sum of members' User.xp instead.
+    const lifetimeXP = famMembers.reduce((sum, m) => sum + m.user.xp, 0);
 
     const leaderboard = famMembers
       .map((m) => ({
@@ -80,7 +88,7 @@ export default async function DashboardPage() {
       .sort((a, b) => b.points - a.points)
       .slice(0, 5);
 
-    const [recentActivity, topGoal] = await Promise.all([
+    const [recentActivity, topGoal, rankingScore] = await Promise.all([
       prisma.famActivity.findMany({
         where: { famId: primaryMembership.famId },
         orderBy: { createdAt: "desc" },
@@ -92,12 +100,15 @@ export default async function DashboardPage() {
         orderBy: { createdAt: "desc" },
         select: { id: true, description: true, currentValue: true, targetValue: true },
       }),
+      computeFamRankingScore(primaryMembership.famId, 7),
     ]);
 
     famSummary = {
       id: primaryMembership.fam.id,
       name: primaryMembership.fam.name,
-      level: primaryMembership.fam.level,
+      level: levelFromXP(lifetimeXP),
+      xp: lifetimeXP,
+      score: Math.round(rankingScore.score),
       leaderboard,
       recentActivity: recentActivity.map((a) => a.message),
       activeGoal: topGoal,

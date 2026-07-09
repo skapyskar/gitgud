@@ -4,6 +4,8 @@ export interface FamSummaryData {
   id: string;
   name: string;
   level: number;
+  xp: number;
+  score: number;
   leaderboard: Array<{ userId: string; label: string; points: number; isMe: boolean }>;
   recentActivity: string[];
   activeGoal: { id: string; description: string; currentValue: number; targetValue: number } | null;

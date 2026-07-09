@@ -1894,9 +1894,10 @@ export type FamActivityScalarFieldEnum = (typeof FamActivityScalarFieldEnum)[key
 export const FamChallengeScalarFieldEnum = {
   id: 'id',
   famId: 'famId',
-  opponentFamId: 'opponentFamId',
   challengerId: 'challengerId',
+  challengerProgress: 'challengerProgress',
   opponentId: 'opponentId',
+  opponentProgress: 'opponentProgress',
   metric: 'metric',
   target: 'target',
   status: 'status',
