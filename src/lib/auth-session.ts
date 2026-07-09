@@ -10,8 +10,22 @@ import { prisma } from "@/lib/db";
 // getServerSession() reads it identically afterwards regardless of how the
 // user signed in.
 const SESSION_MAX_AGE_SECONDS = 30 * 24 * 60 * 60; // 30 days, matches NextAuth's default
-const useSecureCookies = (process.env.NEXTAUTH_URL ?? "").startsWith("https://");
-const SESSION_COOKIE_NAME = useSecureCookies ? "__Secure-next-auth.session-token" : "next-auth.session-token";
+
+// Cookie name + options must be IDENTICAL on the write side (these manual
+// login/signup routes) and the read side (NextAuth's getServerSession), or the
+// session set at login won't be found on the next request and the user is
+// bounced back to /login. We key this off NODE_ENV rather than NEXTAUTH_URL so
+// it stays deterministic even when NEXTAUTH_URL is misconfigured on the host:
+// production (Vercel, HTTPS) -> secure "__Secure-" cookie; dev -> plain cookie.
+// authOptions.cookies.sessionToken in src/lib/auth.ts imports these same values.
+const useSecureCookies = process.env.NODE_ENV === "production";
+export const SESSION_COOKIE_NAME = `${useSecureCookies ? "__Secure-" : ""}next-auth.session-token`;
+export const SESSION_COOKIE_OPTIONS = {
+  httpOnly: true,
+  sameSite: "lax" as const,
+  path: "/",
+  secure: useSecureCookies,
+};
 
 /** Creates a Session row for `userId` and returns a JSON response with the session cookie set. */
 export async function createSessionResponse(userId: string): Promise<NextResponse> {
@@ -21,12 +35,6 @@ export async function createSessionResponse(userId: string): Promise<NextRespons
   });
 
   const res = NextResponse.json({ success: true });
-  res.cookies.set(SESSION_COOKIE_NAME, session.sessionToken, {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    secure: useSecureCookies,
-    expires,
-  });
+  res.cookies.set(SESSION_COOKIE_NAME, session.sessionToken, { ...SESSION_COOKIE_OPTIONS, expires });
   return res;
 }

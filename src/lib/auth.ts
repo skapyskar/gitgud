@@ -5,10 +5,23 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import type { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/db";
+import { SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from "@/lib/auth-session";
 
 export const authOptions: NextAuthOptions = {
   // The generated client lives outside @prisma/client, so the adapter needs a cast.
   adapter: PrismaAdapter(prisma as unknown as Parameters<typeof PrismaAdapter>[0]),
+
+  // Pin the session cookie name/options to a single source of truth (shared with
+  // the manual credentials-login/signup routes) so read and write never disagree,
+  // regardless of NEXTAUTH_URL. Without this, a misconfigured NEXTAUTH_URL on the
+  // host makes getServerSession look for a differently-named cookie than the one
+  // login set, silently bouncing the user back to /login.
+  cookies: {
+    sessionToken: {
+      name: SESSION_COOKIE_NAME,
+      options: SESSION_COOKIE_OPTIONS,
+    },
+  },
 
   providers: [
     GitHub({
