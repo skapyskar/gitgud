@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LayoutDashboard, Swords, Lightbulb, Users } from "lucide-react";
 import type { Task, DayLog } from "../../../../prisma/generated/client";
-import { useTheme } from "../../components/theme";
+import { useTheme, isWallpaperSkin } from "../../components/theme";
 import FlashToastProvider from "./FlashToast";
 import CursorFx from "./CursorFx";
 import Overview from "./Overview";
@@ -40,7 +40,7 @@ export default function DashboardShell({ user, dayLogs, backlogTasks, weeklyTemp
   const auroraRef = useRef<HTMLDivElement>(null);
 
   const level = levelFromXP(user.xp);
-  const showAurora = !(skin === "custom" && !!customBg);
+  const showAurora = !((skin === "custom" && !!customBg) || isWallpaperSkin(skin));
 
   const scrollToRef = (ref: React.RefObject<HTMLDivElement | null>) => {
     if (!ref.current) return;

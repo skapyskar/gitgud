@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Settings, Sun, Moon, Check } from "lucide-react";
-import { useTheme, SKIN_INFO, Skin } from "./theme";
+import { useTheme, SKIN_INFO, BUILTIN_WALLPAPERS, isWallpaperSkin, Skin } from "./theme";
 import { MuteToggle } from "./RewardLayer";
 
 /** Gear popover: skin, light/dark, clock seconds, sounds. */
@@ -37,19 +37,27 @@ export default function SettingsMenu() {
                 <button
                   key={s}
                   onClick={() => update({ skin: s })}
-                  className={`r-lg p-2.5 text-center transition-all border ${
+                  className={`r-lg p-2.5 text-center transition-all border overflow-hidden relative ${
                     skin === s
                       ? "border-acc/60 bg-acc/10 shadow-[0_0_16px_var(--glow)]"
                       : "chip chip-hover border-line"
                   }`}
+                  style={
+                    isWallpaperSkin(s)
+                      ? { backgroundImage: `url("${BUILTIN_WALLPAPERS[s]}")`, backgroundSize: "cover", backgroundPosition: "center" }
+                      : undefined
+                  }
                 >
-                  <span className="block font-display font-bold text-sm text-ink">
-                    {SKIN_INFO[s].icon}
+                  {isWallpaperSkin(s) && (
+                    <span className="absolute inset-0 bg-[rgba(5,6,12,0.45)]" />
+                  )}
+                  <span className="relative block font-display font-bold text-sm text-ink">
+                    {isWallpaperSkin(s) ? "" : SKIN_INFO[s].icon}
                   </span>
-                  <span className="block text-[11px] font-semibold text-ink2 mt-1">
+                  <span className="relative block text-[11px] font-semibold text-ink2 mt-1">
                     {SKIN_INFO[s].label}
                   </span>
-                  <span className="block text-[9px] text-ink3">{SKIN_INFO[s].blurb}</span>
+                  <span className="relative block text-[9px] text-ink3">{SKIN_INFO[s].blurb}</span>
                 </button>
               ))}
             </div>

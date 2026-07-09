@@ -8,7 +8,16 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
  * CSS variables restyle every component instantly.
  */
 
-export type Skin = "aurora" | "terminal" | "zen" | "custom";
+export type Skin =
+  | "aurora"
+  | "terminal"
+  | "zen"
+  | "custom"
+  | "wallpaper1"
+  | "wallpaper2"
+  | "wallpaper3"
+  | "wallpaper4";
+
 export type Mode = "dark" | "light";
 export type View = "board" | "focus";
 
@@ -44,11 +53,29 @@ export const SKIN_INFO: Record<Skin, { label: string; blurb: string; icon: strin
   terminal: { label: "Terminal", blurb: "green phosphor", icon: ">_" },
   zen: { label: "Zen", blurb: "barely there", icon: "◌" },
   custom: { label: "Blank", blurb: "your own wallpaper", icon: "+" },
+  wallpaper1: { label: "Wallpaper 1", blurb: "built-in wallpaper", icon: "🖼️" },
+  wallpaper2: { label: "Wallpaper 2", blurb: "built-in wallpaper", icon: "🖼️" },
+  wallpaper3: { label: "Wallpaper 3", blurb: "built-in wallpaper", icon: "🖼️" },
+  wallpaper4: { label: "Wallpaper 4", blurb: "built-in wallpaper", icon: "🖼️" },
 };
+
+/** Built-in wallpaper skins mapped to their static asset in /public. */
+export const BUILTIN_WALLPAPERS: Record<string, string> = {
+  wallpaper1: "/wallpaper1.jpg",
+  wallpaper2: "/wallpaper2.jpg",
+  wallpaper3: "/wallpaper3.jpg",
+  wallpaper4: "/wallpaper4.jpg",
+};
+
+export function isWallpaperSkin(
+  skin: Skin
+): skin is "wallpaper1" | "wallpaper2" | "wallpaper3" | "wallpaper4" {
+  return skin in BUILTIN_WALLPAPERS;
+}
 
 /** The data-skin token set a skin actually renders with — "custom" borrows zen's chrome. */
 export function tokenSkin(skin: Skin): "aurora" | "terminal" | "zen" {
-  return skin === "custom" ? "zen" : skin;
+  return skin === "custom" || isWallpaperSkin(skin) ? "zen" : skin;
 }
 
 interface ThemeContextValue extends ThemePrefs {
@@ -68,6 +95,15 @@ function applyToDocument(prefs: ThemePrefs) {
   el.dataset.skin = tokenSkin(prefs.skin);
   el.dataset.mode = prefs.mode;
   el.style.setProperty("--glass-opacity", String(prefs.glassOpacity ?? 1));
+
+  // Apply built-in wallpapers.
+  if (isWallpaperSkin(prefs.skin)) {
+    el.style.setProperty("--custom-bg-image", `url('${BUILTIN_WALLPAPERS[prefs.skin]}')`);
+  } else if (prefs.skin === "custom" && prefs.customBg?.type === "image") {
+    el.style.setProperty("--custom-bg-image", `url('${prefs.customBg.url}')`);
+  } else {
+    el.style.removeProperty("--custom-bg-image");
+  }
 }
 
 // Custom backgrounds can be sizeable data URLs — keep them out of the frequently
@@ -121,4 +157,4 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
 }
 
 /** Inline script source: applies persisted skin/mode before first paint. */
-export const THEME_BOOT_SCRIPT = `try{var p=JSON.parse(localStorage.getItem("gg-prefs")||"{}");var d=document.documentElement;var sk=p.skin==="custom"?"zen":(p.skin||"aurora");d.dataset.skin=sk;d.dataset.mode=p.mode||"dark";d.style.setProperty("--glass-opacity",String(p.glassOpacity==null?1:p.glassOpacity));}catch(e){}`;
+export const THEME_BOOT_SCRIPT = `try{var p=JSON.parse(localStorage.getItem("gg-prefs")||"{}");var d=document.documentElement;var wp={wallpaper1:"/wallpaper1.jpg",wallpaper2:"/wallpaper2.jpg",wallpaper3:"/wallpaper3.jpg",wallpaper4:"/wallpaper4.jpg"};var sk=(p.skin==="custom"||wp[p.skin])?"zen":(p.skin||"aurora");d.dataset.skin=sk;d.dataset.mode=p.mode||"dark";d.style.setProperty("--glass-opacity",String(p.glassOpacity==null?1:p.glassOpacity));if(wp[p.skin]){d.style.setProperty("--custom-bg-image","url('"+wp[p.skin]+"')")}}catch(e){}`;

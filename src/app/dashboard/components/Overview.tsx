@@ -7,7 +7,7 @@ import type { Task, DayLog } from "../../../../prisma/generated/client";
 import { GitGudLogo } from "../../components/GitGudLogo";
 import LogoutButton from "../../components/LogoutButton";
 import { MuteToggle, useRewards } from "../../components/RewardLayer";
-import { useTheme, SKIN_INFO, type Skin } from "../../components/theme";
+import { useTheme, SKIN_INFO, BUILTIN_WALLPAPERS, isWallpaperSkin, type Skin } from "../../components/theme";
 import { useFlashToast } from "./FlashToast";
 import Reveal from "./Reveal";
 import AudioDock from "./AudioDock";
@@ -31,7 +31,16 @@ interface OverviewProps {
   onNavFam: () => void;
 }
 
-const THEME_ORDER: Skin[] = ["aurora", "terminal", "zen", "custom"];
+const THEME_ORDER: Skin[] = [
+  "aurora",
+  "terminal",
+  "zen",
+  "wallpaper1",
+  "wallpaper2",
+  "wallpaper3",
+  "wallpaper4",
+  "custom",
+];
 
 function greetingFor(hour: number): string {
   if (hour < 5) return "Late-night grind";
@@ -231,13 +240,15 @@ export default function Overview({
     : "";
   const name = user.name || user.email;
   const hasCustomBg = skin === "custom" && !!customBg;
+  const wallpaperUrl = isWallpaperSkin(skin) ? BUILTIN_WALLPAPERS[skin] : null;
+  const showBgLayer = hasCustomBg || !!wallpaperUrl;
 
   return (
     <section className="min-h-screen relative z-10 flex flex-col" style={{ scrollSnapAlign: "start", scrollSnapStop: "always" }}>
-      {/* Custom background layer */}
-      {hasCustomBg && customBg && (
+      {/* Custom / built-in background layer */}
+      {showBgLayer && (
         <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-          {customBg.type === "video" ? (
+          {hasCustomBg && customBg?.type === "video" ? (
             <video
               src={customBg.url}
               autoPlay
@@ -249,7 +260,10 @@ export default function Overview({
           ) : (
             <div
               className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url("${customBg.url}")`, animation: "bgdrift 45s ease-in-out infinite alternate" }}
+              style={{
+                backgroundImage: `url("${wallpaperUrl ?? customBg?.url}")`,
+                animation: "bgdrift 45s ease-in-out infinite alternate",
+              }}
             />
           )}
           <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(5,6,12,.45), rgba(5,6,12,.62))" }} />
@@ -303,7 +317,9 @@ export default function Overview({
                       ? "linear-gradient(135deg,#022c17,#00ff88)"
                       : t === "zen"
                         ? "linear-gradient(135deg,#62647a,#b3a6f7)"
-                        : "transparent",
+                        : isWallpaperSkin(t)
+                          ? `url("${BUILTIN_WALLPAPERS[t]}") center/cover`
+                          : "transparent",
                 borderStyle: t === "custom" ? "dashed" : "solid",
                 boxShadow: skin === t ? "0 0 0 2px var(--base), 0 0 0 4px var(--acc)" : "none",
                 color: skin === t && t === "custom" ? "var(--acc)" : "var(--ink3)",
