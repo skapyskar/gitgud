@@ -9,6 +9,9 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    // Migrations need a session-mode connection (DDL, advisory locks), which the
+    // transaction pooler on :6543 doesn't support. DIRECT_URL points at the
+    // session pooler on :5432; fall back to DATABASE_URL if it isn't set.
+    url: process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"],
   },
 });
