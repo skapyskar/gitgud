@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { ensureTodayLog } from "@/lib/api";
 import { dayStart } from "@/lib/dates";
-import { computeFamRankingScore } from "@/lib/fam";
+import { computeFamRankingScore, famMemberContribution, getFamGlobalRank } from "@/lib/fam";
 import { levelFromXP } from "@/lib/gamification";
 import RewardProvider from "../components/RewardLayer";
 import DashboardShell from "./components/DashboardShell";
@@ -88,7 +88,7 @@ export default async function DashboardPage() {
       .sort((a, b) => b.points - a.points)
       .slice(0, 5);
 
-    const [recentActivity, topGoal, rankingScore] = await Promise.all([
+    const [recentActivity, topGoal, rankingScore, weeklyContribution, globalRank] = await Promise.all([
       prisma.famActivity.findMany({
         where: { famId: primaryMembership.famId },
         orderBy: { createdAt: "desc" },
@@ -101,7 +101,14 @@ export default async function DashboardPage() {
         select: { id: true, description: true, currentValue: true, targetValue: true },
       }),
       computeFamRankingScore(primaryMembership.famId, 7),
+      famMemberContribution(primaryMembership.famId, 7),
+      getFamGlobalRank(primaryMembership.famId),
     ]);
+
+    const weeklyLeaderboard = [...weeklyContribution]
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5)
+      .map((m) => ({ ...m, isMe: m.userId === user.id }));
 
     famSummary = {
       id: primaryMembership.fam.id,
@@ -110,6 +117,8 @@ export default async function DashboardPage() {
       xp: lifetimeXP,
       score: Math.round(rankingScore.score),
       leaderboard,
+      weeklyLeaderboard,
+      globalRank,
       recentActivity: recentActivity.map((a) => a.message),
       activeGoal: topGoal,
     };
@@ -119,6 +128,7 @@ export default async function DashboardPage() {
     <RewardProvider>
       <DashboardShell
         user={{
+          id: user.id,
           name: user.name,
           username: user.username,
           email: user.email,

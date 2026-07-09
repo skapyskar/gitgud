@@ -269,3 +269,12 @@ export async function getFamSeasonScore(famId: string, seasonId: string): Promis
   });
   return agg._sum.totalXP ?? 0;
 }
+
+/** This Fam's position (1-based) in the same weighted 7-day ranking used by /api/fam/rankings?scope=global. */
+export async function getFamGlobalRank(famId: string): Promise<{ rank: number; totalFams: number; score: number }> {
+  const fams = await prisma.fam.findMany({ select: { id: true } });
+  const scores = await Promise.all(fams.map(async (f) => ({ id: f.id, score: (await computeFamRankingScore(f.id, 7)).score })));
+  scores.sort((a, b) => b.score - a.score);
+  const index = scores.findIndex((s) => s.id === famId);
+  return { rank: index + 1, totalFams: scores.length, score: scores[index]?.score ?? 0 };
+}

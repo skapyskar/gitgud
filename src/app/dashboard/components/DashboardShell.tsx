@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { LayoutDashboard, Swords, Lightbulb, Users } from "lucide-react";
 import type { Task, DayLog } from "../../../../prisma/generated/client";
 import { useTheme } from "../../components/theme";
@@ -11,9 +11,10 @@ import Overview from "./Overview";
 import TheGrind from "./TheGrind";
 import { levelFromXP } from "@/lib/gamification";
 import type { FamSummaryData } from "../../fam/components/FamSummaryCard";
+import FamPageClient from "../../fam/components/FamPageClient";
 
 interface DashboardShellProps {
-  user: { name: string | null; username: string | null; email: string; xp: number; streakDays: number; coins: number };
+  user: { id: string; name: string | null; username: string | null; email: string; xp: number; streakDays: number; coins: number };
   dayLogs: DayLog[];
   backlogTasks: Task[];
   weeklyTemplates: Task[];
@@ -23,17 +24,19 @@ interface DashboardShellProps {
 }
 
 /**
- * Two-page snap-scroll dashboard: Overview (clock, missions, momentum,
- * profile, audio dock) flows straight into The Grind (habits, brain dump).
+ * Three-page snap-scroll dashboard: Overview (clock, missions, momentum,
+ * profile, audio dock) flows into The Grind (habits, brain dump), then Fam.
  */
 export default function DashboardShell({ user, dayLogs, backlogTasks, weeklyTemplates, dailyTasks, famSummary }: DashboardShellProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { skin, customBg } = useTheme();
-  const [activePage, setActivePage] = useState<0 | 1>(0);
+  const [activePage, setActivePage] = useState<0 | 1 | 2>(0);
 
   const dashRef = useRef<HTMLDivElement>(null);
   const grindRef = useRef<HTMLDivElement>(null);
   const dumpRef = useRef<HTMLDivElement>(null);
+  const famRef = useRef<HTMLDivElement>(null);
   const auroraRef = useRef<HTMLDivElement>(null);
 
   const level = levelFromXP(user.xp);
@@ -45,12 +48,19 @@ export default function DashboardShell({ user, dayLogs, backlogTasks, weeklyTemp
   };
 
   const handleNav = (target: "dash" | "grind" | "dump" | "fam") => {
-    if (target === "fam") {
-      router.push("/fam");
-      return;
-    }
-    scrollToRef(target === "dash" ? dashRef : target === "grind" ? grindRef : dumpRef);
+    scrollToRef(target === "dash" ? dashRef : target === "grind" ? grindRef : target === "dump" ? dumpRef : famRef);
   };
+
+  // Deep link from the standalone /fam route (e.g. invite links): land here, scroll to
+  // the Fam page, then drop the query param so a refresh/back doesn't re-trigger it.
+  useEffect(() => {
+    if (searchParams.get("scrollTo") === "fam") {
+      const id = requestAnimationFrame(() => scrollToRef(famRef));
+      router.replace("/dashboard", { scroll: false });
+      return () => cancelAnimationFrame(id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Page-level scroll-snap for the duration this dashboard is mounted.
   useEffect(() => {
@@ -69,10 +79,10 @@ export default function DashboardShell({ user, dayLogs, backlogTasks, weeklyTemp
   useEffect(() => {
     const onScroll = () => {
       if (auroraRef.current) auroraRef.current.style.transform = `translateY(${window.scrollY * 0.16}px)`;
-      if (grindRef.current) {
-        const next: 0 | 1 = window.scrollY > grindRef.current.offsetTop - window.innerHeight * 0.55 ? 1 : 0;
-        setActivePage((prev) => (prev === next ? prev : next));
-      }
+      let next: 0 | 1 | 2 = 0;
+      if (famRef.current && window.scrollY > famRef.current.offsetTop - window.innerHeight * 0.55) next = 2;
+      else if (grindRef.current && window.scrollY > grindRef.current.offsetTop - window.innerHeight * 0.55) next = 1;
+      setActivePage((prev) => (prev === next ? prev : next));
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -83,7 +93,7 @@ export default function DashboardShell({ user, dayLogs, backlogTasks, weeklyTemp
     { label: "Overview", icon: LayoutDashboard, active: activePage === 0, target: "dash" },
     { label: "Habits", icon: Swords, active: activePage === 1, target: "grind" },
     { label: "Dump", icon: Lightbulb, active: activePage === 1, target: "dump" },
-    { label: "Fam", icon: Users, active: false, target: "fam" },
+    { label: "Fam", icon: Users, active: activePage === 2, target: "fam" },
   ];
 
   return (
@@ -103,6 +113,7 @@ export default function DashboardShell({ user, dayLogs, backlogTasks, weeklyTemp
             famSummary={famSummary}
             onNavGrind={() => scrollToRef(grindRef)}
             onNavDump={() => scrollToRef(dumpRef)}
+            onNavFam={() => scrollToRef(famRef)}
           />
         </div>
 
@@ -115,6 +126,10 @@ export default function DashboardShell({ user, dayLogs, backlogTasks, weeklyTemp
             onNavDash={() => scrollToRef(dashRef)}
             dumpRef={dumpRef}
           />
+        </div>
+
+        <div ref={famRef}>
+          <FamPageClient currentUserId={user.id} onNavDash={() => scrollToRef(dashRef)} />
         </div>
 
         {/* Phone bottom navigation */}

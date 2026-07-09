@@ -17,7 +17,7 @@ import { levelProgress, rankForLevel, tierBaseXP } from "@/lib/gamification";
 import { dayKey, todayAt, todayDayIndex } from "@/lib/dates";
 import { buildDayMap, trailingDays, smoothPath } from "./momentum";
 import FamSummaryCard, { type FamSummaryData } from "../../fam/components/FamSummaryCard";
-import Link from "next/link";
+import FamRankTile from "../../fam/components/FamRankTile";
 
 interface OverviewProps {
   user: { name: string | null; username: string | null; email: string; xp: number; streakDays: number };
@@ -28,6 +28,7 @@ interface OverviewProps {
   famSummary: FamSummaryData | null;
   onNavGrind: () => void;
   onNavDump: () => void;
+  onNavFam: () => void;
 }
 
 const THEME_ORDER: Skin[] = ["aurora", "terminal", "zen", "custom"];
@@ -62,6 +63,7 @@ export default function Overview({
   famSummary,
   onNavGrind,
   onNavDump,
+  onNavFam,
 }: OverviewProps) {
   const router = useRouter();
   const { celebrate } = useRewards();
@@ -277,9 +279,9 @@ export default function Overview({
           <button onClick={onNavDump} className="text-[12.5px] font-semibold text-ink2 hover:text-ink hover:bg-[var(--chip-hover)] px-3.5 py-2 rounded-[calc(var(--radius)*.7)] transition-colors">
             Brain dump
           </button>
-          <Link href="/fam" className="text-[12.5px] font-semibold text-ink2 hover:text-ink hover:bg-[var(--chip-hover)] px-3.5 py-2 rounded-[calc(var(--radius)*.7)] transition-colors">
+          <button onClick={onNavFam} className="text-[12.5px] font-semibold text-ink2 hover:text-ink hover:bg-[var(--chip-hover)] px-3.5 py-2 rounded-[calc(var(--radius)*.7)] transition-colors">
             Fam
-          </Link>
+          </button>
         </nav>
 
         <div className="flex-1" />
@@ -388,23 +390,11 @@ export default function Overview({
               <span className="text-[10.5px] tracking-widest text-ink3 font-bold">OPEN QUESTS</span>
               <span className="font-display text-[27px] font-extrabold text-acc3">{openCount}</span>
             </div>
-            {famSummary && (
-              <>
-                <div className="glass glass-hover r-xl p-4 flex flex-col gap-1">
-                  <span className="text-[10.5px] tracking-widest text-ink3 font-bold">FAM XP</span>
-                  <span className="font-display text-[27px] font-extrabold text-acc">{famSummary.xp.toLocaleString()}</span>
-                </div>
-                <div className="glass glass-hover r-xl p-4 flex flex-col gap-1">
-                  <span className="text-[10.5px] tracking-widest text-ink3 font-bold">FAM SCORE</span>
-                  <span className="font-display text-[27px] font-extrabold grad-text">{famSummary.score.toLocaleString()}</span>
-                </div>
-              </>
-            )}
           </Reveal>
 
           {famSummary && (
             <Reveal delay={150}>
-              <FamSummaryCard fam={famSummary} />
+              <FamSummaryCard fam={famSummary} onOpen={onNavFam} />
             </Reveal>
           )}
 
@@ -578,6 +568,12 @@ export default function Overview({
               ))}
             </div>
           </Reveal>
+
+          {famSummary && (
+            <Reveal delay={260}>
+              <FamRankTile fam={famSummary} onOpen={onNavFam} />
+            </Reveal>
+          )}
 
           <Reveal delay={280} className="mt-auto">
             <AudioDock />

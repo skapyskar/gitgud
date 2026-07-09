@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { HudButton } from "../../components/ui";
 import {
@@ -18,7 +17,13 @@ import BrowseFamsPanel from "./BrowseFamsPanel";
 import CreateFamModal from "./CreateFamModal";
 import FamDetailView from "./FamDetailView";
 
-export default function FamPageClient({ currentUserId }: { currentUserId: string }) {
+export default function FamPageClient({
+  currentUserId,
+  onNavDash,
+}: {
+  currentUserId: string;
+  onNavDash: () => void;
+}) {
   const [memberships, setMemberships] = useState<FamMembershipRow[]>([]);
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [selectedFamId, setSelectedFamId] = useState<string | null>(null);
@@ -62,11 +67,14 @@ export default function FamPageClient({ currentUserId }: { currentUserId: string
   const ownedCount = memberships.filter((m) => m.role === "OWNER").length;
 
   return (
-    <div className="min-h-screen px-4 sm:px-9 py-8 flex flex-col gap-5 max-w-5xl mx-auto">
+    <div
+      className="min-h-screen relative z-10 px-4 sm:px-9 py-8 flex flex-col gap-5 max-w-5xl mx-auto"
+      style={{ scrollSnapAlign: "start", scrollSnapStop: "always" }}
+    >
       <div className="flex items-center gap-3">
-        <Link href="/dashboard" className="chip chip-hover r-lg w-9 h-9 grid place-items-center shrink-0" title="Back to dashboard">
+        <button onClick={onNavDash} className="chip chip-hover r-lg w-9 h-9 grid place-items-center shrink-0" title="Back to dashboard">
           <ArrowLeft className="w-4 h-4" />
-        </Link>
+        </button>
         <h1 className="font-display text-2xl font-extrabold tracking-tight flex-1">Fam</h1>
         <HudButton variant="primary" onClick={() => setCreating(true)}>
           Create Fam

@@ -2,10 +2,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import FamPageClient from "./components/FamPageClient";
 
 export const dynamic = "force-dynamic";
 
+// Fam now lives inline as the dashboard's 3rd scroll-snap page rather than a
+// standalone route. This URL is kept only so bookmarks and invite deep-links
+// still work — it just forwards into the dashboard and scrolls to that page.
 export default async function FamPage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
@@ -14,7 +16,7 @@ export default async function FamPage() {
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { id: true, username: true },
+    select: { username: true },
   });
   if (!user) {
     redirect("/login");
@@ -23,5 +25,5 @@ export default async function FamPage() {
     redirect("/complete-profile");
   }
 
-  return <FamPageClient currentUserId={user.id} />;
+  redirect("/dashboard?scrollTo=fam");
 }
