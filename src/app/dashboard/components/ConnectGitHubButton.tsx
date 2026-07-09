@@ -2,33 +2,22 @@
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { Github } from "lucide-react";
 
 export default function ConnectGitHubButton() {
   const [isLoading, setIsLoading] = useState(false);
 
-  const linkGithub = () => {
-    setIsLoading(true);
-    signIn("github", { callbackUrl: "/dashboard" });
-  };
-
   return (
     <button
-      onClick={linkGithub}
+      onClick={() => {
+        setIsLoading(true);
+        signIn("github", { callbackUrl: "/dashboard" });
+      }}
       disabled={isLoading}
-      className="
-        bg-yellow-600/20 border border-yellow-600 text-yellow-500 
-        px-4 py-2 text-xs uppercase tracking-widest font-bold
-        hover:bg-yellow-500 hover:text-black transition-all
-        flex items-center gap-2
-      "
+      className="flex items-center gap-1.5 text-[11px] font-medium text-gold border border-gold/30 bg-gold/10 hover:bg-gold/20 r-md px-2.5 py-1 transition-all disabled:opacity-50"
     >
-      {isLoading ? (
-        <span>ESTABLISHING_UPLINK...</span>
-      ) : (
-        <>
-          <span>[ LINK_GITHUB_ACCOUNT ]</span>
-        </>
-      )}
+      <Github className="w-3.5 h-3.5" />
+      {isLoading ? "linking…" : "link GitHub"}
     </button>
   );
 }

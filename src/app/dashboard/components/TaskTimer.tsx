@@ -1,257 +1,198 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { Play, Pause, RotateCcw, X } from "lucide-react";
+import { HudButton, ModalTitle } from "../../components/ui";
 
 interface TaskTimerProps {
-    taskId: string;
-    initialMinutes: number;
-    hasAllocatedDuration: boolean;
-    onClose: () => void;
-    onTimerComplete?: () => void;
+  taskTitle: string;
+  initialMinutes: number;
+  /** True when the task has a time limit — finishing the countdown completes it. */
+  hasAllocatedDuration: boolean;
+  onClose: () => void;
+  onTimerComplete?: () => void;
 }
 
-export default function TaskTimer({ taskId, initialMinutes, hasAllocatedDuration, onClose, onTimerComplete }: TaskTimerProps) {
-    const [totalSeconds, setTotalSeconds] = useState(initialMinutes * 60);
-    const [isRunning, setIsRunning] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
-    const [editHours, setEditHours] = useState(Math.floor(initialMinutes / 60));
-    const [editMinutes, setEditMinutes] = useState(initialMinutes % 60);
-    const [editSeconds, setEditSeconds] = useState(0);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    const hasCalledCompleteRef = useRef(false);
+export default function TaskTimer({
+  taskTitle,
+  initialMinutes,
+  hasAllocatedDuration,
+  onClose,
+  onTimerComplete,
+}: TaskTimerProps) {
+  const [totalSeconds, setTotalSeconds] = useState(initialMinutes * 60);
+  const [running, setRunning] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editValue, setEditValue] = useState("");
+  const completedRef = useRef(false);
 
-    useEffect(() => {
-        if (isRunning && totalSeconds > 0) {
-            intervalRef.current = setInterval(() => {
-                setTotalSeconds((prev) => {
-                    if (prev <= 1) {
-                        setIsRunning(false);
-                        if (hasAllocatedDuration && onTimerComplete && !hasCalledCompleteRef.current) {
-                            hasCalledCompleteRef.current = true;
-                            setTimeout(() => onTimerComplete(), 0);
-                        }
-                        return 0;
-                    }
-                    return prev - 1;
-                });
-            }, 1000);
+  const initialSeconds = Math.max(1, initialMinutes * 60);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const done = totalSeconds === 0;
+
+  useEffect(() => {
+    if (!running || totalSeconds <= 0) return;
+    const interval = setInterval(() => {
+      setTotalSeconds((prev) => {
+        if (prev <= 1) {
+          setRunning(false);
+          if (hasAllocatedDuration && onTimerComplete && !completedRef.current) {
+            completedRef.current = true;
+            setTimeout(onTimerComplete, 400);
+          }
+          return 0;
         }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [running, totalSeconds, hasAllocatedDuration, onTimerComplete]);
 
-        return () => {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-            }
-        };
-    }, [isRunning, hasAllocatedDuration, onTimerComplete]);
+  const applyEdit = () => {
+    const parts = editValue.split(":").map((p) => parseInt(p) || 0);
+    let secs = 0;
+    if (parts.length === 3) secs = parts[0] * 3600 + parts[1] * 60 + parts[2];
+    else if (parts.length === 2) secs = parts[0] * 60 + parts[1];
+    else secs = parts[0] * 60;
+    if (secs > 0) setTotalSeconds(Math.min(secs, 24 * 3600));
+    setEditing(false);
+  };
 
-    useEffect(() => {
-        if (!isEditing) {
-            setEditHours(hours);
-            setEditMinutes(minutes);
-            setEditSeconds(seconds);
-        }
-    }, [hours, minutes, seconds, isEditing]);
+  const addMinutes = (m: number) => setTotalSeconds((prev) => Math.max(0, prev + m * 60));
 
-    const handleStart = () => {
-        if (totalSeconds > 0) {
-            setIsRunning(true);
-            setIsEditing(false);
-        }
-    };
+  // Progress ring geometry
+  const R = 88;
+  const C = 2 * Math.PI * R;
+  const progress = Math.max(0, Math.min(1, totalSeconds / initialSeconds));
 
-    const handlePause = () => {
-        setIsRunning(false);
-    };
-
-    const handleReset = () => {
-        setIsRunning(false);
-        setTotalSeconds(initialMinutes * 60);
-    };
-
-    const handleApplyEdit = () => {
-        const newTotal = (editHours * 3600) + (editMinutes * 60) + editSeconds;
-        setTotalSeconds(Math.max(0, newTotal));
-        setIsEditing(false);
-    };
-
-    const handleCancelEdit = () => {
-        setEditHours(hours);
-        setEditMinutes(minutes);
-        setEditSeconds(seconds);
-        setIsEditing(false);
-    };
-
-    const addTime = (addMinutes: number) => {
-        setTotalSeconds((prev) => Math.max(0, prev + addMinutes * 60));
-    };
-
-    const isComplete = totalSeconds === 0;
-
-    return (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-black border-2 border-green-500 p-6 max-w-md w-full shadow-[0_0_30px_rgba(34,197,94,0.3)]">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl text-green-400 font-mono uppercase tracking-wider">
-                        ⏱ Task Timer
-                    </h3>
-                    <button
-                        onClick={onClose}
-                        className="text-gray-500 hover:text-red-500 transition-colors text-xl"
-                    >
-                        ✕
-                    </button>
-                </div>
-
-                <div className={`text-center py-6 mb-6 border ${isComplete ? 'border-red-500 bg-red-900/20' : 'border-green-900/50 bg-green-900/10'}`}>
-                    {isEditing ? (
-                        <div className="flex items-center justify-center gap-2">
-                            <input
-                                type="number"
-                                value={editHours}
-                                onChange={(e) => setEditHours(Math.max(0, Math.min(23, parseInt(e.target.value) || 0)))}
-                                className="w-16 bg-black border border-green-500 text-green-400 text-2xl font-mono text-center py-2"
-                                min="0"
-                                max="23"
-                            />
-                            <span className="text-green-400 text-2xl">:</span>
-                            <input
-                                type="number"
-                                value={editMinutes}
-                                onChange={(e) => setEditMinutes(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
-                                className="w-16 bg-black border border-green-500 text-green-400 text-2xl font-mono text-center py-2"
-                                min="0"
-                                max="59"
-                            />
-                            <span className="text-green-400 text-2xl">:</span>
-                            <input
-                                type="number"
-                                value={editSeconds}
-                                onChange={(e) => setEditSeconds(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
-                                className="w-16 bg-black border border-green-500 text-green-400 text-2xl font-mono text-center py-2"
-                                min="0"
-                                max="59"
-                            />
-                        </div>
-                    ) : (
-                        <div
-                            className={`text-5xl font-mono tracking-wider cursor-pointer hover:text-green-300 transition-colors ${isComplete ? 'text-red-400 animate-pulse' : 'text-green-400'}`}
-                            onClick={() => !isRunning && setIsEditing(true)}
-                            title="Click to edit time"
-                        >
-                            {String(hours).padStart(2, "0")}:{String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
-                        </div>
-                    )}
-
-                    {isComplete && (
-                        <div className="text-red-400 font-mono text-sm mt-2 animate-pulse">
-                            ⚠️ TIME'S UP!
-                        </div>
-                    )}
-
-                    {!isEditing && !isRunning && !isComplete && (
-                        <div className="text-gray-600 font-mono text-xs mt-2">
-                            Click time to edit
-                        </div>
-                    )}
-                </div>
-                {isEditing && (
-                    <div className="flex gap-2 mb-4">
-                        <button
-                            onClick={handleApplyEdit}
-                            className="flex-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-4 py-2 text-green-400 font-mono uppercase text-sm"
-                        >
-                            ✓ Apply
-                        </button>
-                        <button
-                            onClick={handleCancelEdit}
-                            className="flex-1 bg-gray-900/30 hover:bg-gray-900/50 border border-gray-700 px-4 py-2 text-gray-400 font-mono uppercase text-sm"
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                )}
-                {!isEditing && (
-                    <div className="flex gap-2 mb-4 justify-center">
-                        <button
-                            onClick={() => addTime(-5)}
-                            disabled={isRunning}
-                            className="px-3 py-1 bg-red-900/30 hover:bg-red-900/50 border border-red-700/50 text-red-400 font-mono text-xs disabled:opacity-50"
-                        >
-                            -5m
-                        </button>
-                        <button
-                            onClick={() => addTime(-1)}
-                            disabled={isRunning}
-                            className="px-3 py-1 bg-red-900/30 hover:bg-red-900/50 border border-red-700/50 text-red-400 font-mono text-xs disabled:opacity-50"
-                        >
-                            -1m
-                        </button>
-                        <button
-                            onClick={() => addTime(1)}
-                            disabled={isRunning}
-                            className="px-3 py-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700/50 text-green-400 font-mono text-xs disabled:opacity-50"
-                        >
-                            +1m
-                        </button>
-                        <button
-                            onClick={() => addTime(5)}
-                            disabled={isRunning}
-                            className="px-3 py-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700/50 text-green-400 font-mono text-xs disabled:opacity-50"
-                        >
-                            +5m
-                        </button>
-                        <button
-                            onClick={() => addTime(15)}
-                            disabled={isRunning}
-                            className="px-3 py-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700/50 text-green-400 font-mono text-xs disabled:opacity-50"
-                        >
-                            +15m
-                        </button>
-                    </div>
-                )}
-
-                <div className="flex gap-3">
-                    {!isRunning ? (
-                        <button
-                            onClick={handleStart}
-                            disabled={isComplete || isEditing}
-                            className="flex-1 bg-green-600 hover:bg-green-500 text-black font-bold py-3 font-mono uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            ▶ START
-                        </button>
-                    ) : (
-                        <button
-                            onClick={handlePause}
-                            className="flex-1 bg-yellow-600 hover:bg-yellow-500 text-black font-bold py-3 font-mono uppercase tracking-wider"
-                        >
-                            ⏸ PAUSE
-                        </button>
-                    )}
-                    <button
-                        onClick={handleReset}
-                        className="px-6 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-gray-300 font-mono uppercase py-3"
-                    >
-                        ↺ RESET
-                    </button>
-                </div>
-                <div className="mt-6">
-                    <div className="h-2 bg-gray-800 overflow-hidden">
-                        <div
-                            className={`h-full transition-all duration-1000 ${isComplete ? 'bg-red-500' : 'bg-green-500'}`}
-                            style={{
-                                width: `${Math.max(0, (totalSeconds / (initialMinutes * 60)) * 100)}%`,
-                            }}
-                        />
-                    </div>
-                    <div className="text-xs text-gray-600 font-mono mt-1 text-center">
-                        {Math.round((totalSeconds / (initialMinutes * 60)) * 100)}% remaining
-                    </div>
-                </div>
-            </div>
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div className="animate-rise glass r-xl shadow-[0_0_80px_var(--glow)] w-full max-w-md p-6">
+        <div className="flex justify-between items-start mb-2">
+          <div className="min-w-0">
+            <ModalTitle>Focus timer</ModalTitle>
+            <p className="text-xs text-ink3 truncate">{taskTitle}</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 r-md text-ink3 hover:text-rosy hover:bg-rosy/10 transition-all"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
-    );
+
+        {/* Ring */}
+        <div className="relative w-56 h-56 mx-auto my-4">
+          <svg viewBox="0 0 200 200" className="w-full h-full -rotate-90">
+            <defs>
+              <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="var(--acc)" />
+                <stop offset="100%" stopColor="var(--acc2)" />
+              </linearGradient>
+            </defs>
+            <circle cx="100" cy="100" r={R} fill="none" stroke="var(--line)" strokeWidth="7" />
+            <circle
+              cx="100"
+              cy="100"
+              r={R}
+              fill="none"
+              stroke={done ? "var(--rose)" : "url(#timerGrad)"}
+              strokeWidth="7"
+              strokeLinecap="round"
+              strokeDasharray={C}
+              strokeDashoffset={C * (1 - progress)}
+              style={{
+                transition: "stroke-dashoffset 1s linear",
+                filter: `drop-shadow(0 0 8px var(--glow))`,
+              }}
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            {editing ? (
+              <input
+                autoFocus
+                value={editValue}
+                onChange={(e) => setEditValue(e.target.value)}
+                onBlur={applyEdit}
+                onKeyDown={(e) => e.key === "Enter" && applyEdit()}
+                placeholder="mm or hh:mm"
+                className="w-32 chip !border-acc/50 r-md text-ink text-center text-xl font-mono py-1.5 focus:outline-none"
+              />
+            ) : (
+              <button
+                className={`font-display text-4xl font-extrabold tracking-wide font-mono ${
+                  done ? "text-rosy animate-pulse" : "grad-text"
+                }`}
+                onClick={() => {
+                  if (!running) {
+                    setEditValue(`${hours ? hours + ":" : ""}${minutes}:${String(seconds).padStart(2, "0")}`);
+                    setEditing(true);
+                  }
+                }}
+                title={running ? undefined : "Click to edit"}
+              >
+                {hours > 0 && `${String(hours).padStart(2, "0")}:`}
+                {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
+              </button>
+            )}
+            {done ? (
+              <p className="text-rosy text-xs font-semibold mt-2 animate-blink">time&apos;s up</p>
+            ) : (
+              !running && <p className="text-ink3 text-[10px] mt-2">tap time to edit</p>
+            )}
+          </div>
+        </div>
+
+        {/* Quick adjust */}
+        <div className="flex justify-center gap-2 mb-4">
+          {[-5, -1, +1, +5, +15].map((m) => (
+            <HudButton
+              key={m}
+              variant={m < 0 ? "danger" : "ghost"}
+              disabled={running}
+              onClick={() => addMinutes(m)}
+            >
+              {m > 0 ? `+${m}` : m}m
+            </HudButton>
+          ))}
+        </div>
+
+        <div className="flex gap-2.5">
+          {!running ? (
+            <HudButton
+              variant="primary"
+              className="flex-1 py-3 text-sm"
+              disabled={done || editing}
+              onClick={() => setRunning(true)}
+            >
+              <Play className="w-4 h-4 inline -mt-0.5 mr-1.5" /> Start
+            </HudButton>
+          ) : (
+            <HudButton variant="gold" className="flex-1 py-3 text-sm" onClick={() => setRunning(false)}>
+              <Pause className="w-4 h-4 inline -mt-0.5 mr-1.5" /> Pause
+            </HudButton>
+          )}
+          <HudButton
+            variant="ghost"
+            className="py-3 px-5"
+            onClick={() => {
+              setRunning(false);
+              completedRef.current = false;
+              setTotalSeconds(initialMinutes * 60);
+            }}
+          >
+            <RotateCcw className="w-4 h-4" />
+          </HudButton>
+        </div>
+
+        {hasAllocatedDuration && (
+          <p className="text-[11px] text-ink3 text-center mt-4">
+            Finishing the countdown auto-completes the quest with the +25% time bonus.
+          </p>
+        )}
+      </div>
+    </div>
+  );
 }

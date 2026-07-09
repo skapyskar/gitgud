@@ -1,39 +1,22 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { requireUser } from "@/lib/api";
 
+/** Day logs for graphs and the activity heatmap (last ~4 months). */
 export async function GET() {
-    try {
-        const session = await getServerSession(authOptions);
+  try {
+    const { user, error } = await requireUser();
+    if (error) return error;
 
-        if (!session?.user?.email) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
+    const dayLogs = await prisma.dayLog.findMany({
+      where: { userId: user.id },
+      orderBy: { date: "desc" },
+      take: 120,
+    });
 
-        const user = await prisma.user.findUnique({
-            where: { email: session.user.email },
-            include: {
-                dayLogs: {
-                    orderBy: { date: 'desc' },
-                    take: 30, // Last 30 days for efficiency graph
-                },
-            },
-        });
-
-        if (!user) {
-            return NextResponse.json({ error: "User not found" }, { status: 404 });
-        }
-
-        return NextResponse.json({
-            success: true,
-            dayLogs: user.dayLogs
-        });
-    } catch (error) {
-        console.error("Fetch daylogs error:", error);
-        return NextResponse.json(
-            { error: "Failed to fetch daylogs" },
-            { status: 500 }
-        );
-    }
+    return NextResponse.json({ success: true, dayLogs });
+  } catch (err) {
+    console.error("Fetch daylogs error:", err);
+    return NextResponse.json({ error: "Failed to fetch daylogs" }, { status: 500 });
+  }
 }

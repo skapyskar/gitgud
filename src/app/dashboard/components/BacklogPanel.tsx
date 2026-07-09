@@ -1,554 +1,263 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Task, TaskTier, Category } from "../../../../prisma/generated/client";
+import { ChevronDown, ChevronRight, CalendarClock, X, ArrowRight, Inbox } from "lucide-react";
+import type { Task } from "../../../../prisma/generated/client";
+import { Panel, HudButton, ConfirmModal, inputCls } from "../../components/ui";
+import ScheduleTaskModal, { ScheduleValues } from "./ScheduleTaskModal";
+import { createTask, deleteTask, uncompleteTask, updateTask } from "./taskApi";
+import { dayKey, dayStart, todayAt } from "@/lib/dates";
 
 interface BacklogPanelProps {
   tasks: Task[];
-  userId: string;
 }
 
-export default function BacklogPanel({ tasks, userId }: BacklogPanelProps) {
+/** The Dump: zero-friction capture. Schedule things when you're ready. */
+export default function BacklogPanel({ tasks }: BacklogPanelProps) {
   const router = useRouter();
-  const [newTask, setNewTask] = useState("");
+  const [items, setItems] = useState<Task[]>(tasks);
+  const [newTitle, setNewTitle] = useState("");
   const [deadline, setDeadline] = useState("");
-  const [isAdding, setIsAdding] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [scheduling, setScheduling] = useState<Task | null>(null);
+  const [deleting, setDeleting] = useState<Task | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
-  const [optimisticTasks, setOptimisticTasks] = useState<Task[]>([...tasks]);
-  const [tempToRealIdMap, setTempToRealIdMap] = useState<Record<string, string>>({});
+  const tempIdRef = useRef(0);
 
-  useEffect(() => {
-    setOptimisticTasks([...tasks]);
-  }, [tasks]);
-  const [movingTaskId, setMovingTaskId] = useState<string | null>(null);
-  const [moveTaskTier, setMoveTaskTier] = useState<TaskTier>("C");
-  const [moveTaskCategory, setMoveTaskCategory] = useState<Category>("LIFE");
-  const [moveDeadlineTime, setMoveDeadlineTime] = useState("");
-  const [moveDuration, setMoveDuration] = useState("");
-  const [moveTaskFrequency, setMoveTaskFrequency] = useState("1");
-  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
+  // Reset optimistic state when fresh server data arrives (render-time reset).
+  const [prevTasks, setPrevTasks] = useState(tasks);
+  if (prevTasks !== tasks) {
+    setPrevTasks(tasks);
+    setItems(tasks);
+  }
 
-  const getMinDeadlineTime = () => {
-    const now = new Date();
-    // Round up to next 5 minutes
-    const minutes = Math.ceil((now.getMinutes() + 1) / 5) * 5;
-    const hours = now.getHours() + Math.floor(minutes / 60);
-    const finalMinutes = minutes % 60;
-    if (hours >= 24) return "23:59"; // Already past end of day
-    return `${hours.toString().padStart(2, '0')}:${finalMinutes.toString().padStart(2, '0')}`;
-  };
+  const { pendingTasks, completedTasks } = useMemo(() => {
+    const pendingList = items
+      .filter((t) => !t.isCompleted)
+      .sort((a, b) => {
+        if (!a.deadline && !b.deadline) return 0;
+        if (!a.deadline) return 1;
+        if (!b.deadline) return -1;
+        return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+      });
+    return { pendingTasks: pendingList, completedTasks: items.filter((t) => t.isCompleted) };
+  }, [items]);
 
-  const MAX_DEADLINE_TIME = "23:59";
-
-  const getMaxDuration = () => {
-    if (!moveDeadlineTime) return 999;
-    const now = new Date();
-    const [deadlineHours, deadlineMinutes] = moveDeadlineTime.split(':').map(Number);
-    const deadlineDate = new Date(now);
-    deadlineDate.setHours(deadlineHours, deadlineMinutes, 0, 0);
-    const diffMs = deadlineDate.getTime() - now.getTime();
-    const diffMinutes = Math.floor(diffMs / (1000 * 60));
-    return Math.max(1, diffMinutes);
-  };
-
-  const isDeadlineValid = () => {
-    if (!moveDeadlineTime) return false;
-    const now = new Date();
-    const [hours, minutes] = moveDeadlineTime.split(':').map(Number);
-    const deadlineDate = new Date(now);
-    deadlineDate.setHours(hours, minutes, 0, 0);
-    return deadlineDate.getTime() > now.getTime();
-  };
-
-  const incompleteTasks = optimisticTasks
-    .filter(task => !task.isCompleted)
-    .sort((a, b) => {
-      if (!a.deadline && !b.deadline) return 0;
-      if (!a.deadline) return 1;
-      if (!b.deadline) return -1;
-      return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-    });
-  const completedTasks = optimisticTasks.filter(task => task.isCompleted);
-
-  const handleAddTask = async (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTask.trim()) return;
+    if (!newTitle.trim() || adding) return;
+    setAdding(true);
 
-    setIsAdding(true);
-    setIsLoading(true);
-    const tempId = Math.random().toString();
+    const tempId = `temp-${++tempIdRef.current}`;
     const now = new Date();
-    const tempTask: Task = {
+    const optimistic = {
       id: tempId,
-      title: newTask,
-      isCompleted: false,
+      title: newTitle.trim(),
       type: "BACKLOG",
-      userId,
+      isCompleted: false,
       deadline: deadline ? new Date(deadline) : null,
-      createdAt: now,
-      updatedAt: now,
       tier: "C",
       category: "LIFE",
-      description: null,
-      plannedDate: now,
-      plannedStartTime: null,
-      plannedEndTime: null,
-      scheduledDate: null,
-      repeatDays: null,
-      completedAt: null,
-      basePoints: 10,
-      xpWorth: 10,
-      isBonus: false,
-      timeBonus: 0,
-      finalPoints: 0,
-      deadlineTime: null,
-      allocatedDuration: null,
-      durationMet: false,
-      isExpired: false,
-      frequency: 1,
-      completedFrequency: 0,
-    };
-    setOptimisticTasks((current) => [tempTask, ...current]);
+      createdAt: now,
+      updatedAt: now,
+    } as Task;
+    setItems((cur) => [optimistic, ...cur]);
 
-    try {
-      const res = await fetch("/api/tasks/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: newTask,
-          type: "BACKLOG",
-          deadline: deadline || null,
-        }),
-      });
+    const res = await createTask({
+      title: newTitle.trim(),
+      type: "BACKLOG",
+      deadline: deadline || null,
+    });
 
-      if (res.ok) {
-        const data = await res.json();
-        const createdTask = data.task;
-        setTempToRealIdMap(prev => ({ ...prev, [tempId]: createdTask.id }));
-        setOptimisticTasks((current) =>
-          current.map(t => t.id === tempId ? { ...t, id: createdTask.id } : t)
-        );
-        setNewTask("");
-        setDeadline("");
-        router.refresh();
-      } else {
-        setOptimisticTasks((current) => current.filter(t => t.id !== tempId));
-      }
-    } catch (error) {
-      setOptimisticTasks((current) => current.filter(t => t.id !== tempId));
-      console.error("Failed to create backlog task:", error);
-    } finally {
-      setIsLoading(false);
-      setIsAdding(false);
+    if (res?.success) {
+      setNewTitle("");
+      setDeadline("");
+      router.refresh();
+    } else {
+      setItems((cur) => cur.filter((t) => t.id !== tempId));
     }
+    setAdding(false);
   };
 
-  const handleMoveToDaily = async (taskId: string) => {
-    if (!moveTaskTier || !moveTaskCategory) {
-      alert("Please select both Task Tier and Category before moving to daily tasks.");
-      return;
-    }
+  const handleSchedule = async (values: ScheduleValues) => {
+    if (!scheduling) return;
+    const id = scheduling.id;
+    setScheduling(null);
 
-    const prev = [...optimisticTasks];
-    setOptimisticTasks((current) => current.filter((t) => t.id !== taskId));
-    setIsLoading(true);
+    const prev = items;
+    setItems((cur) => cur.filter((t) => t.id !== id));
 
-    try {
-      const today = new Date();
-      today.setUTCHours(0, 0, 0, 0);
+    const res = await updateTask({
+      taskId: id,
+      type: "DAILY",
+      plannedDate: dayStart().toISOString(),
+      tier: values.tier,
+      category: values.category,
+      deadlineTime: todayAt(values.deadlineTime).toISOString(),
+      allocatedDuration: values.duration,
+      frequency: values.frequency,
+    });
 
-      let deadlineTimeValue = null;
-      if (moveDeadlineTime) {
-        const [hours, minutes] = moveDeadlineTime.split(':').map(Number);
-        const deadlineDate = new Date();
-        deadlineDate.setHours(hours, minutes, 0, 0);
-        deadlineTimeValue = deadlineDate.toISOString();
-      }
-
-      const res = await fetch("/api/tasks/update", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          taskId,
-          type: "DAILY",
-          plannedDate: today.toISOString(),
-          tier: moveTaskTier,
-          category: moveTaskCategory,
-          deadlineTime: deadlineTimeValue,
-          allocatedDuration: moveDuration ? parseInt(moveDuration) : null,
-          frequency: parseInt(moveTaskFrequency) || 1,
-        }),
-      });
-
-      if (res.ok) {
-        setMovingTaskId(null);
-        setMoveTaskTier("C");
-        setMoveTaskCategory("LIFE");
-        setMoveDeadlineTime("");
-        setMoveDuration("");
-        setMoveTaskFrequency("1");
-        router.refresh();
-      } else {
-        setOptimisticTasks(prev);
-        const errorData = await res.json();
-        alert(`Failed to move task: ${errorData.error || 'Unknown error'}`);
-      }
-    } catch (error) {
-      setOptimisticTasks(prev);
-      console.error("Failed to move task:", error);
-      alert("Failed to move task. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    if (res?.success) router.refresh();
+    else setItems(prev);
   };
 
-  const promptDelete = (taskId: string) => {
-    setDeletingTaskId(taskId);
-  };
-  const confirmDelete = async () => {
-    if (!deletingTaskId) return;
-
-    const taskId = deletingTaskId;
-    setDeletingTaskId(null); // Close dialog
-
-    const prev = [...optimisticTasks];
-    setOptimisticTasks((current) => current.filter((t) => t.id !== taskId));
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/tasks/delete", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskId }),
-      });
-      if (res.ok) {
-        router.refresh();
-      } else {
-        setOptimisticTasks(prev);
-      }
-    } catch (error) {
-      setOptimisticTasks(prev);
-      console.error("Failed to delete task:", error);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleDelete = async () => {
+    if (!deleting) return;
+    const id = deleting.id;
+    setDeleting(null);
+    const prev = items;
+    setItems((cur) => cur.filter((t) => t.id !== id));
+    const res = await deleteTask(id);
+    if (res?.success) router.refresh();
+    else setItems(prev);
   };
 
-  const handleUncompleteTask = async (taskId: string) => {
-    const prev = [...optimisticTasks];
-    setOptimisticTasks((current) =>
-      current.map((t) =>
-        t.id === taskId
-          ? { ...t, isCompleted: false, completedAt: null }
-          : t
-      )
+  const handleUncomplete = async (task: Task) => {
+    const prev = items;
+    setItems((cur) =>
+      cur.map((t) => (t.id === task.id ? { ...t, isCompleted: false, completedAt: null } : t))
     );
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/tasks/uncomplete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskId }),
-      });
-      if (res.ok) {
-        router.refresh();
-      } else {
-        setOptimisticTasks(prev);
-      }
-    } catch (error) {
-      setOptimisticTasks(prev);
-      console.error("Failed to uncomplete task:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    const res = await uncompleteTask(task.id);
+    if (res?.success) router.refresh();
+    else setItems(prev);
+  };
+
+  const deadlineTone = (d: Date | string) => {
+    const key = dayKey(new Date(d));
+    const today = dayKey();
+    if (key < today) return "text-rosy";
+    const twoDays = new Date();
+    twoDays.setDate(twoDays.getDate() + 2);
+    if (key <= dayKey(twoDays)) return "text-gold";
+    return "text-ink3";
   };
 
   return (
-    <div className="border border-green-900/30 p-[0.3vw] bg-black/50 flex flex-col h-[calc(100vh-52vh)] min-h-[12vh] max-h-[35vh] lg:h-[calc(100vh-40vh)] lg:max-h-[50vh] relative">
-      {isLoading && (
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="text-green-400 font-mono text-sm animate-pulse">LOADING...</div>
-        </div>
-      )}
-      {movingTaskId && (
-        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
-          <div className="bg-black border-2 border-green-500 p-[1vw] max-w-md w-full">
-            <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] text-green-400 font-mono mb-[0.5vh] uppercase">Schedule for Today</h3>
-            <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-400 mb-[1vh] font-mono">Select tier and category before adding to daily tasks</p>
+    <Panel title="The Dump" subtitle="capture now, schedule later" accent="gold" className="h-full">
+      <div className="flex flex-col h-full">
+        <form onSubmit={handleAdd} className="space-y-2 mb-3">
+          <input
+            type="text"
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            placeholder="Brain-dump a task…"
+            className={inputCls}
+            maxLength={200}
+            disabled={adding}
+          />
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={deadline}
+              onChange={(e) => setDeadline(e.target.value)}
+              min={dayKey()}
+              title="Optional deadline"
+              className={`${inputCls} flex-1`}
+              disabled={adding}
+            />
+            <HudButton type="submit" variant="gold" className="py-2.5 px-4" disabled={adding || !newTitle.trim()}>
+              {adding ? "…" : "+ Dump"}
+            </HudButton>
+          </div>
+        </form>
 
-            <div className="space-y-[0.5vh]">
-              <div>
-                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Task Tier *</label>
-                <select
-                  value={moveTaskTier}
-                  onChange={(e) => setMoveTaskTier(e.target.value as TaskTier)}
-                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
-                  required
-                >
-                  <option value="S">S - Critical (High XP)</option>
-                  <option value="A">A - Important</option>
-                  <option value="B">B - Maintenance</option>
-                  <option value="C">C - Chores</option>
-                </select>
+        <div className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-2">
+          {pendingTasks.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <div className="w-12 h-12 r-lg chip flex items-center justify-center mb-3">
+                <Inbox className="w-5 h-5 text-ink3" />
               </div>
-
-              <div>
-                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Category *</label>
-                <select
-                  value={moveTaskCategory}
-                  onChange={(e) => setMoveTaskCategory(e.target.value as Category)}
-                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
-                  required
-                >
-                  <option value="DEV">DEV</option>
-                  <option value="ACADEMICS">ACADEMICS</option>
-                  <option value="HEALTH">HEALTH</option>
-                  <option value="LIFE">LIFE</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Deadline Time * (now - 23:59)</label>
-                <input
-                  type="time"
-                  value={moveDeadlineTime}
-                  onChange={(e) => {
-                    setMoveDeadlineTime(e.target.value);
-                    if (moveDuration) {
-                      const now = new Date();
-                      const [h, m] = e.target.value.split(':').map(Number);
-                      const dl = new Date(now); dl.setHours(h, m, 0, 0);
-                      const maxMins = Math.max(1, Math.floor((dl.getTime() - now.getTime()) / 60000));
-                      if (parseInt(moveDuration) > maxMins) {
-                        setMoveDuration(maxMins.toString());
-                      }
-                    }
-                  }}
-                  min={getMinDeadlineTime()}
-                  max={MAX_DEADLINE_TIME}
-                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
-                  required
-                />
-                {moveDeadlineTime && (
-                  <span className={`text-[clamp(0.4rem,0.5vw,0.6rem)] font-mono ${isDeadlineValid() ? 'text-gray-600' : 'text-red-500'}`}>
-                    {isDeadlineValid() ? `${getMaxDuration()} min available` : '⚠️ Time must be in the future!'}
-                  </span>
-                )}
-              </div>
-
-              <div>
-                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Duration (minutes)</label>
-                <input
-                  type="number"
-                  value={moveDuration}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value) || 0;
-                    const maxDur = getMaxDuration();
-                    setMoveDuration(Math.min(val, maxDur).toString());
-                  }}
-                  placeholder={moveDeadlineTime ? `max ${getMaxDuration()}` : "e.g. 60"}
-                  min="1"
-                  max={getMaxDuration()}
-                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono placeholder-gray-600"
-                />
-              </div>
-
-              <div>
-                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Frequency</label>
-                <input
-                  type="number"
-                  value={moveTaskFrequency}
-                  onChange={(e) => setMoveTaskFrequency(e.target.value)}
-                  placeholder="1"
-                  min="1"
-                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono placeholder-gray-600"
-                />
-              </div>
-
-              <div className="flex gap-[0.5vw] pt-[0.3vh]">
-                <button
-                  onClick={() => handleMoveToDaily(movingTaskId)}
-                  disabled={!moveDeadlineTime || !isDeadlineValid()}
-                  className="flex-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 uppercase tracking-wider font-mono disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  → Move to Today
-                </button>
-                <button
-                  onClick={() => {
-                    setMovingTaskId(null);
-                    setMoveTaskTier("C");
-                    setMoveTaskCategory("LIFE");
-                    setMoveDeadlineTime("");
-                    setMoveDuration("");
-                    setMoveTaskFrequency("1");
-                  }}
-                  className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-400 uppercase font-mono"
-                >
-                  Cancel
-                </button>
-              </div>
+              <p className="font-display font-semibold text-ink2 text-sm mb-0.5">Dump empty</p>
+              <p className="text-xs text-ink3">Nothing waiting. Nice.</p>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {deletingTaskId && (
-        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
-          <div className="bg-black border-2 border-red-500 p-[1vw] max-w-md w-full">
-            <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] text-red-400 font-mono mb-[0.5vh] uppercase">
-              Delete Task?
-            </h3>
-            <p className="text-[clamp(0.6rem,0.85vw,0.875rem)] text-gray-400 mb-[1vh] font-mono">
-              This task will be <span className="text-red-400 font-bold">permanently deleted</span>.
-            </p>
-            <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-yellow-500 mb-[1vh] font-mono">
-              ⚠️ This action cannot be undone!
-            </p>
-
-            <div className="flex gap-[0.5vw] pt-[0.3vh]">
-              <button
-                onClick={confirmDelete}
-                className="flex-1 bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-red-400 uppercase tracking-wider font-mono"
+          ) : (
+            pendingTasks.map((task) => (
+              <div
+                key={task.id}
+                className="group r-lg chip chip-hover transition-all px-4 py-3"
               >
-                Delete
-              </button>
-              <button
-                onClick={() => setDeletingTaskId(null)}
-                className="flex-1 bg-gray-900/30 hover:bg-gray-900/50 border border-gray-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-gray-400 uppercase font-mono"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="flex items-center gap-[0.5vw] mb-[0.5vh]">
-        <span className="w-[0.4vw] h-[0.4vh] min-w-[6px] min-h-[6px] bg-yellow-500 rounded-full animate-pulse"></span>
-        <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] font-bold text-green-500 uppercase tracking-wider">
-          &gt;&gt; Dump
-        </h3>
-      </div>
-
-      <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.5vh] font-mono">
-        Schedule when ready
-      </p>
-
-      <form onSubmit={handleAddTask} className="mb-[0.5vh] space-y-[0.3vh]">
-        <input
-          type="text"
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
-          placeholder="New task..."
-          className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 placeholder-gray-600 focus:outline-none focus:border-green-500 font-mono"
-          disabled={isAdding}
-        />
-        <input
-          type="date"
-          value={deadline}
-          onChange={(e) => setDeadline(e.target.value)}
-          min={new Date().toISOString().split('T')[0]}
-          className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
-          disabled={isAdding}
-        />
-        <button
-          type="submit"
-          disabled={isAdding || !newTask.trim()}
-          className="w-full bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-3 py-2 text-xs text-green-400 uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-mono"
-        >
-          {isAdding ? "Adding..." : "+ Add to Dump"}
-        </button>
-      </form>
-      <div className="space-y-2 flex-1 overflow-y-auto pr-2">
-        {incompleteTasks.length === 0 ? (
-          <div className="text-center text-gray-600 text-xs py-8 font-mono">
-            [EMPTY_BACKLOG]
-            <br />
-            No pending tasks
-          </div>
-        ) : (
-          incompleteTasks.map((task) => (
-            <div
-              key={task.id}
-              className="bg-black/70 border border-yellow-700/30 p-3 hover:border-yellow-500/50 transition-colors group"
-            >
-              <div className="flex justify-between items-start gap-2 mb-2">
-                <h4 className="text-sm text-green-400 font-mono">{task.title}</h4>
-              </div>
-
-              {task.deadline && (
-                <div className="text-xs text-yellow-600 mb-2 font-mono">
-                  Deadline: {new Date(task.deadline).toLocaleDateString()}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-medium text-ink truncate block">{task.title}</span>
+                    {task.deadline && (
+                      <span className={`inline-flex items-center gap-1 text-[11px] mt-0.5 ${deadlineTone(task.deadline)}`}>
+                        <CalendarClock className="w-3 h-3" />
+                        due {new Date(task.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                    <HudButton variant="primary" onClick={() => setScheduling(task)} title="Schedule for today">
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </HudButton>
+                    <HudButton variant="danger" onClick={() => setDeleting(task)} title="Delete">
+                      <X className="w-3.5 h-3.5" />
+                    </HudButton>
+                  </div>
                 </div>
-              )}
-
-              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={() => setMovingTaskId(task.id)}
-                  className="text-xs bg-blue-900/30 hover:bg-blue-900/50 border border-blue-700/50 px-2 py-1 text-blue-400 font-mono"
-                >
-                  → Today
-                </button>
-                <button
-                  onClick={() => promptDelete(task.id)}
-                  className="text-xs bg-red-900/30 hover:bg-red-900/50 border border-red-700/50 px-2 py-1 text-red-400 font-mono"
-                >
-                  Delete
-                </button>
               </div>
-            </div>
-          ))
-        )}
-        {completedTasks.length > 0 && (
-          <div className="mt-4">
-            <button
-              onClick={() => setShowCompleted(!showCompleted)}
-              className="w-full flex items-center justify-between text-xs text-gray-500 uppercase tracking-wider mb-2 font-mono hover:text-green-500 transition-colors"
-            >
-              <span>✓ Completed ({completedTasks.length})</span>
-              <span>{showCompleted ? "▼" : "▶"}</span>
-            </button>
+            ))
+          )}
 
-            {showCompleted && (
-              <div className="space-y-2">
-                {completedTasks.map((task) => (
+          {completedTasks.length > 0 && (
+            <div className="pt-2">
+              <button
+                onClick={() => setShowCompleted(!showCompleted)}
+                className="w-full flex items-center justify-between text-[11px] font-semibold text-ink3 uppercase tracking-widest hover:text-ink2 transition-colors py-1"
+              >
+                <span>✓ Done ({completedTasks.length})</span>
+                {showCompleted ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+              </button>
+              {showCompleted &&
+                completedTasks.map((task) => (
                   <div
                     key={task.id}
-                    className="bg-black/70 border border-gray-800 p-3 hover:border-gray-700 transition-colors group opacity-60"
+                    className="group flex items-center justify-between gap-2 r-lg chip px-4 py-2.5 mt-2 opacity-60 hover:opacity-90 transition-opacity"
                   >
-                    <div className="flex justify-between items-start gap-2 mb-2">
-                      <h4 className="text-sm text-gray-500 font-mono line-through">{task.title}</h4>
-                    </div>
-
-                    {task.finalPoints && (
-                      <div className="text-xs text-green-600 mb-2 font-mono">
-                        +{task.finalPoints} XP
-                      </div>
-                    )}
-
-                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => handleUncompleteTask(task.id)}
-                        className="text-xs bg-yellow-900/30 hover:bg-yellow-900/50 border border-yellow-700/50 px-2 py-1 text-yellow-400 font-mono"
-                      >
-                        ↺ Uncomplete
-                      </button>
-                      <button
-                        onClick={() => promptDelete(task.id)}
-                        className="text-xs bg-red-900/30 hover:bg-red-900/50 border border-red-700/50 px-2 py-1 text-red-400 font-mono"
-                      >
-                        Delete
-                      </button>
+                    <span className="text-sm text-ink3 line-through truncate">{task.title}</span>
+                    <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                      <HudButton variant="ghost" onClick={() => handleUncomplete(task)}>
+                        undo
+                      </HudButton>
+                      <HudButton variant="danger" onClick={() => setDeleting(task)}>
+                        <X className="w-3.5 h-3.5" />
+                      </HudButton>
                     </div>
                   </div>
                 ))}
-              </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {scheduling && (
+        <ScheduleTaskModal
+          mode="schedule"
+          heading="Schedule for today"
+          taskTitle={scheduling.title}
+          initial={{ tier: scheduling.tier, category: scheduling.category }}
+          submitLabel="Move to today"
+          onSubmit={handleSchedule}
+          onClose={() => setScheduling(null)}
+        />
+      )}
+
+      {deleting && (
+        <ConfirmModal
+          title="Delete task?"
+          body={
+            <>
+              <span className="text-ink font-medium">{deleting.title}</span> will be permanently
+              deleted.
+            </>
+          }
+          confirmLabel="Delete"
+          onConfirm={handleDelete}
+          onCancel={() => setDeleting(null)}
+        />
+      )}
+    </Panel>
   );
 }

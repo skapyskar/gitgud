@@ -1,1143 +1,636 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Task, TaskTier, Category } from "../../../../prisma/generated/client";
+import { Timer, ChevronDown, ChevronRight, Repeat, Clock, AlarmClock, X, Plus, Check } from "lucide-react";
+import type { Task } from "../../../../prisma/generated/client";
+import { Panel, HudButton, ConfirmModal, Modal, ModalTitle, TierBadge, TIER_STYLE } from "../../components/ui";
+import { useRewards } from "../../components/RewardLayer";
+import ScheduleTaskModal, { ScheduleValues } from "./ScheduleTaskModal";
 import TaskTimer from "./TaskTimer";
-
-type WeeklyTask = Task & { repeatDays?: string | null };
+import { completeTask, createTask, deleteTask, uncompleteTask, updateTask } from "./taskApi";
+import { tierBaseXP } from "@/lib/gamification";
+import { dayKey, dayStart, todayAt, todayDayIndex } from "@/lib/dates";
 
 interface DailyBoardProps {
   dailyTasks: Task[];
-  weeklyTemplates: WeeklyTask[];
-  userId: string;
+  weeklyTemplates: Task[];
 }
 
-const TIER_COLORS = {
-  S: "border-red-600 bg-red-900/20 text-red-400",
-  A: "border-orange-600 bg-orange-900/20 text-orange-400",
-  B: "border-blue-600 bg-blue-900/20 text-blue-400",
-  C: "border-gray-600 bg-gray-900/20 text-gray-400",
-};
+/** A row on today's board: a real task or a not-yet-instantiated habit. */
+interface BoardItem {
+  task: Task;
+  isVirtualHabit: boolean; // WEEKLY template without an instance today
+}
 
+function deadlinePassedToday(deadlineTime: Date | string | null): boolean {
+  if (!deadlineTime) return false;
+  const d = new Date(deadlineTime);
+  const cutoff = new Date();
+  cutoff.setHours(d.getHours(), d.getMinutes(), 0, 0);
+  return Date.now() > cutoff.getTime();
+}
 
-export default function DailyBoard({ dailyTasks, weeklyTemplates, userId }: DailyBoardProps) {
+function formatTime(d: Date | string): string {
+  return new Date(d).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+export default function DailyBoard({ dailyTasks, weeklyTemplates }: DailyBoardProps) {
   const router = useRouter();
-  const [isCreating, setIsCreating] = useState(false);
-  const [newTask, setNewTask] = useState({
-    title: "",
-    tier: "C" as TaskTier,
-    category: "LIFE" as Category,
-    deadlineTime: "",
-    duration: "",
-    frequency: "1",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { celebrate } = useRewards();
+
+  const [tasks, setTasks] = useState<Task[]>(dailyTasks);
+  const [creating, setCreating] = useState(false);
+  const [rescheduling, setRescheduling] = useState<Task | null>(null);
+  const [deleting, setDeleting] = useState<BoardItem | null>(null);
+  const [confirmDuration, setConfirmDuration] = useState<{ item: BoardItem; minutes: number } | null>(null);
+  const [timerFor, setTimerFor] = useState<BoardItem | null>(null);
+  const [dismissed, setDismissed] = useState<string[]>([]);
   const [showCompleted, setShowCompleted] = useState(false);
-  const [showBacklog, setShowBacklog] = useState(false);
-  const [boardLoading, setBoardLoading] = useState(true);
-  const [completingTask, setCompletingTask] = useState<{ id: string; isWeekly: boolean; duration: number | null } | null>(null);
-  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
-  const [dismissedWeeklyIds, setDismissedWeeklyIds] = useState<string[]>([]);
-  const [timerTaskId, setTimerTaskId] = useState<string | null>(null);
-  const [timerDuration, setTimerDuration] = useState<number>(60);
-  const [timerHasAllocatedDuration, setTimerHasAllocatedDuration] = useState<boolean>(false);
-  const [movingBacklogTaskId, setMovingBacklogTaskId] = useState<string | null>(null);
-  const [moveBacklogTier, setMoveBacklogTier] = useState<TaskTier>("C");
-  const [moveBacklogCategory, setMoveBacklogCategory] = useState<Category>("LIFE");
-  const [moveBacklogDeadlineTime, setMoveBacklogDeadlineTime] = useState("");
-  const [moveBacklogDuration, setMoveBacklogDuration] = useState("");
-  const [moveBacklogFrequency, setMoveBacklogFrequency] = useState<string>("1"); // New state for backlog move
+  const [showOverdue, setShowOverdue] = useState(true);
+  const tempIdRef = useRef(0);
 
-  const [optimisticTasks, setOptimisticTasks] = useState<Task[]>([...dailyTasks]);
+  // Reset optimistic state when fresh server data arrives (render-time reset).
+  const [prevDaily, setPrevDaily] = useState(dailyTasks);
+  if (prevDaily !== dailyTasks) {
+    setPrevDaily(dailyTasks);
+    setTasks(dailyTasks);
+  }
 
-  React.useEffect(() => {
-    setOptimisticTasks([...dailyTasks]);
-  }, [dailyTasks]);
-  React.useEffect(() => {
-    const timer = setTimeout(() => setBoardLoading(false), 600);
-    return () => clearTimeout(timer);
-  }, []);
-
-  React.useEffect(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    const stored = localStorage.getItem(`dismissedWeekly_${today}`);
-    if (stored) {
-      try {
-        setDismissedWeeklyIds(JSON.parse(stored));
-      } catch {
-        setDismissedWeeklyIds([]);
+  // Per-day "skip habit" list; old days' keys are cleaned up as we go.
+  const todayStorageKey = `gg-dismissed-${dayKey()}`;
+  useEffect(() => {
+    try {
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key?.startsWith("gg-dismissed-") && key !== todayStorageKey) {
+          localStorage.removeItem(key);
+        }
       }
+      // Loading persisted client state after hydration must happen in an
+      // effect — a lazy initializer would mismatch the server-rendered HTML.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setDismissed(JSON.parse(localStorage.getItem(todayStorageKey) ?? "[]"));
+    } catch {
+      setDismissed([]);
     }
-  }, []);
+  }, [todayStorageKey]);
 
-  const today = new Date();
-  const todayDayIndex = today.getDay();
+  const todayK = dayKey();
 
-  const getMinDeadlineTime = () => {
-    const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = (now.getMinutes() + 1).toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-  };
+  const { pending, completed, overdue } = useMemo(() => {
+    const todays = tasks.filter((t) => t.scheduledDate && dayKey(new Date(t.scheduledDate)) === todayK);
+    const instancedTemplates = new Set(todays.filter((t) => t.templateId).map((t) => t.templateId));
 
-  const MAX_DEADLINE_TIME = "23:59";
+    const habitItems: BoardItem[] = weeklyTemplates
+      .filter((t) => {
+        const days = t.repeatDays?.split(",").map(Number) ?? [];
+        return (
+          days.includes(todayDayIndex()) &&
+          !instancedTemplates.has(t.id) &&
+          !dismissed.includes(t.id)
+        );
+      })
+      .map((task) => ({ task, isVirtualHabit: true }));
 
-  const getMaxDuration = () => {
-    if (!newTask.deadlineTime) return 999;
-    const now = new Date();
-    const [deadlineHours, deadlineMinutes] = newTask.deadlineTime.split(':').map(Number);
-    const deadlineDate = new Date(now);
-    deadlineDate.setHours(deadlineHours, deadlineMinutes, 0, 0);
-
-    const diffMs = deadlineDate.getTime() - now.getTime();
-    const diffMinutes = Math.floor(diffMs / (1000 * 60));
-    return Math.max(1, diffMinutes);
-  };
-
-  React.useEffect(() => {
-    if (newTask.deadlineTime && newTask.duration) {
-      const maxDur = getMaxDuration();
-      const currentDur = parseInt(newTask.duration);
-      if (currentDur > maxDur) {
-        setNewTask(prev => ({ ...prev, duration: maxDur.toString() }));
-      }
-    }
-  }, [newTask.deadlineTime]);
-
-  const getTierBaseXP = (tier: TaskTier): number => {
-    switch (tier) {
-      case "S": return 100;
-      case "A": return 60;
-      case "B": return 30;
-      case "C": return 10;
-      default: return 10;
-    }
-  };
-
-  const todaysWeeklyTasks = weeklyTemplates.filter((template) => {
-    const days = template.repeatDays?.split(",").map(Number) || [];
-    return days.includes(todayDayIndex) && !dismissedWeeklyIds.includes(template.id);
-  });
-
-  const todayISO = today.toISOString().slice(0, 10);
-  const todaysTasks = optimisticTasks.filter(task =>
-    task.scheduledDate && new Date(task.scheduledDate).toISOString().slice(0, 10) === todayISO
-  );
-  const backlogTasks = optimisticTasks.filter(task =>
-    task.scheduledDate &&
-    new Date(task.scheduledDate).toISOString().slice(0, 10) < todayISO &&
-    !task.isCompleted
-  );
-
-  const allTodayTasks = [
-    ...todaysTasks,
-    ...todaysWeeklyTasks
-  ];
-
-  const isTaskExpired = (task: Task | WeeklyTask): boolean => {
-    if (!task.deadlineTime) return false;
-    const now = new Date();
-    const deadlineDate = new Date(task.deadlineTime);
-    const todayDeadline = new Date();
-    todayDeadline.setHours(deadlineDate.getHours(), deadlineDate.getMinutes(), 0, 0);
-    return now.getTime() > todayDeadline.getTime();
-  };
-
-  const pendingTasks = allTodayTasks
-    .filter(task => !task.isCompleted)
-    .sort((a, b) => {
-      const aTime = a.deadlineTime ? new Date(a.deadlineTime).getTime() : Infinity;
-      const bTime = b.deadlineTime ? new Date(b.deadlineTime).getTime() : Infinity;
-      if (aTime !== bTime) return aTime - bTime;
-      const aDuration = a.allocatedDuration ?? Infinity;
-      const bDuration = b.allocatedDuration ?? Infinity;
-      if (aDuration !== bDuration) return aDuration - bDuration;
-      return a.title.localeCompare(b.title);
+    const pendingItems: BoardItem[] = [
+      ...todays.filter((t) => !t.isCompleted).map((task) => ({ task, isVirtualHabit: false })),
+      ...habitItems,
+    ].sort((a, b) => {
+      // Sort by deadline's time-of-day (stored dates may be from any calendar day).
+      const minutesOf = (t: Task) => {
+        if (!t.deadlineTime) return Infinity;
+        const d = new Date(t.deadlineTime);
+        return d.getHours() * 60 + d.getMinutes();
+      };
+      const at = minutesOf(a.task);
+      const bt = minutesOf(b.task);
+      if (at !== bt) return at - bt;
+      return a.task.title.localeCompare(b.task.title);
     });
-  const completedTasks = allTodayTasks.filter(task => task.isCompleted);
 
-  const handleCreateDailyTask = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTask.title.trim() || !newTask.deadlineTime) return;
-    setIsCreating(false);
-    setIsSubmitting(true);
+    return {
+      pending: pendingItems,
+      completed: todays.filter((t) => t.isCompleted),
+      overdue: tasks.filter(
+        (t) => t.scheduledDate && dayKey(new Date(t.scheduledDate)) < todayK && !t.isCompleted
+      ),
+    };
+  }, [tasks, weeklyTemplates, dismissed, todayK]);
 
-    const tempId = Math.random().toString();
+  /* ── Actions ── */
+
+  const handleCreate = async (values: ScheduleValues) => {
+    setCreating(false);
+    const tempId = `temp-${++tempIdRef.current}`;
     const now = new Date();
-    const utcMidnight = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-    const [hours, minutes] = newTask.deadlineTime.split(':').map(Number);
-    const deadlineDate = new Date();
-    deadlineDate.setHours(hours, minutes, 0, 0);
-
-    const optimisticTask: Task & { frequency: number, completedFrequency: number } = {
+    const optimistic: Task = {
       id: tempId,
-      title: newTask.title,
-      isCompleted: false,
-      type: "DAILY",
-      tier: newTask.tier,
-      category: newTask.category,
-      userId,
-      plannedDate: utcMidnight,
-      createdAt: now,
-      updatedAt: now,
+      userId: "",
+      title: values.title,
       description: null,
+      type: "DAILY",
+      tier: values.tier,
+      category: values.category,
+      plannedDate: dayStart(),
       plannedStartTime: null,
       plannedEndTime: null,
-      scheduledDate: utcMidnight,
+      deadline: null,
+      scheduledDate: dayStart(),
       repeatDays: null,
+      templateId: null,
+      isCompleted: false,
       completedAt: null,
       basePoints: 10,
       xpWorth: 10,
       isBonus: false,
       timeBonus: 0,
       finalPoints: 0,
-      deadline: null,
-      deadlineTime: deadlineDate,
-      allocatedDuration: newTask.duration ? parseInt(newTask.duration) : null,
+      deadlineTime: todayAt(values.deadlineTime),
+      allocatedDuration: values.duration,
       durationMet: false,
       isExpired: false,
-      frequency: parseInt(newTask.frequency) || 1,
+      frequency: values.frequency,
       completedFrequency: 0,
+      createdAt: now,
+      updatedAt: now,
     };
-    // @ts-ignore - casting to Task for state update
-    setOptimisticTasks((current) => [optimisticTask as Task, ...current]);
+    setTasks((cur) => [optimistic, ...cur]);
 
-    const taskData = {
-      title: newTask.title,
+    const res = await createTask({
+      title: values.title,
       type: "DAILY",
-      tier: newTask.tier,
-      category: newTask.category,
-      scheduledDate: utcMidnight.toISOString(),
-      deadlineTime: deadlineDate.toISOString(),
-      allocatedDuration: newTask.duration ? parseInt(newTask.duration) : null,
-      frequency: parseInt(newTask.frequency) || 1,
-    };
+      tier: values.tier,
+      category: values.category,
+      scheduledDate: dayStart().toISOString(),
+      deadlineTime: todayAt(values.deadlineTime).toISOString(),
+      allocatedDuration: values.duration,
+      frequency: values.frequency,
+    });
 
-    setNewTask({ title: "", tier: "C", category: "LIFE", deadlineTime: "", duration: "", frequency: "1" });
+    if (res?.success) router.refresh();
+    else setTasks((cur) => cur.filter((t) => t.id !== tempId));
+  };
 
-    try {
-      const res = await fetch("/api/tasks/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(taskData),
-      });
-      if (res.ok) {
-        router.refresh();
-      } else {
-        setOptimisticTasks((current) => current.filter(t => t.id !== tempId));
-      }
-    } catch (error) {
-      setOptimisticTasks((current) => current.filter(t => t.id !== tempId));
-      console.error("Failed to create daily task:", error);
-    } finally {
-      setIsSubmitting(false);
+  const requestComplete = (item: BoardItem) => {
+    if (item.task.allocatedDuration) {
+      setConfirmDuration({ item, minutes: item.task.allocatedDuration });
+    } else {
+      void doComplete(item, false);
     }
   };
 
-  const handleCompleteTask = async (taskId: string, isWeeklyTask: boolean) => {
-    const task = allTodayTasks.find(t => t.id === taskId);
-    if (task?.allocatedDuration) {
-      setCompletingTask({ id: taskId, isWeekly: isWeeklyTask, duration: task.allocatedDuration });
-      return;
+  const doComplete = async (item: BoardItem, durationMet: boolean, count = 1) => {
+    setConfirmDuration(null);
+    const prev = tasks;
+    const { task, isVirtualHabit } = item;
+    const frequency = task.frequency || 1;
+
+    if (isVirtualHabit) {
+      // Materialize an optimistic instance so the habit shows progress instantly.
+      const instance: Task = {
+        ...task,
+        id: `temp-${++tempIdRef.current}`,
+        type: "DAILY",
+        templateId: task.id,
+        scheduledDate: dayStart(),
+        completedFrequency: count,
+        isCompleted: count >= frequency,
+        completedAt: count >= frequency ? new Date() : null,
+      };
+      setTasks((cur) => [instance, ...cur]);
+    } else {
+      setTasks((cur) =>
+        cur.map((t) => {
+          if (t.id !== task.id) return t;
+          const done = (t.completedFrequency || 0) + count;
+          return {
+            ...t,
+            completedFrequency: done,
+            isCompleted: done >= frequency,
+            completedAt: done >= frequency ? new Date() : null,
+          };
+        })
+      );
     }
 
-    await confirmCompleteTask(taskId, isWeeklyTask, false);
-  };
-
-  const confirmCompleteTask = async (taskId: string, isWeeklyTask: boolean, durationMet: boolean) => {
-    setCompletingTask(null);
-    const prev = [...optimisticTasks];
-    setOptimisticTasks((current) =>
-      current.map((t) => {
-        if (t.id !== taskId) return t;
-        // @ts-ignore
-        const currentFreq = t.frequency || 1;
-        // @ts-ignore
-        const currentDone = t.completedFrequency || 0;
-        const newDone = currentDone + 1;
-        const isNowDone = newDone >= currentFreq;
-
-        return {
-          ...t,
-          isCompleted: isNowDone,
-          completedFrequency: newDone,
-          completedAt: isNowDone ? new Date() : null,
-          durationMet: isNowDone ? durationMet : t.durationMet
-        };
-      })
-    );
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/tasks/complete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          taskId,
-          isWeeklyBonus: isWeeklyTask,
-          durationMet,
-          count: 1,
-        }),
-      });
-      if (res.ok) {
-        router.refresh();
-      } else {
-        setOptimisticTasks(prev);
-      }
-    } catch (error) {
-      setOptimisticTasks(prev);
-      console.error("Failed to complete task:", error);
-    } finally {
-      setIsLoading(false);
+    const res = await completeTask({ taskId: task.id, durationMet, count });
+    if (res?.success) {
+      celebrate(res);
+      router.refresh();
+    } else {
+      setTasks(prev);
     }
   };
 
-  const promptDeleteTask = (taskId: string) => {
-    setDeletingTaskId(taskId);
-  };
-  const confirmDeleteTask = async () => {
-    if (!deletingTaskId) return;
-
-    const taskId = deletingTaskId;
-    setDeletingTaskId(null); // Close dialog
-
-    const isWeeklyTask = weeklyTemplates.some(t => t.id === taskId);
-
-    if (isWeeklyTask) {
-      const today = new Date().toISOString().slice(0, 10);
-      const newDismissed = [...dismissedWeeklyIds, taskId];
-      setDismissedWeeklyIds(newDismissed);
-      localStorage.setItem(`dismissedWeekly_${today}`, JSON.stringify(newDismissed));
-      return;
-    }
-    const prev = [...optimisticTasks];
-    setOptimisticTasks((current) => current.filter((t) => t.id !== taskId));
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/tasks/delete", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskId }),
-      });
-      if (res.ok) {
-        router.refresh();
-      } else {
-        setOptimisticTasks(prev);
-      }
-    } catch (error) {
-      setOptimisticTasks(prev);
-      console.error("Failed to delete task:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleUncompleteTask = async (taskId: string) => {
-    const prev = [...optimisticTasks];
-    setOptimisticTasks((current) =>
-      current.map((t) =>
-        t.id === taskId
-          ? { ...t, isCompleted: false, completedAt: null }
+  const handleUncomplete = async (task: Task) => {
+    const prev = tasks;
+    setTasks((cur) =>
+      cur.map((t) =>
+        t.id === task.id
+          ? {
+              ...t,
+              completedFrequency: Math.max(0, (t.completedFrequency || 1) - 1),
+              isCompleted: false,
+              completedAt: null,
+            }
           : t
       )
     );
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/tasks/uncomplete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskId }),
-      });
-      if (res.ok) {
-        router.refresh();
-      } else {
-        setOptimisticTasks(prev);
-      }
-    } catch (error) {
-      setOptimisticTasks(prev);
-      console.error("Failed to uncomplete task:", error);
-    } finally {
-      setIsLoading(false);
+    const res = await uncompleteTask(task.id);
+    if (res?.success) router.refresh();
+    else setTasks(prev);
+  };
+
+  const handleDelete = async () => {
+    if (!deleting) return;
+    const { task, isVirtualHabit } = deleting;
+    setDeleting(null);
+
+    if (isVirtualHabit) {
+      const next = [...dismissed, task.id];
+      setDismissed(next);
+      localStorage.setItem(todayStorageKey, JSON.stringify(next));
+      return;
     }
+
+    const prev = tasks;
+    setTasks((cur) => cur.filter((t) => t.id !== task.id));
+    const res = await deleteTask(task.id);
+    if (res?.success) router.refresh();
+    else setTasks(prev);
   };
 
-  // Backlog handlers
-  const getBacklogMaxDuration = () => {
-    if (!moveBacklogDeadlineTime) return 999;
-    const now = new Date();
-    const [h, m] = moveBacklogDeadlineTime.split(':').map(Number);
-    const dl = new Date(now);
-    dl.setHours(h, m, 0, 0);
-    const diffMs = dl.getTime() - now.getTime();
-    return Math.max(1, Math.floor(diffMs / 60000));
+  const handleReschedule = async (values: ScheduleValues) => {
+    if (!rescheduling) return;
+    const id = rescheduling.id;
+    setRescheduling(null);
+    const prev = tasks;
+    setTasks((cur) =>
+      cur.map((t) => (t.id === id ? { ...t, scheduledDate: dayStart() } : t))
+    );
+    const res = await updateTask({
+      taskId: id,
+      scheduledDate: dayStart().toISOString(),
+      tier: values.tier,
+      category: values.category,
+      deadlineTime: todayAt(values.deadlineTime).toISOString(),
+      allocatedDuration: values.duration,
+      frequency: values.frequency,
+    });
+    if (res?.success) router.refresh();
+    else setTasks(prev);
   };
 
-  const isBacklogDeadlineValid = () => {
-    if (!moveBacklogDeadlineTime) return false;
-    const now = new Date();
-    const [h, m] = moveBacklogDeadlineTime.split(':').map(Number);
-    const dl = new Date(now);
-    dl.setHours(h, m, 0, 0);
-    return dl.getTime() > now.getTime();
+  const handleMoveToDump = async (task: Task) => {
+    const prev = tasks;
+    setTasks((cur) => cur.filter((t) => t.id !== task.id));
+    const res = await updateTask({ taskId: task.id, type: "BACKLOG", scheduledDate: null });
+    if (res?.success) router.refresh();
+    else setTasks(prev);
   };
 
-  const handleMoveBacklogToToday = async () => {
-    if (!movingBacklogTaskId || !moveBacklogDeadlineTime || !isBacklogDeadlineValid()) return;
+  /* ── Row renderer ── */
 
-    const prev = [...optimisticTasks];
-    setOptimisticTasks(current => current.filter(t => t.id !== movingBacklogTaskId));
-    setIsLoading(true);
+  const renderRow = (item: BoardItem) => {
+    const { task, isVirtualHabit } = item;
+    const isHabit = isVirtualHabit || !!task.templateId;
+    const expired = !task.isCompleted && deadlinePassedToday(task.deadlineTime);
+    const frequency = task.frequency || 1;
+    const done = task.completedFrequency || 0;
 
-    try {
-      const todayDate = new Date();
-      todayDate.setUTCHours(0, 0, 0, 0);
+    return (
+      <div
+        key={task.id}
+        className={`group relative r-lg chip chip-hover border-l-[3px] ${TIER_STYLE[task.tier].border} transition-all px-4 py-3 ${expired ? "opacity-45" : ""}`}
+      >
+        <div className="flex items-start gap-3">
+          {expired ? (
+            <span className="mt-0.5 w-6 h-6 shrink-0 r-md chip flex items-center justify-center text-ink3">
+              <X className="w-3.5 h-3.5" />
+            </span>
+          ) : frequency === 1 ? (
+            <button
+              onClick={() => requestComplete(item)}
+              className={`mt-0.5 w-6 h-6 shrink-0 r-md border-2 transition-all hover:scale-110 hover:shadow-[0_0_12px_var(--glow)] ${
+                isHabit ? "border-hab/70 hover:bg-hab/25" : "border-acc/70 hover:bg-acc/25"
+              }`}
+              title="Complete"
+            />
+          ) : (
+            <span className="mt-0.5 w-6 h-6 shrink-0 flex items-center justify-center text-[10px] font-bold text-ink2 chip r-md font-mono">
+              {done}/{frequency}
+            </span>
+          )}
 
-      const [hours, minutes] = moveBacklogDeadlineTime.split(':').map(Number);
-      const deadlineDate = new Date();
-      deadlineDate.setHours(hours, minutes, 0, 0);
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm font-medium text-ink truncate">{task.title}</span>
+              {isHabit && (
+                <span className="flex items-center gap-1 text-[10px] font-semibold text-hab bg-hab/10 ring-1 ring-inset ring-hab/30 rounded-full px-2 py-0.5">
+                  <Repeat className="w-3 h-3" /> habit
+                </span>
+              )}
+            </div>
 
-      const res = await fetch("/api/tasks/update", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          taskId: movingBacklogTaskId,
-          scheduledDate: todayDate.toISOString(),
-          tier: moveBacklogTier,
-          category: moveBacklogCategory,
-          deadlineTime: deadlineDate.toISOString(),
-          allocatedDuration: moveBacklogDuration ? parseInt(moveBacklogDuration) : null,
-          frequency: parseInt(moveBacklogFrequency) || 1,
-        }),
-      });
+            <div className="flex items-center gap-2.5 mt-1.5 flex-wrap text-[11px]">
+              <TierBadge tier={task.tier} />
+              <span className="text-ink3">{task.category}</span>
+              {expired ? (
+                <span className="text-rosy font-bold">expired · 0 XP</span>
+              ) : (
+                <span className="text-acc font-semibold">+{tierBaseXP(task.tier)} XP</span>
+              )}
+              {task.deadlineTime && (
+                <span className={`flex items-center gap-1 ${expired ? "text-rosy" : "text-gold"}`}>
+                  <AlarmClock className="w-3 h-3" /> {formatTime(task.deadlineTime)}
+                </span>
+              )}
+              {task.allocatedDuration && (
+                <span className="flex items-center gap-1 text-hab">
+                  <Clock className="w-3 h-3" /> {task.allocatedDuration}m
+                </span>
+              )}
+            </div>
 
-      if (res.ok) {
-        setMovingBacklogTaskId(null);
-        setMoveBacklogTier("C");
-        setMoveBacklogCategory("LIFE");
-        setMoveBacklogDeadlineTime("");
-        setMoveBacklogDuration("");
-        setMoveBacklogFrequency("1");
-        router.refresh();
-      } else {
-        setOptimisticTasks(prev);
-      }
-    } catch (error) {
-      setOptimisticTasks(prev);
-      console.error("Failed to move backlog task to today:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleMoveBacklogToDump = async (taskId: string) => {
-    const prev = [...optimisticTasks];
-    setOptimisticTasks(current => current.filter(t => t.id !== taskId));
-    setIsLoading(true);
-
-    try {
-      const res = await fetch("/api/tasks/update", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          taskId,
-          type: "BACKLOG",
-        }),
-      });
-
-      if (res.ok) {
-        router.refresh();
-      } else {
-        setOptimisticTasks(prev);
-      }
-    } catch (error) {
-      setOptimisticTasks(prev);
-      console.error("Failed to move backlog task to dump:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className="border border-green-900/30 p-[0.15vw] bg-black/50 flex flex-col h-[calc(100vh-60vh)] min-h-[12vh] max-h-[30vh] lg:h-[calc(100vh-40vh)] lg:max-h-[50vh] relative">
-      {(isLoading || boardLoading) && (
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="text-green-400 font-mono text-lg animate-pulse">LOADING TASKS...</div>
-        </div>
-      )}
-      {completingTask && (() => {
-        const taskComp = allTodayTasks.find(t => t.id === completingTask.id);
-        // @ts-ignore
-        const freq = taskComp?.frequency || 1;
-        const bonusPct = freq > 1 ? (25 / freq).toFixed(1).replace(/\.0$/, '') : "25";
-
-        return (
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
-            <div className="bg-black border-2 border-green-500 p-[1vw] max-w-md w-full">
-              <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] text-green-400 font-mono mb-[0.5vh] uppercase">
-                Task Complete?
-              </h3>
-              <p className="text-[clamp(0.6rem,0.85vw,0.875rem)] text-gray-400 mb-[1vh] font-mono">
-                Did you complete this task within <span className="text-green-400 font-bold">{completingTask.duration} minutes</span>?
-              </p>
-              <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-yellow-500 mb-[1vh] font-mono">
-                +{bonusPct}% XP BONUS if yes!
-              </p>
-
-              <div className="flex gap-[0.5vw] pt-[0.3vh]">
+            {!expired && frequency > 1 && (
+              <div className="flex items-center gap-1.5 mt-2.5">
+                {Array.from({ length: frequency }).map((_, idx) => {
+                  const filled = idx < done;
+                  const clickable = idx === done || (filled && idx === done - 1);
+                  return (
+                    <button
+                      key={idx}
+                      disabled={!clickable}
+                      onClick={() => {
+                        if (idx === done) requestComplete(item);
+                        else if (filled && idx === done - 1 && !isVirtualHabit) handleUncomplete(task);
+                      }}
+                      className={`w-4 h-4 rounded-md border transition-all hover:scale-110 ${
+                        filled
+                          ? isHabit
+                            ? "bg-gradient-to-br from-hab to-acc3 border-transparent shadow-[0_0_8px_var(--glow)]"
+                            : "grad-primary border-transparent shadow-[0_0_8px_var(--glow)]"
+                          : `${isHabit ? "border-hab/50 hover:bg-hab/25" : "border-acc/50 hover:bg-acc/25"} ${clickable ? "" : "opacity-40"}`
+                      }`}
+                    />
+                  );
+                })}
                 <button
-                  onClick={() => confirmCompleteTask(completingTask.id, completingTask.isWeekly, true)}
-                  className="flex-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 uppercase tracking-wider font-mono"
+                  onClick={() => doComplete(item, false, frequency - done)}
+                  className="ml-1 text-[10px] font-semibold text-acc hover:text-acc2 transition-colors"
                 >
-                  Yes (+{bonusPct}% XP)
-                </button>
-                <button
-                  onClick={() => confirmCompleteTask(completingTask.id, completingTask.isWeekly, false)}
-                  className="flex-1 bg-gray-900/30 hover:bg-gray-900/50 border border-gray-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-gray-400 uppercase font-mono"
-                >
-                  No
-                </button>
-                <button
-                  onClick={() => setCompletingTask(null)}
-                  className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-red-400 uppercase font-mono"
-                >
-                  Cancel
+                  all
                 </button>
               </div>
-            </div>
+            )}
           </div>
-        );
-      })()}
-      {timerTaskId && (
-        <TaskTimer
-          taskId={timerTaskId}
-          initialMinutes={timerDuration}
-          hasAllocatedDuration={timerHasAllocatedDuration}
-          onClose={() => setTimerTaskId(null)}
-          onTimerComplete={() => {
-            const task = allTodayTasks.find(t => t.id === timerTaskId);
-            if (task) {
-              confirmCompleteTask(timerTaskId, task.type === 'WEEKLY', true);
-            }
-            setTimerTaskId(null);
-          }}
+
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {!expired && (
+              <button
+                onClick={() => setTimerFor(item)}
+                className="p-2 r-md text-hab hover:bg-hab/15 transition-all"
+                title="Focus timer"
+              >
+                <Timer className="w-4 h-4" />
+              </button>
+            )}
+            <button
+              onClick={() => setDeleting(item)}
+              className="p-2 r-md text-rosy hover:bg-rosy/15 transition-all"
+              title={isVirtualHabit ? "Skip today" : "Delete"}
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const dateLabel = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  });
+
+  return (
+    <Panel
+      title="Today's quests"
+      subtitle={dateLabel}
+      accent="neon"
+      className="h-full"
+      right={
+        <HudButton variant="primary" className="flex items-center gap-1.5" onClick={() => setCreating(true)}>
+          <Plus className="w-3.5 h-3.5" /> New quest
+        </HudButton>
+      }
+    >
+      <div className="h-full overflow-y-auto pr-1 space-y-2">
+        {pending.length === 0 && completed.length === 0 && overdue.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-14 text-center">
+            <div className="w-14 h-14 r-lg chip flex items-center justify-center mb-4">
+              <Check className="w-6 h-6 text-ink3" />
+            </div>
+            <p className="font-display font-semibold text-ink2 mb-1">All clear</p>
+            <p className="text-xs text-ink3">
+              No quests queued. Deploy one or pull from the dump.
+            </p>
+          </div>
+        ) : (
+          <>
+            {pending.map(renderRow)}
+
+            {completed.length > 0 && (
+              <div className="pt-2">
+                <button
+                  onClick={() => setShowCompleted(!showCompleted)}
+                  className="w-full flex items-center justify-between text-[11px] font-semibold text-ink3 uppercase tracking-widest hover:text-ink2 transition-colors py-1"
+                >
+                  <span>✓ Cleared ({completed.length})</span>
+                  {showCompleted ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                </button>
+                {showCompleted &&
+                  completed.map((task) => (
+                    <div
+                      key={task.id}
+                      className="group flex items-center gap-3 r-lg chip px-4 py-2.5 mt-2 opacity-60 hover:opacity-90 transition-opacity"
+                    >
+                      <button
+                        onClick={() => handleUncomplete(task)}
+                        className={`w-6 h-6 shrink-0 r-md flex items-center justify-center transition-all hover:scale-110 ${
+                          task.templateId ? "bg-gradient-to-br from-hab to-acc3" : "grad-primary"
+                        }`}
+                        title="Undo"
+                      >
+                        <Check className="w-3.5 h-3.5 text-white" />
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm text-ink3 line-through truncate block">
+                          {task.title}
+                        </span>
+                        {task.finalPoints > 0 && (
+                          <span className="text-[11px] text-acc/80 font-medium">
+                            +{task.finalPoints} XP banked
+                          </span>
+                        )}
+                      </div>
+                      <TierBadge tier={task.tier} />
+                      <button
+                        onClick={() => setDeleting({ task, isVirtualHabit: false })}
+                        className="p-1.5 r-md text-rosy hover:bg-rosy/15 opacity-0 group-hover:opacity-100 transition-all"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            )}
+
+            {overdue.length > 0 && (
+              <div className="pt-2">
+                <button
+                  onClick={() => setShowOverdue(!showOverdue)}
+                  className="w-full flex items-center justify-between text-[11px] font-semibold text-warm uppercase tracking-widest hover:text-ink2 transition-colors py-1"
+                >
+                  <span>⚠ Overdue ({overdue.length})</span>
+                  {showOverdue ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                </button>
+                {showOverdue &&
+                  overdue.map((task) => (
+                    <div
+                      key={task.id}
+                      className="group r-lg border border-warm/25 bg-warm/5 px-4 py-2.5 mt-2"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <span className="text-sm text-ink2 font-medium truncate block">
+                            {task.title}
+                          </span>
+                          <span className="text-[10px] text-ink3">
+                            slipped{" "}
+                            {task.scheduledDate &&
+                              new Date(task.scheduledDate).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                              })}{" "}
+                            · not counted until rescheduled
+                          </span>
+                        </div>
+                        <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <HudButton variant="primary" onClick={() => setRescheduling(task)}>
+                            Today
+                          </HudButton>
+                          <HudButton variant="gold" onClick={() => handleMoveToDump(task)}>
+                            Dump
+                          </HudButton>
+                          <HudButton
+                            variant="danger"
+                            onClick={() => setDeleting({ task, isVirtualHabit: false })}
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </HudButton>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* ── Modals ── */}
+
+      {creating && (
+        <ScheduleTaskModal
+          mode="create"
+          heading="Deploy new quest"
+          onSubmit={handleCreate}
+          onClose={() => setCreating(false)}
         />
       )}
 
-      {deletingTaskId && (
-        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
-          <div className="bg-black border-2 border-red-500 p-[1vw] max-w-md w-full">
-            <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] text-red-400 font-mono mb-[0.5vh] uppercase">
-              Delete Task?
-            </h3>
-            <p className="text-[clamp(0.6rem,0.85vw,0.875rem)] text-gray-400 mb-[1vh] font-mono">
-              This task will be <span className="text-red-400 font-bold">permanently deleted</span> and removed from your efficiency calculations.
-            </p>
-            <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-yellow-500 mb-[1vh] font-mono">
-              ⚠️ This action cannot be undone!
-            </p>
-
-            <div className="flex gap-[0.5vw] pt-[0.3vh]">
-              <button
-                onClick={confirmDeleteTask}
-                className="flex-1 bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-red-400 uppercase tracking-wider font-mono"
-              >
-                Delete
-              </button>
-              <button
-                onClick={() => setDeletingTaskId(null)}
-                className="flex-1 bg-gray-900/30 hover:bg-gray-900/50 border border-gray-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-gray-400 uppercase font-mono"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {movingBacklogTaskId && (
-        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
-          <div className="bg-black border-2 border-green-500 p-[1vw] max-w-md w-full">
-            <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] text-green-400 font-mono mb-[0.5vh] uppercase">Reschedule for Today</h3>
-            <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-400 mb-[1vh] font-mono">Set deadline and details for today</p>
-
-            <div className="space-y-[0.5vh]">
-              <div>
-                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Task Tier *</label>
-                <select
-                  value={moveBacklogTier}
-                  onChange={(e) => setMoveBacklogTier(e.target.value as TaskTier)}
-                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
-                >
-                  <option value="S">S - Critical (High XP)</option>
-                  <option value="A">A - Important</option>
-                  <option value="B">B - Maintenance</option>
-                  <option value="C">C - Chores</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Category *</label>
-                <select
-                  value={moveBacklogCategory}
-                  onChange={(e) => setMoveBacklogCategory(e.target.value as Category)}
-                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
-                >
-                  <option value="DEV">DEV</option>
-                  <option value="ACADEMICS">ACADEMICS</option>
-                  <option value="HEALTH">HEALTH</option>
-                  <option value="LIFE">LIFE</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Deadline Time *</label>
-                <input
-                  type="time"
-                  value={moveBacklogDeadlineTime}
-                  onChange={(e) => {
-                    setMoveBacklogDeadlineTime(e.target.value);
-                    if (moveBacklogDuration) {
-                      const now = new Date();
-                      const [h, m] = e.target.value.split(':').map(Number);
-                      const dl = new Date(now); dl.setHours(h, m, 0, 0);
-                      const maxMins = Math.max(1, Math.floor((dl.getTime() - now.getTime()) / 60000));
-                      if (parseInt(moveBacklogDuration) > maxMins) {
-                        setMoveBacklogDuration(maxMins.toString());
-                      }
-                    }
-                  }}
-                  min={getMinDeadlineTime()}
-                  max={MAX_DEADLINE_TIME}
-                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
-                  required
-                />
-                {moveBacklogDeadlineTime && (
-                  <span className={`text-[clamp(0.4rem,0.5vw,0.6rem)] font-mono ${isBacklogDeadlineValid() ? 'text-gray-600' : 'text-red-500'}`}>
-                    {isBacklogDeadlineValid() ? `${getBacklogMaxDuration()} min available` : '⚠️ Time must be in the future!'}
-                  </span>
-                )}
-              </div>
-
-              <div>
-                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Duration (minutes)</label>
-                <input
-                  type="number"
-                  value={moveBacklogDuration}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value) || 0;
-                    const maxDur = getBacklogMaxDuration();
-                    setMoveBacklogDuration(Math.min(val, maxDur).toString());
-                  }}
-                  placeholder={moveBacklogDeadlineTime ? `max ${getBacklogMaxDuration()}` : "e.g. 60"}
-                  min="1"
-                  max={getBacklogMaxDuration()}
-                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono placeholder-gray-600"
-                />
-              </div>
-
-              <div>
-                <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 mb-[0.3vh] block font-mono uppercase">Frequency</label>
-                <input
-                  type="number"
-                  value={moveBacklogFrequency}
-                  onChange={(e) => setMoveBacklogFrequency(e.target.value)}
-                  placeholder="1"
-                  min="1"
-                  className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono placeholder-gray-600"
-                />
-              </div>
-
-              <div className="flex gap-[0.5vw] pt-[0.3vh]">
-                <button
-                  onClick={handleMoveBacklogToToday}
-                  disabled={!moveBacklogDeadlineTime || !isBacklogDeadlineValid()}
-                  className="flex-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 uppercase tracking-wider font-mono disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  → Move to Today
-                </button>
-                <button
-                  onClick={() => {
-                    setMovingBacklogTaskId(null);
-                    setMoveBacklogTier("C");
-                    setMoveBacklogCategory("LIFE");
-                    setMoveBacklogDeadlineTime("");
-                    setMoveBacklogDuration("");
-                  }}
-                  className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-400 uppercase font-mono"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      <div className="flex items-center justify-between mb-[0.5vh]">
-        <div className="flex items-center gap-[0.5vw]">
-          <span className="w-[0.4vw] h-[0.4vh] min-w-[6px] min-h-[6px] bg-green-500 rounded-full animate-ping"></span>
-          <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] font-bold text-green-500 uppercase tracking-wider">
-            &gt;&gt; Today&apos;s_Missions
-          </h3>
-        </div>
-
-        {!isCreating && (
-          <button
-            onClick={() => {
-              setIsCreating(true);
-              setBoardLoading(true);
-              setTimeout(() => setBoardLoading(false), 300);
-            }}
-            className="text-[clamp(0.5rem,0.7vw,0.75rem)] bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-[0.5vw] py-[0.3vh] text-green-400 uppercase tracking-wider font-mono"
-          >
-            + Task
-          </button>
-        )}
-      </div>
-
-      <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.5vh] font-mono">
-        {today.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
-      </p>
-
-      {isCreating && (
-        <form onSubmit={handleCreateDailyTask} className="mb-[0.5vh] p-[0.5vw] bg-green-900/10 border border-green-700/30">
-          <input
-            type="text"
-            value={newTask.title}
-            onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-            placeholder="Task title..."
-            className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 placeholder-gray-600 focus:outline-none focus:border-green-500 font-mono mb-[0.5vh]"
-            autoFocus
-          />
-
-          <div className="grid grid-cols-2 gap-[0.5vw] mb-[0.5vh]">
-            <div>
-              <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Tier</label>
-              <select
-                value={newTask.tier}
-                onChange={(e) => setNewTask({ ...newTask, tier: e.target.value as TaskTier })}
-                className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
-              >
-                <option value="S">S - Critical</option>
-                <option value="A">A - Important</option>
-                <option value="B">B - Maintenance</option>
-                <option value="C">C - Chores</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Category</label>
-              <select
-                value={newTask.category}
-                onChange={(e) => setNewTask({ ...newTask, category: e.target.value as Category })}
-                className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
-              >
-                <option value="DEV">DEV</option>
-                <option value="ACADEMICS">ACADEMICS</option>
-                <option value="HEALTH">HEALTH</option>
-                <option value="LIFE">LIFE</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-[0.5vw] mb-[0.5vh]">
-            <div>
-              <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Deadline Time * (max 23:59)</label>
-              <input
-                type="time"
-                value={newTask.deadlineTime}
-                onChange={(e) => setNewTask({ ...newTask, deadlineTime: e.target.value })}
-                min={getMinDeadlineTime()}
-                max={MAX_DEADLINE_TIME}
-                className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono"
-                required
-              />
-              <span className="text-[clamp(0.4rem,0.5vw,0.6rem)] text-gray-600 font-mono">
-                {newTask.deadlineTime && `${getMaxDuration()} min available`}
-              </span>
-            </div>
-
-            <div>
-              <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Duration (min)</label>
-              <input
-                type="number"
-                value={newTask.duration}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value) || 0;
-                  const maxDur = getMaxDuration();
-                  // Clamp to max duration
-                  setNewTask({ ...newTask, duration: Math.min(val, maxDur).toString() });
-                }}
-                placeholder={newTask.deadlineTime ? `max ${getMaxDuration()}` : "e.g. 60"}
-                min="1"
-                max={getMaxDuration()}
-                className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono placeholder-gray-600"
-              />
-            </div>
-          </div>
-
-          <div className="mb-[0.5vh]">
-            <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Frequency (Repeats)</label>
-            <input
-              type="number"
-              value={
-                // @ts-ignore
-                newTask.frequency
-              }
-              onChange={(e) => setNewTask({ ...newTask, frequency: e.target.value })}
-              placeholder="1"
-              min="1"
-              className="w-full bg-black/70 border border-green-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-green-500 font-mono placeholder-gray-600"
-            />
-          </div>
-
-          <div className="flex gap-[0.5vw]">
-            <button
-              type="submit"
-              disabled={isSubmitting || !newTask.title.trim() || !newTask.deadlineTime}
-              className="flex-1 bg-green-900/30 hover:bg-green-900/50 border border-green-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-green-400 uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed font-mono"
-            >
-              {isSubmitting ? "Creating..." : "Add Task"}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setIsCreating(false);
-                setNewTask({ title: "", tier: "C", category: "LIFE", deadlineTime: "", duration: "", frequency: "1" });
-              }}
-              className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-400 uppercase font-mono"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+      {rescheduling && (
+        <ScheduleTaskModal
+          mode="schedule"
+          heading="Reschedule for today"
+          taskTitle={rescheduling.title}
+          initial={{
+            tier: rescheduling.tier,
+            category: rescheduling.category,
+            frequency: rescheduling.frequency || 1,
+            duration: rescheduling.allocatedDuration,
+          }}
+          submitLabel="Move to today"
+          onSubmit={handleReschedule}
+          onClose={() => setRescheduling(null)}
+        />
       )}
 
-      <div className="flex-1 overflow-y-auto pr-2">
-        <div>
-          <div className="space-y-[0.3vh]">
-            {pendingTasks.length === 0 ? (
-              <div className="text-center text-gray-600 text-[clamp(0.6rem,0.85vw,0.875rem)] py-[2vh] font-mono flex flex-col items-center justify-center">
-                <div className="text-[clamp(0.8rem,1.3vw,1.25rem)] mb-[0.3vh]">[NO_TASKS_TODAY]</div>
-                <div className="text-[clamp(0.5rem,0.7vw,0.75rem)]">Add tasks for today or move from backlog</div>
-              </div>
+      {deleting && (
+        <ConfirmModal
+          title={deleting.isVirtualHabit ? "Skip habit today?" : "Delete quest?"}
+          body={
+            deleting.isVirtualHabit ? (
+              <>
+                <span className="text-ink font-medium">{deleting.task.title}</span> will be hidden
+                from today&apos;s board. The weekly habit stays intact.
+              </>
             ) : (
-              pendingTasks.map((task) => {
-                const expired = isTaskExpired(task);
-                // @ts-ignore
-                const frequency = task.frequency || 1;
-                // @ts-ignore
-                const completedFrequency = task.completedFrequency || 0;
+              <>
+                <span className="text-ink font-medium">{deleting.task.title}</span> will be
+                permanently deleted and its XP clawed back. This cannot be undone.
+              </>
+            )
+          }
+          confirmLabel={deleting.isVirtualHabit ? "Skip today" : "Delete"}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleting(null)}
+        />
+      )}
 
-                return (
-                  <div
-                    key={task.id}
-                    className={`p-[0.5vw] border transition-colors group ${expired ? 'border-gray-700 bg-gray-900/30 opacity-60' : TIER_COLORS[task.tier]}`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-start gap-[0.5vw] flex-1">
-                        {expired ? (
-                          <div className="w-[1vw] h-[1vh] min-w-[16px] min-h-[16px] border-2 border-gray-600 rounded bg-gray-700/50 flex-shrink-0 mt-0.5 flex items-center justify-center">
-                            <span className="text-[0.5rem] text-gray-500">✕</span>
-                          </div>
-                        ) : (
-                          // Only show completion button if frequency is 1, otherwise ticks are shown below title
-                          frequency === 1 && (
-                            <button
-                              onClick={() => handleCompleteTask(task.id, task.type === 'WEEKLY')}
-                              className={`w-[1vw] h-[1vh] min-w-[16px] min-h-[16px] border-2 rounded hover:bg-green-500/30 transition-colors flex-shrink-0 mt-0.5 ${task.type === 'WEEKLY' ? 'border-purple-500' : 'border-green-500'}`}
-                            />
-                          )
-                        )}
-                        <div className="flex-1">
-                          <div className="flex items-center gap-[0.3vw] mb-[0.2vh]">
-                            <span className={`text-[clamp(0.5rem,0.7vw,0.75rem)] px-[0.3vw] py-[0.1vh] border font-mono ${expired ? 'border-gray-700 text-gray-500' : TIER_COLORS[task.tier]}`}>
-                              {task.tier}
-                            </span>
-                            <span className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 font-mono">{task.category}</span>
-                            {expired ? (
-                              <span className="text-[clamp(0.45rem,0.6vw,0.65rem)] text-red-500 font-mono font-bold">
-                                EXPIRED (0 XP)
-                              </span>
-                            ) : (
-                              <div className="flex items-center gap-1">
-                                <span className="text-[clamp(0.45rem,0.6vw,0.65rem)] text-green-500 font-mono font-bold">
-                                  +{getTierBaseXP(task.tier)} XP
-                                </span>
-                                {frequency > 1 && (
-                                  <span className="text-[0.6rem] text-gray-400 font-mono">
-                                    ({completedFrequency}/{frequency})
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                          <h5 className={`text-[clamp(0.6rem,0.85vw,0.875rem)] font-mono ${expired ? 'text-gray-500 line-through' : 'text-green-400'}`}>{task.title}</h5>
-                          <div className="flex gap-[0.5vw] mt-[0.2vh] flex-wrap">
-                            {task.deadlineTime && (
-                              <span className={`text-[clamp(0.45rem,0.6vw,0.65rem)] font-mono ${expired ? 'text-red-500' : 'text-yellow-500'}`}>
-                                ⏰ {new Date(task.deadlineTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} {expired && '(PASSED)'}
-                              </span>
-                            )}
-                            {task.allocatedDuration && (
-                              <span className="text-[clamp(0.45rem,0.6vw,0.65rem)] text-cyan-500 font-mono">
-                                ⏱ {task.allocatedDuration}min
-                              </span>
-                            )}
-                          </div>
-                          {task.description && (
-                            <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mt-[0.2vh] font-mono">{task.description}</p>
-                          )}
-                          {!expired && frequency > 1 && (
-                            <div className="flex items-center gap-1 flex-wrap mt-[0.5vh]">
-                              {Array.from({ length: frequency }).map((_, idx) => {
-                                const isFilled = idx < completedFrequency;
-                                return (
-                                  <button
-                                    key={idx}
-                                    onClick={() => {
-                                      if (isFilled) {
-                                        if (idx === completedFrequency - 1) {
-                                          handleUncompleteTask(task.id);
-                                        }
-                                      } else {
-                                        if (idx === completedFrequency) {
-                                          handleCompleteTask(task.id, task.type === 'WEEKLY');
-                                        }
-                                      }
-                                    }}
-                                    className={`w-[0.8vw] h-[0.8vw] min-w-[12px] min-h-[12px] border rounded transition-colors ${isFilled
-                                      ? (task.type === 'WEEKLY' ? 'bg-purple-500 border-purple-500' : 'bg-green-500 border-green-500')
-                                      : (task.type === 'WEEKLY' ? 'border-purple-500 hover:bg-purple-500/30' : 'border-green-500 hover:bg-green-500/30')
-                                      }`}
-                                  />
-                                );
-                              })}
-                              <button
-                                onClick={() => {
-                                  const remaining = frequency - completedFrequency;
-                                  if (remaining > 0) {
-                                    const prev = [...optimisticTasks];
-                                    setOptimisticTasks((current) =>
-                                      current.map((t) =>
-                                        t.id === task.id
-                                          ? { ...t, isCompleted: true, completedFrequency: frequency, completedAt: new Date(), durationMet: false }
-                                          : t
-                                      )
-                                    );
-                                    fetch("/api/tasks/complete", {
-                                      method: "POST",
-                                      headers: { "Content-Type": "application/json" },
-                                      body: JSON.stringify({
-                                        taskId: task.id,
-                                        isWeeklyBonus: task.type === 'WEEKLY',
-                                        durationMet: false,
-                                        count: remaining
-                                      }),
-                                    }).then(res => {
-                                      if (res.ok) router.refresh();
-                                      else setOptimisticTasks(prev);
-                                    });
-                                  }
-                                }}
-                                className="ml-1 text-[0.6rem] text-green-400 font-mono hover:underline"
-                                title="Tick All"
-                              >
-                                [ALL]
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-2 items-center">
-                        {!expired && (
-                          <button
-                            onClick={() => {
-                              setTimerTaskId(task.id);
-                              setTimerDuration(task.allocatedDuration || 60);
-                              setTimerHasAllocatedDuration(!!task.allocatedDuration);
-                            }}
-                            className="text-lg lg:text-xl text-cyan-500 hover:text-cyan-400 hover:scale-110 opacity-0 group-hover:opacity-100 transition-all font-mono p-1"
-                            title="Start Timer"
-                          >
-                            ⏱️
-                          </button>
-                        )}
-                        <button
-                          onClick={() => promptDeleteTask(task.id)}
-                          className="text-lg lg:text-xl text-red-500 hover:text-red-400 hover:scale-110 opacity-0 group-hover:opacity-100 transition-all font-mono p-1"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-        {completedTasks.length > 0 && (
-          <div className="mt-[0.5vh]">
-            <button
-              onClick={() => setShowCompleted(!showCompleted)}
-              className="w-full flex items-center justify-between text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 uppercase tracking-wider mb-[0.3vh] font-mono hover:text-gray-400 transition-colors"
+      {confirmDuration && (
+        <Modal onClose={() => setConfirmDuration(null)}>
+          <ModalTitle>Beat the clock?</ModalTitle>
+          <p className="text-sm text-ink2 mb-1">
+            Did you finish within{" "}
+            <span className="grad-text font-bold">{confirmDuration.minutes} minutes</span>?
+          </p>
+          <p className="text-xs text-gold mb-5">+25% XP for beating the time limit</p>
+          <div className="flex gap-2.5">
+            <HudButton
+              variant="primary"
+              className="flex-1 py-2.5"
+              onClick={() => doComplete(confirmDuration.item, true)}
             >
-              <span>✓ Completed ({completedTasks.length})</span>
-              <span>{showCompleted ? "▼" : "▶"}</span>
-            </button>
-            {showCompleted && (
-              <div className="space-y-2">
-                {completedTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="p-3 border border-gray-800 bg-gray-900/30 transition-colors group opacity-60"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-start gap-3 flex-1">
-                        <button
-                          onClick={() => handleUncompleteTask(task.id)}
-                          className="w-5 h-5 border-2 rounded bg-green-500 border-green-500 hover:bg-green-500/50 transition-colors flex-shrink-0 mt-0.5"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs px-2 py-0.5 border border-gray-700 text-gray-500 font-mono">
-                              {task.tier}
-                            </span>
-                            <span className="text-xs text-gray-600 font-mono">{task.category}</span>
-                            {/* @ts-ignore */}
-                            {task.frequency > 1 && (
-                              <span className="text-[10px] text-gray-500 font-mono ml-1">
-                                {/* @ts-ignore */}
-                                ({task.completedFrequency}/{task.frequency})
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex flex-col">
-                            <h5 className="text-sm text-gray-500 font-mono line-through">{task.title}</h5>
-                            {/* @ts-ignore */}
-                            {task.frequency > 1 && (
-                              <div className="flex items-center gap-1 flex-wrap mt-1 opacity-50">
-                                {/* @ts-ignore */}
-                                {Array.from({ length: task.frequency }).map((_, idx) => (
-                                  <div
-                                    key={idx}
-                                    className={`w-[10px] h-[10px] border rounded ${
-                                      // @ts-ignore
-                                      idx < task.completedFrequency
-                                        ? (task.type === 'WEEKLY' ? 'bg-purple-500/50 border-purple-500' : 'bg-green-500/50 border-green-500')
-                                        : 'border-gray-600'
-                                      }`}
-                                  />
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          {task.finalPoints && (
-                            <p className="text-xs text-green-600 mt-1 font-mono">+{task.finalPoints} XP</p>
-                          )}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => promptDeleteTask(task.id)}
-                        className="text-xs text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono ml-2"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-        {backlogTasks.length > 0 && (
-          <div className="mt-[0.5vh]">
-            <button
-              onClick={() => setShowBacklog(!showBacklog)}
-              className="w-full flex items-center justify-between text-[clamp(0.5rem,0.7vw,0.75rem)] text-orange-500 uppercase tracking-wider mb-[0.3vh] font-mono hover:text-orange-400 transition-colors"
+              Yes (+25%)
+            </HudButton>
+            <HudButton
+              variant="ghost"
+              className="flex-1 py-2.5"
+              onClick={() => doComplete(confirmDuration.item, false)}
             >
-              <span>⏳ Backlog ({backlogTasks.length})</span>
-              <span>{showBacklog ? "▼" : "▶"}</span>
-            </button>
-            {showBacklog && (
-              <div className="space-y-2">
-                {backlogTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="p-3 border border-orange-800/50 bg-orange-900/10 transition-colors group opacity-70"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs px-2 py-0.5 border border-orange-700/50 text-orange-500 font-mono">
-                            {task.tier}
-                          </span>
-                          <span className="text-xs text-orange-600 font-mono">{task.category}</span>
-                          <span className="text-xs text-gray-600 font-mono">
-                            {task.scheduledDate && new Date(task.scheduledDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </span>
-                          {/* @ts-ignore */}
-                          {task.frequency > 1 && (
-                            <span className="text-[10px] text-gray-500 font-mono ml-1">
-                              {/* @ts-ignore */}
-                              ({task.completedFrequency}/{task.frequency})
-                            </span>
-                          )}
-                        </div>
-                        <h5 className="text-sm text-orange-400/70 font-mono line-through">{task.title}</h5>
-                        {/* @ts-ignore */}
-                        {task.frequency > 1 && (
-                          <div className="flex items-center gap-1 flex-wrap mt-1 opacity-50">
-                            {/* @ts-ignore */}
-                            {Array.from({ length: task.frequency }).map((_, idx) => (
-                              <div
-                                key={idx}
-                                className={`w-[10px] h-[10px] border rounded ${
-                                  // @ts-ignore
-                                  idx < task.completedFrequency
-                                    ? (task.type === 'WEEKLY' ? 'bg-purple-500/50 border-purple-500' : 'bg-green-500/50 border-green-500')
-                                    : 'border-gray-600'
-                                  }`}
-                              />
-                            ))}
-                          </div>
-                        )}
-                        <p className="text-[clamp(0.4rem,0.55vw,0.65rem)] text-gray-600 font-mono mt-1">
-                          (Not counted for efficiency until rescheduled)
-                        </p>
-                      </div>
-                      <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => {
-                            setMovingBacklogTaskId(task.id);
-                            setMoveBacklogTier(task.tier);
-                            setMoveBacklogCategory(task.category);
-                          }}
-                          className="text-xs bg-green-900/30 hover:bg-green-900/50 border border-green-700/50 px-2 py-1 text-green-400 font-mono"
-                        >
-                          → Today
-                        </button>
-                        <button
-                          onClick={() => handleMoveBacklogToDump(task.id)}
-                          className="text-xs bg-yellow-900/30 hover:bg-yellow-900/50 border border-yellow-700/50 px-2 py-1 text-yellow-400 font-mono"
-                        >
-                          → Dump
-                        </button>
-                        <button
-                          onClick={() => promptDeleteTask(task.id)}
-                          className="text-xs bg-red-900/30 hover:bg-red-900/50 border border-red-700/50 px-2 py-1 text-red-400 font-mono"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+              No
+            </HudButton>
           </div>
-        )}
-      </div>
-    </div >
+        </Modal>
+      )}
+
+      {timerFor && (
+        <TaskTimer
+          taskTitle={timerFor.task.title}
+          initialMinutes={timerFor.task.allocatedDuration || 25}
+          hasAllocatedDuration={!!timerFor.task.allocatedDuration}
+          onClose={() => setTimerFor(null)}
+          onTimerComplete={() => {
+            const item = timerFor;
+            setTimerFor(null);
+            if (item) void doComplete(item, true);
+          }}
+        />
+      )}
+    </Panel>
   );
 }

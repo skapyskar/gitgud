@@ -1,127 +1,591 @@
 @import "tailwindcss";
 
-/* 1. THEME CONFIGURATION (Tailwind v4 Style) */
-/* stylelint-disable-next-line at-rule-no-unknown */
-/* @theme is a Tailwind CSS v4 at-rule */
-/* stylelint-disable-next-line at-rule-no-unknown */
-@theme {
-  /* This makes 'font-mono' use these fonts automatically */
-  --font-mono: "Courier Prime", "Courier New", Courier, monospace;
+/* ────────────────────────────────────────────────────────────────
+   GIT GUD — multi-skin theme engine
+   Skins:  aurora (glass+gradients) · terminal (green phosphor) · zen (barely there)
+   Modes:  dark · light
+   Everything below flows from CSS variables set per [data-skin][data-mode],
+   exposed to Tailwind through @theme inline (text-ink, bg-acc/20, …).
+   ──────────────────────────────────────────────────────────────── */
 
-  /* Custom Colors - usage: text-neon-green, bg-panel-bg */
-  --color-neon-green: #00ff41;
-  --color-neon-purple: #b026ff;
-  --color-bg-dark: #050505;
-  --color-panel-bg: #111111;
-  
-  /* Custom Animations */
-  --animate-glitch: glitch 1s linear infinite;
-  --animate-scan: scan 8s linear infinite;
-  --animate-loading: loading 2s ease-in-out infinite;
+/* ═══ 1. Runtime tokens per skin × mode ═══ */
+
+:root {
+  /* AURORA · DARK (default) */
+  --base: #07070e;
+  --ink: #f2f2fa;
+  --ink2: #b4b7cc;
+  --ink3: #7c7f99;
+
+  --acc: #a78bfa;
+  --acc2: #e879f9;
+  --acc3: #22d3ee;
+  --hab: #67e8f9;
+  --gold: #fcd34d;
+  --rose: #fb7185;
+  --warm: #fdba74;
+
+  --ts: #fda4af;
+  --ta: #fdba74;
+  --tb: #7dd3fc;
+  --tc: #cbd5e1;
+
+  --chip: rgba(255, 255, 255, 0.05);
+  --chip-hover: rgba(255, 255, 255, 0.09);
+  --line: rgba(255, 255, 255, 0.1);
+
+  --card-bg: linear-gradient(150deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  --card-border: rgba(255, 255, 255, 0.09);
+  --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --glow: rgba(139, 92, 246, 0.25);
+
+  --radius: 1rem;
+  --blur: 24px;
+
+  --font-body-active: var(--font-inter);
+  --font-head-active: var(--font-sora);
 }
 
-/* 2. BASE STYLES */
+html[data-mode="light"] {
+  /* AURORA · LIGHT */
+  --base: #f2f1fa;
+  --ink: #191a30;
+  --ink2: #474a63;
+  --ink3: #7d8098;
+
+  --acc: #7c3aed;
+  --acc2: #c026d3;
+  --acc3: #0891b2;
+  --hab: #0e7490;
+  --gold: #b45309;
+  --rose: #e11d48;
+  --warm: #c2410c;
+
+  --ts: #e11d48;
+  --ta: #c2410c;
+  --tb: #0369a1;
+  --tc: #475569;
+
+  --chip: rgba(20, 20, 60, 0.05);
+  --chip-hover: rgba(20, 20, 60, 0.09);
+  --line: rgba(20, 20, 60, 0.12);
+
+  --card-bg: linear-gradient(150deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.55));
+  --card-border: rgba(25, 25, 70, 0.1);
+  --card-shadow: 0 10px 40px rgba(90, 80, 190, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --glow: rgba(139, 92, 246, 0.16);
+}
+
+html[data-skin="terminal"] {
+  /* TERMINAL · DARK */
+  --base: #030704;
+  --ink: #d9ffe9;
+  --ink2: #8fd3ab;
+  --ink3: #4f8a68;
+
+  --acc: #00ff88;
+  --acc2: #38f0c8;
+  --acc3: #22d3ee;
+  --hab: #22d3ee;
+  --gold: #ffd93d;
+  --rose: #ff5f7a;
+  --warm: #ffa62b;
+
+  --ts: #ff5f7a;
+  --ta: #ffa62b;
+  --tb: #38bdf8;
+  --tc: #9aa8b2;
+
+  --chip: rgba(0, 255, 136, 0.05);
+  --chip-hover: rgba(0, 255, 136, 0.1);
+  --line: rgba(0, 255, 136, 0.18);
+
+  --card-bg: linear-gradient(160deg, rgba(0, 255, 136, 0.04), transparent 30%), rgba(2, 12, 6, 0.78);
+  --card-border: rgba(0, 255, 136, 0.22);
+  --card-shadow: 0 0 24px rgba(0, 255, 136, 0.06), inset 0 0 24px rgba(0, 255, 136, 0.03);
+  --glow: rgba(0, 255, 136, 0.2);
+
+  --radius: 0.4rem;
+  --blur: 8px;
+
+  --font-body-active: var(--font-jetbrains);
+  --font-head-active: var(--font-jetbrains);
+}
+
+html[data-skin="terminal"][data-mode="light"] {
+  /* TERMINAL · LIGHT (green ink on paper) */
+  --base: #edf5ec;
+  --ink: #093a20;
+  --ink2: #2c6e49;
+  --ink3: #5e9678;
+
+  --acc: #047857;
+  --acc2: #0d9488;
+  --acc3: #0e7490;
+  --hab: #0e7490;
+  --gold: #a16207;
+  --rose: #be123c;
+  --warm: #c2410c;
+
+  --ts: #be123c;
+  --ta: #c2410c;
+  --tb: #0369a1;
+  --tc: #52525b;
+
+  --chip: rgba(4, 120, 87, 0.06);
+  --chip-hover: rgba(4, 120, 87, 0.12);
+  --line: rgba(4, 120, 87, 0.25);
+
+  --card-bg: rgba(255, 255, 255, 0.75);
+  --card-border: rgba(4, 120, 87, 0.35);
+  --card-shadow: 0 4px 20px rgba(4, 120, 87, 0.08);
+  --glow: rgba(4, 120, 87, 0.15);
+}
+
+html[data-skin="zen"] {
+  /* ZEN · DARK — near-invisible chrome for wallpaper duty */
+  --base: #0b0b10;
+  --ink: #e8e8ee;
+  --ink2: #a2a4b8;
+  --ink3: #62647a;
+
+  --acc: #8e97f5;
+  --acc2: #b3a6f7;
+  --acc3: #7dd3fc;
+  --hab: #7dd3fc;
+  --gold: #e7c37b;
+  --rose: #f0899d;
+  --warm: #eaa87c;
+
+  --ts: #f0899d;
+  --ta: #eaa87c;
+  --tb: #7dd3fc;
+  --tc: #b0b3c6;
+
+  --chip: rgba(255, 255, 255, 0.035);
+  --chip-hover: rgba(255, 255, 255, 0.07);
+  --line: rgba(255, 255, 255, 0.07);
+
+  --card-bg: rgba(255, 255, 255, 0.028);
+  --card-border: rgba(255, 255, 255, 0.055);
+  --card-shadow: none;
+  --glow: rgba(142, 151, 245, 0.12);
+
+  --radius: 1.15rem;
+  --blur: 16px;
+}
+
+html[data-skin="zen"][data-mode="light"] {
+  /* ZEN · LIGHT */
+  --base: #f6f6f3;
+  --ink: #26262e;
+  --ink2: #585a68;
+  --ink3: #8b8d9a;
+
+  --acc: #6366f1;
+  --acc2: #8b5cf6;
+  --acc3: #0891b2;
+  --hab: #0e7490;
+  --gold: #a16207;
+  --rose: #be123c;
+  --warm: #c2410c;
+
+  --ts: #be123c;
+  --ta: #c2410c;
+  --tb: #0369a1;
+  --tc: #52525b;
+
+  --chip: rgba(30, 30, 40, 0.04);
+  --chip-hover: rgba(30, 30, 40, 0.08);
+  --line: rgba(30, 30, 40, 0.09);
+
+  --card-bg: rgba(255, 255, 255, 0.55);
+  --card-border: rgba(30, 30, 40, 0.07);
+  --card-shadow: none;
+  --glow: rgba(99, 102, 241, 0.1);
+}
+
+/* ═══ 2. Expose runtime tokens to Tailwind utilities ═══ */
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink2: var(--ink2);
+  --color-ink3: var(--ink3);
+  --color-acc: var(--acc);
+  --color-acc2: var(--acc2);
+  --color-acc3: var(--acc3);
+  --color-hab: var(--hab);
+  --color-gold: var(--gold);
+  --color-rosy: var(--rose);
+  --color-warm: var(--warm);
+  --color-ts: var(--ts);
+  --color-ta: var(--ta);
+  --color-tb: var(--tb);
+  --color-tc: var(--tc);
+  --color-line: var(--line);
+}
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
+/* ═══ 3. Base ═══ */
+
 :root {
-  --background: var(--color-bg-dark);
-  --foreground: #e0e0e0;
-  
-  /* Responsive Scaling Variables */
-  --scale-factor: clamp(0.8, 1vw + 0.5vh, 1.2);
-  --text-xs: clamp(0.4rem, 0.7vw, 0.75rem);
-  --text-sm: clamp(0.5rem, 0.85vw, 0.875rem);
-  --text-base: clamp(0.6rem, 1vw, 1rem);
-  --text-lg: clamp(0.7rem, 1.3vw, 1.125rem);
-  --text-xl: clamp(0.8rem, 1.6vw, 1.25rem);
-  --text-2xl: clamp(0.9rem, 1.8vw, 1.5rem);
-  --text-3xl: clamp(1rem, 2.2vw, 2rem);
-  --text-4xl: clamp(1.2rem, 2.5vw, 2.5rem);
-  
-  --spacing-xs: clamp(0.125rem, 0.3vw, 0.5rem);
-  --spacing-sm: clamp(0.25rem, 0.6vw, 0.75rem);
-  --spacing-md: clamp(0.5rem, 1vw, 1rem);
-  --spacing-lg: clamp(0.75rem, 1.5vw, 1.5rem);
-  --spacing-xl: clamp(1rem, 2vw, 2rem);
+  color-scheme: dark;
+}
+html[data-mode="light"] {
+  color-scheme: light;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-mono);
-  overflow-x: hidden; /* Prevent horizontal scroll from effects */
+  background-color: var(--base);
+  color: var(--ink);
+  font-family: var(--font-body-active);
   min-height: 100vh;
-  font-size: var(--text-base);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-/* 3. CYBERPUNK VISUAL EFFECTS */
-
-/* The Scanline Overlay */
-body::before {
-  content: " ";
-  display: block;
-  position: fixed; /* Fixed ensures it stays when scrolling */
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  background: 
-    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-  z-index: 50; /* Top layer */
-  background-size: 100% 2px, 3px 100%;
-  pointer-events: none; /* Click through it */
-}
-
-/* Hacker Scrollbars */
+/* ── Scrollbars ── */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #000;
-  border-left: 1px solid #111;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #111;
-  border: 1px solid var(--color-neon-green);
+  background: var(--line);
+  border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-neon-green);
-  box-shadow: 0 0 10px var(--color-neon-green);
+  background: color-mix(in srgb, var(--acc) 45%, transparent);
 }
 
-/* 4. UTILITY CLASSES */
+/* ═══ 4. Backdrop layers (skin-aware) ═══ */
 
-/* Text Glitch Effect */
+.aurora {
+  position: fixed;
+  inset: -25%;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(80px) saturate(150%);
+  background:
+    radial-gradient(38% 38% at 18% 22%, rgba(139, 92, 246, 0.32), transparent 70%),
+    radial-gradient(32% 32% at 82% 18%, rgba(232, 121, 249, 0.22), transparent 70%),
+    radial-gradient(36% 36% at 68% 82%, rgba(34, 211, 238, 0.18), transparent 70%),
+    radial-gradient(26% 26% at 28% 88%, rgba(251, 191, 36, 0.1), transparent 70%);
+  animation: aurora-drift 28s ease-in-out infinite alternate;
+  transition: opacity 0.5s ease;
+}
+
+html[data-mode="light"] .aurora {
+  filter: blur(90px) saturate(120%);
+  background:
+    radial-gradient(38% 38% at 18% 22%, rgba(139, 92, 246, 0.22), transparent 70%),
+    radial-gradient(32% 32% at 82% 18%, rgba(232, 121, 249, 0.16), transparent 70%),
+    radial-gradient(36% 36% at 68% 82%, rgba(34, 211, 238, 0.14), transparent 70%),
+    radial-gradient(26% 26% at 28% 88%, rgba(251, 191, 36, 0.1), transparent 70%);
+}
+
+html[data-skin="terminal"] .aurora {
+  inset: 0;
+  filter: none;
+  animation: none;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--acc) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--acc) 7%, transparent) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 90% 85% at 50% 30%, black 25%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 85% at 50% 30%, black 25%, transparent 100%);
+}
+
+/* CRT scanlines, terminal-dark only */
+html[data-skin="terminal"][data-mode="dark"] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  background: linear-gradient(rgba(255, 255, 255, 0.015) 50%, rgba(0, 0, 0, 0.14) 50%);
+  background-size: 100% 3px;
+  mix-blend-mode: overlay;
+}
+
+html[data-skin="zen"] .aurora {
+  filter: blur(110px) saturate(110%);
+  animation-duration: 45s;
+  background:
+    radial-gradient(45% 45% at 30% 30%, color-mix(in srgb, var(--acc) 14%, transparent), transparent 70%),
+    radial-gradient(40% 40% at 75% 75%, color-mix(in srgb, var(--acc3) 9%, transparent), transparent 70%);
+}
+
+.noise {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-skin="zen"] .noise {
+  opacity: 0.15;
+}
+html[data-mode="light"] .noise {
+  opacity: 0.2;
+}
+
+/* ═══ 5. Component primitives ═══ */
+
 @layer utilities {
-  .glitch-text {
+  /* Card surface — the skin decides how "glassy" it is */
+  .glass {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(var(--blur));
+    -webkit-backdrop-filter: blur(var(--blur));
+    box-shadow: var(--card-shadow);
+    transition: background 0.4s ease, border-color 0.4s ease;
+  }
+
+  .glass-hover {
+    transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .glass-hover:hover {
+    border-color: color-mix(in srgb, var(--acc) 35%, var(--card-border));
+    transform: translateY(-2px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25), 0 0 32px var(--glow);
+  }
+
+  /* Small inner surfaces: rows, chips, inputs */
+  .chip {
+    background: var(--chip);
+    border: 1px solid var(--line);
+  }
+  .chip-hover:hover {
+    background: var(--chip-hover);
+  }
+
+  /* Radius scale follows the skin (terminal = sharp, aurora = soft) */
+  .r-xl {
+    border-radius: calc(var(--radius) * 1.6);
+  }
+  .r-lg {
+    border-radius: var(--radius);
+  }
+  .r-md {
+    border-radius: calc(var(--radius) * 0.7);
+  }
+
+  .font-display {
+    font-family: var(--font-head-active);
+  }
+
+  /* Gradient text & fills built from the skin accents */
+  .grad-text {
+    background-image: linear-gradient(92deg, var(--acc) 0%, var(--acc2) 55%, var(--acc3) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .grad-text-warm {
+    background-image: linear-gradient(92deg, var(--gold), var(--warm));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .grad-primary {
+    background-image: linear-gradient(92deg, var(--acc), var(--acc2));
+  }
+
+  .glow-shadow {
+    box-shadow: 0 8px 28px var(--glow);
+  }
+
+  /* Animated conic ring for the level-up moment */
+  .levelup-ring {
+    background: conic-gradient(
+      from 0deg,
+      transparent,
+      color-mix(in srgb, var(--acc) 70%, transparent),
+      color-mix(in srgb, var(--acc2) 70%, transparent),
+      color-mix(in srgb, var(--acc3) 70%, transparent),
+      transparent
+    );
+    animation: spin-slow 3.5s linear infinite;
+    mask: radial-gradient(closest-side, transparent 72%, black 74%);
+    -webkit-mask: radial-gradient(closest-side, transparent 72%, black 74%);
+  }
+
+  .xp-shimmer {
     position: relative;
-    text-shadow: 2px 0 #b026ff, -2px 0 #00ff41;
-    animation: text-flicker 3s infinite alternate;
+    overflow: hidden;
+  }
+  .xp-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 25%, rgba(255, 255, 255, 0.45) 50%, transparent 75%);
+    transform: translateX(-100%);
+    animation: shimmer 2.4s linear infinite;
   }
 
-  .animate-scan {
-    animation: scan 8s linear infinite;
+  .animate-pop {
+    animation: pop 0.35s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+  }
+  .animate-rise {
+    animation: rise 0.5s cubic-bezier(0.2, 1.2, 0.3, 1) both;
+  }
+  .animate-blink {
+    animation: blink 1.2s steps(2) infinite;
+  }
+  .animate-levelup {
+    animation: levelup 0.7s cubic-bezier(0.2, 1.4, 0.3, 1) both;
+  }
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
   }
 
-  .animate-loading {
-    animation: loading 2s ease-in-out infinite;
+  /* Focus-view clock */
+  .clock-time {
+    font-size: clamp(4rem, 15vw, 11rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
   }
 }
 
-/* Animation Keyframes */
-@keyframes text-flicker {
-  0% { opacity: 1; text-shadow: 2px 0 #b026ff, -2px 0 #00ff41; }
-  5% { opacity: 0.8; text-shadow: 3px 0 #b026ff, -3px 0 #00ff41; }
-  10% { opacity: 1; text-shadow: 2px 0 #b026ff, -2px 0 #00ff41; }
-  100% { opacity: 1; text-shadow: 2px 0 #b026ff, -2px 0 #00ff41; }
+/* ═══ 6. Keyframes ═══ */
+
+@keyframes aurora-drift {
+  0% {
+    transform: translate3d(-2%, -1%, 0) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(2%, 2%, 0) scale(1.08) rotate(2deg);
+  }
+  100% {
+    transform: translate3d(-1%, 1%, 0) scale(1.03) rotate(-2deg);
+  }
 }
 
-@keyframes scan {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(100%); }
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-@keyframes loading {
-  0% { width: 0%; }
-  50% { width: 100%; }
-  100% { width: 0%; }
+@keyframes rise {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes levelup {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes spin-slow {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Dashboard-only motifs: audio EQ bars, momentum graph draw-in, scroll cue,
+   drifting custom video backdrop. */
+@keyframes eq {
+  0%,
+  100% {
+    transform: scaleY(0.25);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+@keyframes bgdrift {
+  0% {
+    transform: scale(1.02) translateY(0);
+  }
+  100% {
+    transform: scale(1.1) translateY(-14px);
+  }
+}
+@keyframes cue {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translateY(7px);
+    opacity: 0.35;
+  }
+}
+@keyframes dashIn {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora,
+  .xp-shimmer::after,
+  .levelup-ring,
+  .animate-float {
+    animation: none !important;
+  }
 }

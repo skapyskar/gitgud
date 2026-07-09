@@ -1,0 +1,43 @@
+{
+  "projectId": "ec6a924d-6936-43bc-b38a-5d73853f2303",
+  "shape": "package",
+  "pkg": "gitgud",
+  "globalName": "GitGudKit",
+  "buildCmd": "bash .design-sync/build-css.sh",
+  "tsconfig": "tsconfig.json",
+  "srcDir": "src",
+  "cssEntry": ".design-sync/.cache/kit.css",
+  "readmeHeader": ".design-sync/conventions.md",
+  "provider": { "component": "KitSurface" },
+  "componentSrcMap": {
+    "Panel": "src/app/components/ui.tsx",
+    "HudButton": "src/app/components/ui.tsx",
+    "Modal": "src/app/components/ui.tsx",
+    "ModalTitle": "src/app/components/ui.tsx",
+    "ConfirmModal": "src/app/components/ui.tsx",
+    "TierBadge": "src/app/components/ui.tsx",
+    "GitGudLogo": "src/app/components/GitGudLogo.tsx",
+    "LoadingScreen": "src/app/components/LoadingScreen.tsx",
+    "Heatmap": "src/app/components/Heatmap.tsx",
+    "RewardProvider": "src/app/components/RewardLayer.tsx",
+    "MuteToggle": "src/app/components/RewardLayer.tsx",
+    "ThemeProvider": "src/app/components/theme.tsx",
+    "SettingsMenu": "src/app/components/SettingsMenu.tsx",
+    "MiniEfficiencyGraph": "src/app/dashboard/components/MiniEfficiencyGraph.tsx",
+    "FullPerformanceGraph": "src/app/dashboard/components/FullPerformanceGraph.tsx",
+    "TaskTimer": "src/app/dashboard/components/TaskTimer.tsx",
+    "ScheduleTaskModal": "src/app/dashboard/components/ScheduleTaskModal.tsx"
+  },
+  "overrides": {
+    "HudButton": { "cardMode": "column" },
+    "Panel": { "cardMode": "column" },
+    "TierBadge": { "cardMode": "column" },
+    "Modal": { "cardMode": "single", "viewport": "520x480" },
+    "ConfirmModal": { "cardMode": "single", "viewport": "520x420" },
+    "ScheduleTaskModal": { "cardMode": "single", "viewport": "560x760" },
+    "TaskTimer": { "cardMode": "single", "viewport": "520x700" },
+    "FullPerformanceGraph": { "cardMode": "single", "viewport": "900x640" },
+    "LoadingScreen": { "cardMode": "single", "viewport": "640x480" },
+    "RewardProvider": { "cardMode": "single", "viewport": "640x560" }
+  }
+}

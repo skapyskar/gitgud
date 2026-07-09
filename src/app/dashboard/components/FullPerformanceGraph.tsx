@@ -1,245 +1,200 @@
 "use client";
 
-import { Target, RefreshCw } from "lucide-react";
-
-interface DayLog {
-  date: Date;
-  totalXP: number;
-  tasksDone: number;
-  possibleXP?: number;
-}
+import { Target, RefreshCw, X } from "lucide-react";
+import { efficiencyOf, possibleOf, DayLogLike } from "./efficiency";
 
 interface FullPerformanceGraphProps {
-  dayLogs: DayLog[];
+  dayLogs: DayLogLike[];
   onClose: () => void;
-  initialGraph?: string;
   onRefresh?: () => void;
   isRefreshing?: boolean;
 }
 
-export default function FullPerformanceGraph({ dayLogs, onClose, onRefresh, isRefreshing }: FullPerformanceGraphProps) {
+/** Expanded analytics view: 30-day efficiency line + headline stats. */
+export default function FullPerformanceGraph({
+  dayLogs,
+  onClose,
+  onRefresh,
+  isRefreshing,
+}: FullPerformanceGraphProps) {
   const logs = [...dayLogs].reverse().slice(-30);
 
-  const formatDate = (date: Date) => {
+  const totalXP = logs.reduce((sum, log) => sum + log.totalXP, 0);
+  const totalTasks = logs.reduce((sum, log) => sum + log.tasksDone, 0);
+  const data = logs.map((log) => ({
+    date: log.date,
+    efficiency: efficiencyOf(log),
+    earnedXP: log.totalXP,
+    possibleXP: possibleOf(log),
+  }));
+  const avgEfficiency =
+    data.length > 0 ? Math.round(data.reduce((s, d) => s + d.efficiency, 0) / data.length) : 0;
+
+  const width = 800;
+  const height = 300;
+  const pad = { top: 20, right: 24, bottom: 36, left: 44 };
+  const gw = width - pad.left - pad.right;
+  const gh = height - pad.top - pad.bottom;
+
+  const points = data.map((d, i) => ({
+    x: pad.left + (i / Math.max(1, data.length - 1)) * gw,
+    y: pad.top + (1 - d.efficiency / 100) * gh,
+    ...d,
+  }));
+
+  const line = points.length ? `M ${points.map((p) => `${p.x} ${p.y}`).join(" L ")}` : "";
+  const area = points.length
+    ? `M ${points[0].x} ${height - pad.bottom} L ${points.map((p) => `${p.x} ${p.y}`).join(" L ")} L ${points[points.length - 1].x} ${height - pad.bottom} Z`
+    : "";
+
+  const fmt = (date: Date | string) => {
     const d = new Date(date);
     return `${d.getMonth() + 1}/${d.getDate()}`;
   };
 
-  const totalXP = logs.reduce((sum, log) => sum + log.totalXP, 0);
-  const totalTasks = logs.reduce((sum, log) => sum + log.tasksDone, 0);
-
-  const efficiencyData = logs.map((log) => {
-    const possibleXP = log.possibleXP ?? (log.tasksDone > 0 ? log.tasksDone * 30 : 0);
-    const efficiency = possibleXP > 0 ? (log.totalXP / possibleXP) * 100 : 100;
-    return {
-      date: log.date,
-      efficiency: Math.min(efficiency, 100),
-      earnedXP: log.totalXP,
-      possibleXP
-    };
-  });
-
-  const avgEfficiency = efficiencyData.length > 0
-    ? Math.round(efficiencyData.reduce((sum, d) => sum + d.efficiency, 0) / efficiencyData.length)
-    : 0;
-
-  const width = 800;
-  const height = 300;
-  const padding = { top: 20, right: 30, bottom: 40, left: 50 };
-  const graphWidth = width - padding.left - padding.right;
-  const graphHeight = height - padding.top - padding.bottom;
-
-  const points = efficiencyData.map((data, index) => {
-    const x = padding.left + (index / (efficiencyData.length - 1 || 1)) * graphWidth;
-    const y = padding.top + (1 - data.efficiency / 100) * graphHeight;
-    return { x, y, ...data };
-  });
-
-  const pathD = points.length > 0
-    ? `M ${points[0].x} ${points[0].y} ` + points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ')
-    : '';
-  const areaD = points.length > 0
-    ? `M ${points[0].x} ${height - padding.bottom} L ${points[0].x} ${points[0].y} ` +
-    points.slice(1).map(p => `L ${p.x} ${p.y}`).join(' ') +
-    ` L ${points[points.length - 1].x} ${height - padding.bottom} Z`
-    : '';
+  const stats = [
+    { label: "avg efficiency", value: `${avgEfficiency}%`, cls: "grad-text" },
+    { label: "xp earned", value: totalXP.toLocaleString(), cls: "text-acc3" },
+    { label: "tasks cleared", value: totalTasks, cls: "text-acc2" },
+  ];
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-black border border-green-600 shadow-[0_0_20px_rgba(0,255,0,0.3)] w-full max-w-4xl max-h-[80vh] overflow-auto">
-        <div className="border-b border-green-800 p-6 sticky top-0 bg-black z-10">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <Target className="w-6 h-6 text-green-400" />
-              <div>
-                <h2 className="text-2xl font-bold text-green-400 font-mono uppercase tracking-wider">
-                  &gt;&gt; Efficiency_Analytics
-                </h2>
-                <p className="text-xs text-gray-500 mt-1 font-mono">
-                  Last {logs.length} days • Points earned / Possible points
-                </p>
-              </div>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div className="animate-rise glass r-xl shadow-[0_0_80px_var(--glow)] w-full max-w-4xl max-h-[85vh] overflow-y-auto">
+        <div
+          className="border-b border-line p-5 sticky top-0 backdrop-blur-xl z-10 flex justify-between items-center"
+          style={{ background: "color-mix(in srgb, var(--base) 85%, transparent)" }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 r-lg grad-primary glow-shadow flex items-center justify-center">
+              <Target className="w-5 h-5 text-white" />
             </div>
-            <div className="flex items-center gap-3">
-              {onRefresh && (
-                <button
-                  onClick={onRefresh}
-                  disabled={isRefreshing}
-                  className="text-green-500 hover:text-green-400 font-bold font-mono px-4 py-2 border border-green-900 hover:border-green-700 transition-colors flex items-center gap-2 disabled:opacity-50"
-                  title="Refresh graph data (auto-refreshes every 15 min)"
-                >
-                  <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                  {isRefreshing ? 'SYNCING...' : '[REFRESH]'}
-                </button>
-              )}
+            <div>
+              <h2 className="font-display text-xl font-bold text-ink">Performance log</h2>
+              <p className="text-[11px] text-ink3">
+                last {logs.length} days · earned / possible XP
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {onRefresh && (
               <button
-                onClick={onClose}
-                className="text-red-500 hover:text-red-400 text-2xl font-bold font-mono px-4 py-2 border border-red-900 hover:border-red-700 transition-colors"
+                onClick={onRefresh}
+                disabled={isRefreshing}
+                className="p-2 r-md text-ink3 hover:text-ink hover:bg-[var(--chip-hover)] transition-all disabled:opacity-50"
+                title="Refresh"
               >
-                [X]
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
               </button>
-            </div>
-          </div>
-        </div>
-        <div className="p-6 border-b border-green-900/30">
-          <div className="grid grid-cols-3 gap-6">
-            <div className="border border-green-900/30 p-4 bg-green-900/10">
-              <div className="text-xs text-gray-500 font-mono mb-1">AVG_EFFICIENCY</div>
-              <div className="text-3xl font-bold text-green-400 font-mono">{avgEfficiency}%</div>
-            </div>
-            <div className="border border-blue-900/30 p-4 bg-blue-900/10">
-              <div className="text-xs text-gray-500 font-mono mb-1">TOTAL_XP_EARNED</div>
-              <div className="text-3xl font-bold text-blue-400 font-mono">{totalXP.toLocaleString()}</div>
-            </div>
-            <div className="border border-purple-900/30 p-4 bg-purple-900/10">
-              <div className="text-xs text-gray-500 font-mono mb-1">TASKS_COMPLETED</div>
-              <div className="text-3xl font-bold text-purple-400 font-mono">{totalTasks}</div>
-            </div>
-          </div>
-        </div>
-        <div className="p-6">
-          <div className="text-xs text-gray-500 mb-4 font-mono uppercase tracking-wider">
-            Efficiency Rate (Points Earned / Possible Points)
-          </div>
-
-          <div className="relative bg-black/50 border border-green-900/30 p-4">
-            {logs.length === 0 ? (
-              <div className="h-80 flex items-center justify-center text-gray-600 text-sm font-mono">
-                [NO_EFFICIENCY_DATA_AVAILABLE]
-              </div>
-            ) : (
-              <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
-                <defs>
-                  <linearGradient id="efficiencyGradientFull" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="rgba(34, 197, 94, 0.3)" />
-                    <stop offset="100%" stopColor="rgba(34, 197, 94, 0)" />
-                  </linearGradient>
-                </defs>
-                {[0, 25, 50, 75, 100].map((percent) => {
-                  const y = padding.top + (1 - percent / 100) * graphHeight;
-                  return (
-                    <g key={percent}>
-                      <line
-                        x1={padding.left}
-                        y1={y}
-                        x2={width - padding.right}
-                        y2={y}
-                        stroke="rgba(34, 197, 94, 0.1)"
-                        strokeWidth="1"
-                      />
-                      <text
-                        x={padding.left - 10}
-                        y={y + 4}
-                        fill="rgba(107, 114, 128, 1)"
-                        fontSize="10"
-                        textAnchor="end"
-                        fontFamily="monospace"
-                      >
-                        {percent}%
-                      </text>
-                    </g>
-                  );
-                })}
-
-                <path d={areaD} fill="url(#efficiencyGradientFull)" />
-
-                <path
-                  d={pathD}
-                  fill="none"
-                  stroke="rgb(34, 197, 94)"
-                  strokeWidth="0.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ filter: 'drop-shadow(0 0 4px rgba(34, 197, 94, 0.6))' }}
-                />
-                {points.map((point, index) => (
-                  <g key={index} className="group">
-                    <circle
-                      cx={point.x}
-                      cy={point.y}
-                      r="4"
-                      fill="rgb(34, 197, 94)"
-                      stroke="black"
-                      strokeWidth="1"
-                      className="cursor-pointer hover:r-6"
-                      style={{ filter: 'drop-shadow(0 0 3px rgba(34, 197, 94, 0.8))' }}
-                    />
-                    <g className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                      <rect
-                        x={point.x - 50}
-                        y={point.y - 55}
-                        width="100"
-                        height="45"
-                        fill="black"
-                        stroke="rgb(34, 197, 94)"
-                        strokeWidth="1"
-                        rx="2"
-                      />
-                      <text x={point.x} y={point.y - 40} fill="rgb(34, 197, 94)" fontSize="10" textAnchor="middle" fontFamily="monospace">
-                        {formatDate(point.date)}
-                      </text>
-                      <text x={point.x} y={point.y - 27} fill="white" fontSize="11" textAnchor="middle" fontFamily="monospace" fontWeight="bold">
-                        {point.efficiency.toFixed(1)}%
-                      </text>
-                      <text x={point.x} y={point.y - 15} fill="gray" fontSize="9" textAnchor="middle" fontFamily="monospace">
-                        {point.earnedXP}/{point.possibleXP} XP
-                      </text>
-                    </g>
-
-                    {(index % 5 === 0 || index === points.length - 1) && (
-                      <text
-                        x={point.x}
-                        y={height - padding.bottom + 20}
-                        fill={index === points.length - 1 ? "rgb(34, 197, 94)" : "rgba(107, 114, 128, 1)"}
-                        fontSize="10"
-                        textAnchor="middle"
-                        fontFamily="monospace"
-                        fontWeight={index === points.length - 1 ? "bold" : "normal"}
-                      >
-                        {formatDate(point.date)}
-                      </text>
-                    )}
-                  </g>
-                ))}
-              </svg>
             )}
+            <button
+              onClick={onClose}
+              className="p-2 r-md text-ink3 hover:text-rosy hover:bg-rosy/10 transition-all"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
+        </div>
 
-          <div className="mt-6 pt-6 border-t border-green-900/30 flex items-center justify-between">
-            <div className="flex items-center gap-6 text-xs font-mono">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-1 bg-green-500 shadow-[0_0_10px_rgba(0,255,0,0.5)]"></div>
-                <span className="text-gray-500">Efficiency Rate</span>
+        <div className="grid grid-cols-3 gap-3 p-5 border-b border-line">
+          {stats.map((stat) => (
+            <div key={stat.label} className="chip r-lg p-4">
+              <div className="text-[10px] text-ink3 uppercase tracking-widest font-semibold mb-1">
+                {stat.label}
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-green-500/30"></div>
-                <span className="text-gray-500">Area Fill</span>
-              </div>
+              <div className={`font-display text-2xl font-extrabold ${stat.cls}`}>{stat.value}</div>
             </div>
-            <div className="text-xs text-gray-500 font-mono">
-              Hover over points for details
+          ))}
+        </div>
+
+        <div className="p-5">
+          {logs.length === 0 ? (
+            <div className="h-64 flex items-center justify-center text-ink3 text-sm">
+              no data yet — clear some tasks first
             </div>
-          </div>
+          ) : (
+            <svg width="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
+              <defs>
+                <linearGradient id="effFillFull" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="var(--acc)" stopOpacity="0.35" />
+                  <stop offset="100%" stopColor="var(--acc)" stopOpacity="0" />
+                </linearGradient>
+                <linearGradient id="effStrokeFull" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="var(--acc)" />
+                  <stop offset="60%" stopColor="var(--acc2)" />
+                  <stop offset="100%" stopColor="var(--acc3)" />
+                </linearGradient>
+              </defs>
+              {[0, 25, 50, 75, 100].map((pct) => {
+                const y = pad.top + (1 - pct / 100) * gh;
+                return (
+                  <g key={pct}>
+                    <line x1={pad.left} y1={y} x2={width - pad.right} y2={y} stroke="var(--line)" />
+                    <text x={pad.left - 8} y={y + 4} fill="var(--ink3)" fontSize="10" textAnchor="end">
+                      {pct}%
+                    </text>
+                  </g>
+                );
+              })}
+
+              <path d={area} fill="url(#effFillFull)" />
+              <path
+                d={line}
+                fill="none"
+                stroke="url(#effStrokeFull)"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ filter: "drop-shadow(0 0 6px var(--glow))" }}
+              />
+
+              {points.map((p, i) => (
+                <g key={i} className="group">
+                  <circle
+                    cx={p.x}
+                    cy={p.y}
+                    r="4"
+                    fill="var(--acc2)"
+                    stroke="var(--base)"
+                    strokeWidth="1.5"
+                    className="cursor-pointer"
+                  />
+                  <g className="opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <rect
+                      x={p.x - 52}
+                      y={p.y - 58}
+                      width="104"
+                      height="46"
+                      fill="var(--base)"
+                      stroke="var(--acc)"
+                      strokeOpacity="0.5"
+                      rx="10"
+                    />
+                    <text x={p.x} y={p.y - 43} fill="var(--acc)" fontSize="10" textAnchor="middle">
+                      {fmt(p.date)}
+                    </text>
+                    <text x={p.x} y={p.y - 30} fill="var(--ink)" fontSize="12" textAnchor="middle" fontWeight="bold">
+                      {p.efficiency.toFixed(1)}%
+                    </text>
+                    <text x={p.x} y={p.y - 18} fill="var(--ink3)" fontSize="9" textAnchor="middle">
+                      {p.earnedXP}/{p.possibleXP} XP
+                    </text>
+                  </g>
+                  {(i % 5 === 0 || i === points.length - 1) && (
+                    <text
+                      x={p.x}
+                      y={height - pad.bottom + 18}
+                      fill={i === points.length - 1 ? "var(--acc2)" : "var(--ink3)"}
+                      fontSize="10"
+                      textAnchor="middle"
+                    >
+                      {fmt(p.date)}
+                    </text>
+                  )}
+                </g>
+              ))}
+            </svg>
+          )}
         </div>
       </div>
     </div>

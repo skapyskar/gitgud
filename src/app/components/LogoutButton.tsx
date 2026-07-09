@@ -1,13 +1,17 @@
 "use client";
+
 import { signOut } from "next-auth/react";
+import { LogOut } from "lucide-react";
 
 export default function LogoutButton() {
   return (
     <button
       onClick={() => signOut({ callbackUrl: "/" })}
-      className="text-xs px-3 py-1.5 text-gray-400 hover:text-red-500 hover:bg-red-500/10 border border-red-900/30 hover:border-red-500/50 transition-all uppercase tracking-widest font-mono"
+      className="flex items-center gap-2 text-xs font-medium px-3.5 py-2 r-md chip text-ink2 hover:text-rosy hover:!border-rosy/40 hover:!bg-rosy/10 transition-all"
+      title="Sign out"
     >
-      [ TERMINATE_SESSION ]
+      <LogOut className="w-3.5 h-3.5" />
+      <span className="hidden sm:inline">Save &amp; quit</span>
     </button>
   );
 }

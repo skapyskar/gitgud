@@ -1,127 +1,74 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { tierBaseXP } from "@/lib/gamification";
+import { requireUser } from "@/lib/api";
+import { possibleXPForTask } from "@/lib/gamification";
+import { dayStart, todayDayIndex } from "@/lib/dates";
+import { TaskTier, Category, TaskType } from "../../../../../prisma/generated/enums";
+
+const TIERS = Object.values(TaskTier);
+const CATEGORIES = Object.values(Category);
+const TYPES = Object.values(TaskType);
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    const { user, error } = await requireUser();
+    if (error) return error;
 
     const body = await request.json();
-    const { title, type, tier, category, deadline, scheduledDate, repeatDays, deadlineTime, allocatedDuration } = body;
+    const { title, type, deadline, scheduledDate, repeatDays, deadlineTime, allocatedDuration } = body;
 
-    // Validate required fields
-    if (!title || !type) {
-      return NextResponse.json(
-        { error: "Title and type are required" },
-        { status: 400 }
-      );
+    if (!title?.trim() || !type || !TYPES.includes(type)) {
+      return NextResponse.json({ error: "Title and a valid type are required" }, { status: 400 });
     }
 
-    // Create the task
+    const tier: TaskTier = TIERS.includes(body.tier) ? body.tier : "C";
+    const category: Category = CATEGORIES.includes(body.category) ? body.category : "LIFE";
+    const frequency = Math.min(50, Math.max(1, parseInt(body.frequency) || 1));
+
     const task = await prisma.task.create({
       data: {
         userId: user.id,
-        title,
+        title: title.trim().slice(0, 200),
         type,
-        tier: tier || "C",
-        category: category || "LIFE",
+        tier,
+        category,
         deadline: deadline ? new Date(deadline) : null,
         scheduledDate: scheduledDate ? new Date(scheduledDate) : null,
         plannedDate: scheduledDate ? new Date(scheduledDate) : new Date(),
         repeatDays: repeatDays || null,
         deadlineTime: deadlineTime ? new Date(deadlineTime) : null,
         allocatedDuration: allocatedDuration || null,
-        frequency: body.frequency || 1,
+        frequency,
         completedFrequency: 0,
       },
     });
 
-    // For DAILY tasks, update DayLog to track possibleXP (for efficiency calculation)
-    if (type === "DAILY" && scheduledDate) {
-      const taskDate = new Date(scheduledDate);
-      taskDate.setHours(0, 0, 0, 0);
-      const baseXP = tierBaseXP(tier || "C");
-      // Include duration bonus (25%) in possibleXP if task has allocated duration
-      const durationBonus = allocatedDuration ? Math.round(baseXP * 0.25) : 0;
-      const totalPossibleXP = baseXP + durationBonus;
+    // Track the XP this task makes possible (efficiency denominator).
+    const possible = possibleXPForTask(tier, !!allocatedDuration);
 
+    const isActiveWeeklyToday =
+      type === "WEEKLY" &&
+      !!repeatDays &&
+      repeatDays.split(",").map(Number).includes(todayDayIndex());
+
+    const logDate =
+      type === "DAILY" && scheduledDate
+        ? dayStart(new Date(scheduledDate))
+        : isActiveWeeklyToday
+          ? dayStart()
+          : null;
+
+    if (logDate) {
       await prisma.dayLog.upsert({
-        where: {
-          userId_date: {
-            userId: user.id,
-            date: taskDate,
-          },
-        },
-        update: {
-          possibleXP: { increment: totalPossibleXP },
-        },
-        create: {
-          userId: user.id,
-          date: taskDate,
-          totalXP: 0,
-          tasksDone: 0,
-          possibleXP: totalPossibleXP,
-        },
+        where: { userId_date: { userId: user.id, date: logDate } },
+        update: { possibleXP: { increment: possible } },
+        create: { userId: user.id, date: logDate, totalXP: 0, tasksDone: 0, possibleXP: possible },
       });
     }
 
-    // For WEEKLY tasks, update today's DayLog if today is one of the repeatDays
-    if (type === "WEEKLY" && repeatDays) {
-      const today = new Date();
-      const todayDayIndex = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      const selectedDays = repeatDays.split(",").map(Number);
-
-      if (selectedDays.includes(todayDayIndex)) {
-        // This weekly task is active today, update today's possibleXP
-        const todayDate = new Date();
-        todayDate.setHours(0, 0, 0, 0);
-
-        const baseXP = tierBaseXP(tier || "C");
-        // Include duration bonus (25%) in possibleXP if task has allocated duration
-        const durationBonus = allocatedDuration ? Math.round(baseXP * 0.25) : 0;
-        const totalPossibleXP = baseXP + durationBonus;
-
-        await prisma.dayLog.upsert({
-          where: {
-            userId_date: {
-              userId: user.id,
-              date: todayDate,
-            },
-          },
-          update: {
-            possibleXP: { increment: totalPossibleXP },
-          },
-          create: {
-            userId: user.id,
-            date: todayDate,
-            totalXP: 0,
-            tasksDone: 0,
-            possibleXP: totalPossibleXP,
-          },
-        });
-      }
-    }
-
     return NextResponse.json({ success: true, task });
-  } catch (error) {
-    console.error("Create task error:", error);
-    return NextResponse.json(
-      { error: "Failed to create task" },
-      { status: 500 }
-    );
+  } catch (err) {
+    console.error("Create task error:", err);
+    return NextResponse.json({ error: "Failed to create task" }, { status: 500 });
   }
 }

@@ -1,406 +1,344 @@
 "use client";
 
-import { useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Task, TaskTier, Category } from "../../../../prisma/generated/client";
-
-type WeeklyTask = Task & { repeatDays?: string | null };
-
-interface WeeklyPlannerProps {
-  templates: WeeklyTask[];
-  userId: string;
-}
+import { Repeat, X, Clock, Plus } from "lucide-react";
+import type { Task } from "../../../../prisma/generated/client";
+import {
+  Panel,
+  HudButton,
+  ConfirmModal,
+  Modal,
+  ModalTitle,
+  TierBadge,
+  inputCls,
+  labelCls,
+} from "../../components/ui";
+import { createTask, deleteTask } from "./taskApi";
+import { TaskTier, Category } from "../../../../prisma/generated/enums";
+import { tierBaseXP, TIER_LABELS, WEEKLY_BONUS_XP } from "@/lib/gamification";
+import { todayDayIndex } from "@/lib/dates";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-export default function WeeklyPlanner({ templates, userId }: WeeklyPlannerProps) {
+interface WeeklyPlannerProps {
+  templates: Task[];
+}
+
+/** Recurring habit templates — they spawn a fresh instance every scheduled day. */
+export default function WeeklyPlanner({ templates }: WeeklyPlannerProps) {
   const router = useRouter();
-  const [isCreating, setIsCreating] = useState(false);
-  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [items, setItems] = useState<Task[]>(templates);
+  const [creating, setCreating] = useState(false);
+  const [deleting, setDeleting] = useState<Task | null>(null);
+
+  // Form state
+  const [title, setTitle] = useState("");
   const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [tier, setTier] = useState<TaskTier>("C");
   const [category, setCategory] = useState<Category>("LIFE");
   const [deadlineTime, setDeadlineTime] = useState("");
   const [duration, setDuration] = useState("");
   const [frequency, setFrequency] = useState("1");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  // Delete confirmation state
-  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
-  // Optimistic UI: local state for templates
-  const [optimisticTemplates, setOptimisticTemplates] = useState<WeeklyTask[]>([...templates]);
+  const [submitting, setSubmitting] = useState(false);
+  const tempIdRef = useRef(0);
 
-  const toggleDay = (dayIndex: number) => {
-    setSelectedDays(prev =>
-      prev.includes(dayIndex)
-        ? prev.filter(d => d !== dayIndex)
-        : [...prev, dayIndex]
-    );
+  // Reset optimistic state when fresh server data arrives (render-time reset).
+  const [prevTemplates, setPrevTemplates] = useState(templates);
+  if (prevTemplates !== templates) {
+    setPrevTemplates(templates);
+    setItems(templates);
+  }
+
+  const sorted = useMemo(
+    () => [...items].sort((a, b) => a.title.localeCompare(b.title)),
+    [items]
+  );
+
+  const resetForm = () => {
+    setTitle("");
+    setSelectedDays([]);
+    setTier("C");
+    setCategory("LIFE");
+    setDeadlineTime("");
+    setDuration("");
+    setFrequency("1");
+    setCreating(false);
   };
 
-  // Optimistic add
-  const handleCreateTemplate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTaskTitle.trim() || selectedDays.length === 0) return;
+  const toggleDay = (idx: number) =>
+    setSelectedDays((prev) =>
+      prev.includes(idx) ? prev.filter((d) => d !== idx) : [...prev, idx]
+    );
 
-    setIsSubmitting(true);
-    // 1. Create a fake template for instant UI
-    const tempId = Math.random().toString();
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || selectedDays.length === 0 || !deadlineTime || submitting) return;
+    setSubmitting(true);
+
+    const tempId = `temp-${++tempIdRef.current}`;
     const now = new Date();
-    const tempTemplate: WeeklyTask = {
+    const optimistic = {
       id: tempId,
-      title: newTaskTitle,
-      description: null,
-      isCompleted: false,
+      title: title.trim(),
       type: "WEEKLY",
       tier,
       category,
-      userId,
-      repeatDays: selectedDays.sort().join(","),
-      plannedDate: now,
-      plannedStartTime: null,
-      plannedEndTime: null,
-      deadline: null,
-      scheduledDate: null,
-      completedAt: null,
-      basePoints: 10,
-      xpWorth: 10,
-      isBonus: false,
-      timeBonus: 0,
-      finalPoints: 0,
+      repeatDays: [...selectedDays].sort().join(","),
+      isCompleted: false,
+      allocatedDuration: duration ? parseInt(duration) : null,
+      frequency: parseInt(frequency) || 1,
       createdAt: now,
       updatedAt: now,
-      // New fields
-      deadlineTime: null,
+    } as Task;
+    setItems((cur) => [optimistic, ...cur]);
+
+    const todayKeyISO = new Date().toISOString().slice(0, 10);
+    const res = await createTask({
+      title: title.trim(),
+      type: "WEEKLY",
+      tier,
+      category,
+      repeatDays: [...selectedDays].sort().join(","),
+      deadlineTime: deadlineTime ? new Date(`${todayKeyISO}T${deadlineTime}:00`).toISOString() : null,
       allocatedDuration: duration ? parseInt(duration) : null,
-      durationMet: false,
-      isExpired: false,
-      // @ts-ignore
       frequency: parseInt(frequency) || 1,
-      // @ts-ignore
-      completedFrequency: 0,
-    };
-    setOptimisticTemplates((current) => [tempTemplate, ...current]);
+    });
 
-    try {
-      const res = await fetch("/api/tasks/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: newTaskTitle,
-          type: "WEEKLY",
-          tier,
-          category,
-          repeatDays: selectedDays.sort().join(","),
-          // Store as local time without UTC offset (use today's date as base)
-          deadlineTime: deadlineTime ? new Date(`${new Date().toISOString().slice(0, 10)}T${deadlineTime}:00`).toISOString() : null,
-          allocatedDuration: duration ? parseInt(duration) : null,
-          frequency: parseInt(frequency) || 1,
-        }),
-      });
-      if (res.ok) {
-        setNewTaskTitle("");
-        setSelectedDays([]);
-        setTier("C");
-        setCategory("LIFE");
-        setDeadlineTime("");
-        setDuration("");
-        setFrequency("1");
-        setIsCreating(false);
-        router.refresh(); // Will replace fake with real
-      } else {
-        setOptimisticTemplates((current) => current.filter(t => t.id !== tempId));
-      }
-    } catch (error) {
-      setOptimisticTemplates((current) => current.filter(t => t.id !== tempId));
-      console.error("Failed to create weekly task:", error);
-    } finally {
-      setIsSubmitting(false);
+    if (res?.success) {
+      resetForm();
+      router.refresh();
+    } else {
+      setItems((cur) => cur.filter((t) => t.id !== tempId));
     }
+    setSubmitting(false);
   };
 
-  // Show delete confirmation dialog
-  const promptDeleteTemplate = (taskId: string) => {
-    setDeletingTaskId(taskId);
-  };
-
-  // Confirm and execute delete
-  const confirmDeleteTemplate = async () => {
-    if (!deletingTaskId) return;
-
-    const taskId = deletingTaskId;
-    setDeletingTaskId(null); // Close dialog
-
-    const prev = [...optimisticTemplates];
-    setOptimisticTemplates((current) => current.filter((t) => t.id !== taskId));
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/tasks/delete", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskId }),
-      });
-      if (res.ok) {
-        router.refresh();
-      } else {
-        setOptimisticTemplates(prev);
-      }
-    } catch (error) {
-      setOptimisticTemplates(prev);
-      console.error("Failed to delete template:", error);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleDelete = async () => {
+    if (!deleting) return;
+    const id = deleting.id;
+    setDeleting(null);
+    const prev = items;
+    setItems((cur) => cur.filter((t) => t.id !== id));
+    const res = await deleteTask(id);
+    if (res?.success) router.refresh();
+    else setItems(prev);
   };
 
   return (
-    <div className="border border-green-900/30 p-[0.3vw] bg-black/50 flex flex-col h-[calc(100vh-52vh)] min-h-[12vh] max-h-[35vh] lg:h-[calc(100vh-40vh)] lg:max-h-[50vh] relative">
-      {isLoading && (
-        <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="text-green-400 font-mono text-sm animate-pulse">LOADING...</div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Modal */}
-      {deletingTaskId && (
-        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-[1vw]">
-          <div className="bg-black border-2 border-red-500 p-[1vw] max-w-md w-full">
-            <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] text-red-400 font-mono mb-[0.5vh] uppercase">
-              Delete Template?
-            </h3>
-            <p className="text-[clamp(0.6rem,0.85vw,0.875rem)] text-gray-400 mb-[1vh] font-mono">
-              This weekly template will be <span className="text-red-400 font-bold">permanently deleted</span>.
-            </p>
-            <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-yellow-500 mb-[1vh] font-mono">
-              ⚠️ This action cannot be undone!
-            </p>
-
-            <div className="flex gap-[0.5vw] pt-[0.3vh]">
-              <button
-                onClick={confirmDeleteTemplate}
-                className="flex-1 bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-red-400 uppercase tracking-wider font-mono"
-              >
-                Delete
-              </button>
-              <button
-                onClick={() => setDeletingTaskId(null)}
-                className="flex-1 bg-gray-900/30 hover:bg-gray-900/50 border border-gray-700 px-[0.5vw] py-[0.5vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-gray-400 uppercase font-mono"
-              >
-                Cancel
-              </button>
+    <Panel
+      title="Habits"
+      subtitle={`repeat weekly · +${WEEKLY_BONUS_XP} bonus XP each`}
+      accent="habit"
+      className="h-full"
+      right={
+        <HudButton variant="habit" className="flex items-center gap-1.5" onClick={() => setCreating(true)}>
+          <Plus className="w-3.5 h-3.5" /> Habit
+        </HudButton>
+      }
+    >
+      <div className="h-full overflow-y-auto pr-1 space-y-2">
+        {sorted.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-10 text-center">
+            <div className="w-12 h-12 r-lg chip flex items-center justify-center mb-3">
+              <Repeat className="w-5 h-5 text-ink3" />
             </div>
-          </div>
-        </div>
-      )}
-
-      <div className="flex items-center justify-between mb-[0.5vh]">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></span>
-          <h3 className="text-[clamp(0.8rem,1.3vw,1.25rem)] font-bold text-green-500 uppercase tracking-wider">
-            &gt;&gt; Weekly_Tasks
-          </h3>
-        </div>
-
-        {!isCreating && (
-          <button
-            onClick={() => setIsCreating(true)}
-            className="text-[clamp(0.5rem,0.7vw,0.75rem)] bg-purple-900/30 hover:bg-purple-900/50 border border-purple-700 px-3 py-1 text-purple-400 uppercase tracking-wider font-mono"
-          >
-            + New Template
-          </button>
-        )}
-      </div>
-
-      <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-4 font-mono">
-        Preplanned Tasks
-      </p>
-
-      {/* Create New Template Form */}
-      {isCreating && (
-        <form onSubmit={handleCreateTemplate} className="mb-[0.5vh] p-[0.5vw] bg-purple-900/10 border border-purple-700/30">
-          <input
-            type="text"
-            value={newTaskTitle}
-            onChange={(e) => setNewTaskTitle(e.target.value)}
-            placeholder="Weekly task name..."
-            className="w-full bg-black/70 border border-purple-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 placeholder-gray-600 focus:outline-none focus:border-purple-500 font-mono mb-[0.5vh]"
-            autoFocus
-          />
-
-          <div className="grid grid-cols-2 gap-[0.5vw] mb-[0.5vh]">
-            <div>
-              <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Tier</label>
-              <select
-                value={tier}
-                onChange={(e) => setTier(e.target.value as TaskTier)}
-                className="w-full bg-black/70 border border-purple-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-purple-500 font-mono"
-              >
-                <option value="S">S - Critical</option>
-                <option value="A">A - Important</option>
-                <option value="B">B - Maintenance</option>
-                <option value="C">C - Chores</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Category</label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value as Category)}
-                className="w-full bg-black/70 border border-purple-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-purple-500 font-mono"
-              >
-                <option value="DEV">DEV</option>
-                <option value="ACADEMICS">ACADEMICS</option>
-                <option value="HEALTH">HEALTH</option>
-                <option value="LIFE">LIFE</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="mb-[0.5vh]">
-            <p className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.3vh] font-mono">Select Days:</p>
-            <div className="flex gap-[0.3vw] flex-wrap">
-              {DAYS.map((day, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => toggleDay(index)}
-                  className={`px-[0.5vw] py-[0.2vh] text-[clamp(0.5rem,0.7vw,0.75rem)] font-mono border transition-colors ${selectedDays.includes(index)
-                    ? "bg-purple-600/50 border-purple-400 text-purple-200"
-                    : "bg-black/50 border-purple-900/30 text-gray-500 hover:border-purple-700"
-                    }`}
-                >
-                  {day}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-[0.5vw] mb-[0.5vh]">
-            <div>
-              <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Deadline Time *</label>
-              <input
-                type="time"
-                value={deadlineTime}
-                onChange={(e) => setDeadlineTime(e.target.value)}
-                className="w-full bg-black/70 border border-purple-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-purple-500 font-mono"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Duration (min)</label>
-              <input
-                type="number"
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                placeholder="e.g. 60"
-                min="1"
-                className="w-full bg-black/70 border border-purple-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-purple-500 font-mono placeholder-gray-600"
-              />
-            </div>
-            <div>
-              <label className="text-[clamp(0.5rem,0.7vw,0.75rem)] text-gray-500 mb-[0.2vh] block font-mono">Frequency</label>
-              <input
-                type="number"
-                value={frequency}
-                onChange={(e) => setFrequency(e.target.value)}
-                placeholder="1"
-                min="1"
-                className="w-full bg-black/70 border border-purple-900/50 px-[0.5vw] py-[0.3vh] text-[clamp(0.6rem,0.85vw,0.875rem)] text-green-400 focus:outline-none focus:border-purple-500 font-mono placeholder-gray-600"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-[0.5vw]">
-            <button
-              type="submit"
-              disabled={isSubmitting || !newTaskTitle.trim() || selectedDays.length === 0 || !deadlineTime}
-              className="flex-1 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-purple-400 uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed font-mono"
-            >
-              {isSubmitting ? "Creating..." : "Create Template"}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setIsCreating(false);
-                setNewTaskTitle("");
-                setSelectedDays([]);
-                setTier("C");
-                setCategory("LIFE");
-                setDeadlineTime("");
-                setDuration("");
-                setFrequency("1");
-              }}
-              className="bg-red-900/30 hover:bg-red-900/50 border border-red-700 px-[0.5vw] py-[0.3vh] text-[clamp(0.5rem,0.7vw,0.75rem)] text-red-400 uppercase font-mono"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Existing Templates */}
-      <div className="space-y-[0.3vh] flex-1 overflow-y-auto pr-2">
-        {templates.length === 0 ? (
-          <div className="text-center text-gray-600 text-xs py-8 font-mono">
-            [NO_WEEKLY_TEMPLATES]
-            <br />
-            Create recurring tasks
+            <p className="font-display font-semibold text-ink2 text-sm mb-0.5">No habits yet</p>
+            <p className="text-xs text-ink3">Recurring quests spawn here every scheduled day.</p>
           </div>
         ) : (
-          templates.map((template) => {
-            const days = template.repeatDays?.split(",").map(Number) || [];
-
+          sorted.map((template) => {
+            const days = template.repeatDays?.split(",").map(Number) ?? [];
+            const activeToday = days.includes(todayDayIndex());
             return (
               <div
                 key={template.id}
-                className="bg-black/70 border border-purple-700/30 p-3 hover:border-purple-500/50 transition-colors group"
+                className={`group r-lg chip chip-hover transition-all px-4 py-3 ${
+                  activeToday ? "!border-hab/40" : ""
+                }`}
               >
-                <div className="flex justify-between items-start gap-2 mb-2">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className={`text-xs px-1.5 py-0.5 font-bold border font-mono ${template.tier === 'S' ? 'bg-red-900/30 border-red-500 text-red-400' :
-                        template.tier === 'A' ? 'bg-orange-900/30 border-orange-500 text-orange-400' :
-                          template.tier === 'B' ? 'bg-blue-900/30 border-blue-500 text-blue-400' :
-                            'bg-gray-900/30 border-gray-500 text-gray-400'
-                        }`}>{template.tier}</span>
-                      <span className="text-[10px] text-gray-500 font-mono">[{template.category}]</span>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-medium text-ink truncate">{template.title}</span>
+                      {activeToday && (
+                        <span className="flex items-center gap-1 text-[10px] font-semibold text-hab bg-hab/10 ring-1 ring-inset ring-hab/30 rounded-full px-2 py-0.5 animate-pulse">
+                          <Repeat className="w-3 h-3" /> live today
+                        </span>
+                      )}
                     </div>
-                    <h4 className="text-sm text-green-400 font-mono">{template.title}</h4>
+                    <div className="flex items-center gap-2.5 mt-1.5 text-[11px]">
+                      <TierBadge tier={template.tier} />
+                      <span className="text-ink3">{template.category}</span>
+                      <span className="text-acc font-semibold">+{tierBaseXP(template.tier)} XP</span>
+                      {template.allocatedDuration && (
+                        <span className="flex items-center gap-1 text-hab">
+                          <Clock className="w-3 h-3" /> {template.allocatedDuration}m
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <button
-                    onClick={() => promptDeleteTemplate(template.id)}
-                    className="text-xs text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity font-mono"
+                    onClick={() => setDeleting(template)}
+                    className="p-2 r-md text-rosy hover:bg-rosy/15 opacity-0 group-hover:opacity-100 transition-all"
+                    title="Delete habit"
                   >
-                    Delete
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
 
-                <div className="flex gap-1 flex-wrap mt-2">
-                  {DAYS.map((day, index) => (
+                <div className="flex gap-1 mt-2.5">
+                  {DAYS.map((day, idx) => (
                     <span
-                      key={index}
-                      className={`text-xs px-2 py-0.5 border font-mono ${days.includes(index)
-                        ? "bg-purple-600/30 border-purple-500/50 text-purple-300"
-                        : "bg-black/50 border-gray-800 text-gray-700"
-                        }`}
+                      key={idx}
+                      className={`flex-1 text-center text-[10px] font-semibold py-1 r-md ${
+                        days.includes(idx)
+                          ? `bg-hab/15 text-hab ring-1 ring-inset ring-hab/40 ${
+                              idx === todayDayIndex() ? "shadow-[0_0_10px_var(--glow)]" : ""
+                            }`
+                          : "bg-[var(--chip)] text-ink3"
+                      }`}
                     >
                       {day}
                     </span>
                   ))}
                 </div>
-
-                {days.includes(new Date().getDay()) && (
-                  <div className="mt-2 text-xs text-green-500 font-mono">
-                    ✓ Active today (+10 bonus XP if completed)
-                  </div>
-                )}
               </div>
             );
           })
         )}
       </div>
-    </div>
+
+      {creating && (
+        <Modal accent="habit" onClose={resetForm}>
+          <ModalTitle>New habit</ModalTitle>
+          <form onSubmit={handleCreate} className="space-y-4 mt-4">
+            <div>
+              <label className={labelCls}>Habit *</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g. Gym, DSA practice…"
+                className={inputCls}
+                maxLength={200}
+                autoFocus
+              />
+            </div>
+
+            <div>
+              <label className={labelCls}>Repeat on *</label>
+              <div className="flex gap-1.5">
+                {DAYS.map((day, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => toggleDay(idx)}
+                    className={`flex-1 py-2 text-[11px] font-semibold r-md transition-all ${
+                      selectedDays.includes(idx)
+                        ? "bg-gradient-to-br from-cyan-400 to-sky-500 text-slate-950 shadow-lg shadow-cyan-500/25"
+                        : "chip chip-hover text-ink2"
+                    }`}
+                  >
+                    {day}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={labelCls}>Tier</label>
+                <select value={tier} onChange={(e) => setTier(e.target.value as TaskTier)} className={inputCls}>
+                  {Object.values(TaskTier).map((t) => (
+                    <option key={t} value={t}>
+                      {t} — {TIER_LABELS[t]} ({tierBaseXP(t)} XP)
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className={labelCls}>Category</label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as Category)}
+                  className={inputCls}
+                >
+                  {Object.values(Category).map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className={labelCls}>Deadline *</label>
+                <input
+                  type="time"
+                  value={deadlineTime}
+                  onChange={(e) => setDeadlineTime(e.target.value)}
+                  className={inputCls}
+                  required
+                />
+              </div>
+              <div>
+                <label className={labelCls}>Limit (min)</label>
+                <input
+                  type="number"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  placeholder="—"
+                  min={1}
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label className={labelCls}>Reps</label>
+                <input
+                  type="number"
+                  value={frequency}
+                  onChange={(e) => setFrequency(e.target.value)}
+                  min={1}
+                  max={50}
+                  className={inputCls}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2.5 pt-1">
+              <HudButton
+                type="submit"
+                variant="habit"
+                className="flex-1 py-2.5"
+                disabled={submitting || !title.trim() || selectedDays.length === 0 || !deadlineTime}
+              >
+                {submitting ? "Creating…" : "Create habit"}
+              </HudButton>
+              <HudButton type="button" variant="ghost" className="py-2.5" onClick={resetForm}>
+                Cancel
+              </HudButton>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {deleting && (
+        <ConfirmModal
+          title="Delete habit?"
+          body={
+            <>
+              <span className="text-ink font-medium">{deleting.title}</span> stops repeating. Past
+              completions keep their XP.
+            </>
+          }
+          confirmLabel="Delete"
+          onConfirm={handleDelete}
+          onCancel={() => setDeleting(null)}
+        />
+      )}
+    </Panel>
   );
 }

@@ -1,110 +1,107 @@
-// src/app/page.tsx
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
+import { Zap, Flame, Repeat, Trophy, ArrowRight, Sparkles } from "lucide-react";
 import { GitGudLogo } from "./components/GitGudLogo";
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
 
+  const features = [
+    {
+      icon: Zap,
+      tint: "from-violet-500 to-fuchsia-500 shadow-fuchsia-500/30",
+      title: "XP for everything",
+      body: "Every task has a tier and a reward. Beat your time limit for +25% XP.",
+    },
+    {
+      icon: Flame,
+      tint: "from-amber-400 to-orange-500 shadow-orange-500/30",
+      title: "Streak multipliers",
+      body: "Show up daily and stack up to a ×2 multiplier. Miss a day, lose the flame.",
+    },
+    {
+      icon: Repeat,
+      tint: "from-cyan-400 to-sky-500 shadow-cyan-500/30",
+      title: "Habits that respawn",
+      body: "Weekly templates spawn fresh missions on schedule — with bonus XP.",
+    },
+    {
+      icon: Trophy,
+      tint: "from-emerald-400 to-teal-500 shadow-emerald-500/30",
+      title: "Ranks & levels",
+      body: "Climb from Script Kiddie to The Compiler. Your grind, visualized.",
+    },
+  ];
+
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-black via-gray-900 to-black relative overflow-hidden">
-      {/* Cyberpunk Grid Background */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,65,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,65,0.1)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
-      </div>
+    <main className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      <div className="aurora" />
+      <div className="noise" />
 
-      {/* Glowing Orb Effect */}
-      <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-1/4 right-1/3 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      <div className="relative z-10 text-center px-6 py-16 max-w-5xl mx-auto">
+        <div className="animate-rise flex flex-col items-center gap-6">
+          <div className="animate-float">
+            <GitGudLogo className="w-24 h-24 md:w-28 md:h-28" />
+          </div>
 
-      <div className="relative z-10 text-center space-y-8 p-8">
-        {/* Logo and Title */}
-        <div className="space-y-4 flex flex-col items-center">
-          <GitGudLogo className="w-24 h-24 md:w-32 md:h-32 text-green-500" />
-          <h1 className="text-6xl md:text-8xl font-bold text-green-400 tracking-tighter uppercase font-mono glitch-text">
-            Git_Gud<span className="animate-pulse">_</span>
+          <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 text-xs font-medium text-ink2">
+            <Sparkles className="w-3.5 h-3.5 text-acc2" />
+            productivity, but it plays like a game
+          </div>
+
+          <h1 className="font-display text-6xl md:text-8xl font-extrabold tracking-tight leading-[0.95]">
+            <span className="text-ink">Level up</span>
+            <br />
+            <span className="grad-text">your life.</span>
           </h1>
-          <p className="text-green-600 text-sm md:text-base font-mono tracking-widest animate-pulse">
-            {'>'} PRODUCTIVITY.PROTOCOL.INITIALIZED
+
+          <p className="text-ink2 text-base md:text-lg max-w-xl leading-relaxed">
+            Turn your to-do list into a game you actually want to play — XP, streaks,
+            ranks, and habits that respawn.
           </p>
-        </div>
 
-        {/* Dynamic Button based on Auth Status */}
-        <div className="pt-8">
-          {session ? (
+          <div className="flex flex-col items-center gap-3 mt-2">
             <Link
-              href="/dashboard"
-              className="
-                group relative px-8 py-4 bg-transparent 
-                border border-green-500 text-green-500 
-                font-mono text-xl uppercase tracking-widest
-                hover:bg-green-500 hover:text-black 
-                transition-all duration-300
-                shadow-[0_0_10px_rgba(0,255,0,0.2)]
-                hover:shadow-[0_0_20px_rgba(0,255,0,0.6)]
-                inline-block
-              "
+              href={session ? "/dashboard" : "/login"}
+              className="group inline-flex items-center gap-2.5 px-8 py-4 r-lg grad-primary text-white font-display font-bold text-lg glow-shadow hover:brightness-110 hover:-translate-y-0.5 transition-all"
             >
-              <span className="absolute inset-0 w-full h-full border-t border-b border-transparent group-hover:border-green-900 scale-y-110 transition-transform"></span>
-              <span className="relative">[ ENTER_SYSTEM ]</span>
+              {session ? "Enter the game" : "Press start"}
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-          ) : (
-            <Link
-              href="/login"
-              className="
-                group relative px-8 py-4 bg-transparent 
-                border border-green-500 text-green-500 
-                font-mono text-xl uppercase tracking-widest
-                hover:bg-green-500 hover:text-black 
-                transition-all duration-300
-                shadow-[0_0_10px_rgba(0,255,0,0.2)]
-                hover:shadow-[0_0_20px_rgba(0,255,0,0.6)]
-                inline-block
-              "
-            >
-              <span className="absolute inset-0 w-full h-full border-t border-b border-transparent group-hover:border-green-900 scale-y-110 transition-transform"></span>
-              <span className="relative">[ INITIALIZE_CONNECTION ]</span>
-            </Link>
-          )}
+            <p className="text-ink3 text-xs">
+              {session ? (
+                <span className="inline-flex items-center gap-2">
+                  <span className="w-2 h-2 bg-acc rounded-full animate-pulse" />
+                  signed in as {session.user?.name || session.user?.email}
+                </span>
+              ) : (
+                "free · sign in with GitHub or Google"
+              )}
+            </p>
+          </div>
         </div>
 
-        {/* Status Indicator */}
-        <div className="pt-4">
-          {session ? (
-            <p className="text-gray-500 text-xs font-mono flex items-center justify-center gap-2">
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
-              SESSION_ACTIVE // USER: {session.user?.name || session.user?.email}
-            </p>
-          ) : (
-            <p className="text-gray-600 text-xs font-mono">
-              [ ACCESS_RESTRICTED // AUTHORIZATION_REQUIRED ]
-            </p>
-          )}
-        </div>
-
-        {/* Feature Highlights */}
-        <div className="pt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          <div className="border border-green-900/30 bg-black/50 p-4 backdrop-blur-sm">
-            <div className="text-green-500 text-2xl mb-2">⚡</div>
-            <h3 className="text-green-400 font-mono text-sm uppercase mb-1">TASK_TRACKING</h3>
-            <p className="text-gray-600 text-xs font-mono">Real-time productivity monitoring</p>
-          </div>
-          <div className="border border-green-900/30 bg-black/50 p-4 backdrop-blur-sm">
-            <div className="text-green-500 text-2xl mb-2">📊</div>
-            <h3 className="text-green-400 font-mono text-sm uppercase mb-1">XP_SYSTEM</h3>
-            <p className="text-gray-600 text-xs font-mono">Gamified progress tracking</p>
-          </div>
-          <div className="border border-green-900/30 bg-black/50 p-4 backdrop-blur-sm">
-            <div className="text-green-500 text-2xl mb-2">🔗</div>
-            <h3 className="text-green-400 font-mono text-sm uppercase mb-1">GIT_INTEGRATION</h3>
-            <p className="text-gray-600 text-xs font-mono">Automated commit tracking</p>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-16">
+          {features.map((f, i) => (
+            <div
+              key={f.title}
+              className="glass glass-hover r-xl p-5 text-left animate-rise"
+              style={{ animationDelay: `${120 + i * 80}ms` }}
+            >
+              <div
+                className={`w-11 h-11 r-lg bg-gradient-to-br ${f.tint} shadow-lg flex items-center justify-center mb-4`}
+              >
+                <f.icon className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="font-display font-semibold text-ink text-[15px] mb-1.5">
+                {f.title}
+              </h3>
+              <p className="text-ink2 text-[13px] leading-relaxed">{f.body}</p>
+            </div>
+          ))}
         </div>
       </div>
-
-      {/* Scanline Effect */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.3)_50%)] bg-[length:100%_4px] animate-scan"></div>
     </main>
   );
 }

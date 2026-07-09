@@ -110,6 +110,7 @@ export const TaskScalarFieldEnum = {
   deadline: 'deadline',
   scheduledDate: 'scheduledDate',
   repeatDays: 'repeatDays',
+  templateId: 'templateId',
   isCompleted: 'isCompleted',
   completedAt: 'completedAt',
   basePoints: 'basePoints',
@@ -139,7 +140,8 @@ export const DayLogScalarFieldEnum = {
   possibleXP: 'possibleXP',
   cTierCount: 'cTierCount',
   sTierCount: 'sTierCount',
-  streakAtEnd: 'streakAtEnd'
+  streakAtEnd: 'streakAtEnd',
+  weeklySeeded: 'weeklySeeded'
 } as const
 
 export type DayLogScalarFieldEnum = (typeof DayLogScalarFieldEnum)[keyof typeof DayLogScalarFieldEnum]

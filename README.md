@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GIT GUD
 
-## Getting Started
+Gamified productivity. Tasks earn XP, streaks multiply it, habits respawn on schedule, and you rank up from **Script Kiddie** to **The Compiler**.
 
-First, run the development server:
+## How the game works
+
+- **Tiers** — every task is S / A / B / C (100 / 60 / 30 / 10 base XP).
+- **Time limits** — give a task a duration and beat it for **+25% XP**. The focus timer auto-completes with the bonus.
+- **Streaks** — complete anything each day to keep the flame. Multipliers: ×1.1 @ 3d, ×1.3 @ 7d, ×1.5 @ 14d, ×2 @ 30d.
+- **Habits** — weekly templates spawn a fresh instance every scheduled day (+10 bonus XP each).
+- **Diminishing returns** — C-tier spam and S-tier grinding pay less as the day goes on.
+- **Coins** — 1 coin per 10 XP earned (currency for future shop features).
+- **Levels** — quadratic curve: level n needs 500·(n−1)² lifetime XP. Ranks unlock as you climb.
+- **Efficiency** — earned XP vs. possible XP per day, graphed, plus a commit-style activity heatmap.
+
+## Appearance
+
+Three skins × light/dark, switchable from the gear menu (persisted per browser):
+**Aurora** (glass & gradients), **Terminal** (green phosphor + scanlines), **Zen** (barely-there chrome for wallpaper duty).
+The navbar toggles between **Board** (the three panels) and **Focus** — a fullscreen live clock with date, greeting, streak/XP chips, and your next quests, made to sit on a spare desktop workspace. On phones the boards become bottom-tab pages and the stat cards swipe horizontally.
+
+## The three boards
+
+1. **The Dump** — zero-friction capture. Add a title (and optional deadline), schedule it later.
+2. **Today's Ops** — today's missions with deadlines, time limits, and rep counters. Overdue tasks nag until rescheduled or dumped.
+3. **Habits** — recurring weekly templates.
+
+## Stack
+
+Next.js 16 (App Router) · React 19 · Tailwind v4 · Prisma 7 + PostgreSQL · NextAuth (GitHub / Google)
+
+## Setup
 
 ```bash
+cp .env.example .env    # fill in DATABASE_URL, NEXTAUTH_SECRET, OAuth creds
+npm install
+npx prisma migrate deploy   # or `migrate dev` while developing
+npx prisma generate
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Key layout:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/lib/gamification.ts   ← all XP/level/coin math (single source of truth)
+src/lib/api.ts            ← route auth helper + daily habit seeding
+src/app/api/tasks/*       ← create / complete / uncomplete / update / delete
+src/app/dashboard/*       ← the HUD
+```

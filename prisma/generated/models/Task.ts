@@ -60,6 +60,7 @@ export type TaskMinAggregateOutputType = {
   deadline: Date | null
   scheduledDate: Date | null
   repeatDays: string | null
+  templateId: string | null
   isCompleted: boolean | null
   completedAt: Date | null
   basePoints: number | null
@@ -91,6 +92,7 @@ export type TaskMaxAggregateOutputType = {
   deadline: Date | null
   scheduledDate: Date | null
   repeatDays: string | null
+  templateId: string | null
   isCompleted: boolean | null
   completedAt: Date | null
   basePoints: number | null
@@ -122,6 +124,7 @@ export type TaskCountAggregateOutputType = {
   deadline: number
   scheduledDate: number
   repeatDays: number
+  templateId: number
   isCompleted: number
   completedAt: number
   basePoints: number
@@ -175,6 +178,7 @@ export type TaskMinAggregateInputType = {
   deadline?: true
   scheduledDate?: true
   repeatDays?: true
+  templateId?: true
   isCompleted?: true
   completedAt?: true
   basePoints?: true
@@ -206,6 +210,7 @@ export type TaskMaxAggregateInputType = {
   deadline?: true
   scheduledDate?: true
   repeatDays?: true
+  templateId?: true
   isCompleted?: true
   completedAt?: true
   basePoints?: true
@@ -237,6 +242,7 @@ export type TaskCountAggregateInputType = {
   deadline?: true
   scheduledDate?: true
   repeatDays?: true
+  templateId?: true
   isCompleted?: true
   completedAt?: true
   basePoints?: true
@@ -355,6 +361,7 @@ export type TaskGroupByOutputType = {
   deadline: Date | null
   scheduledDate: Date | null
   repeatDays: string | null
+  templateId: string | null
   isCompleted: boolean
   completedAt: Date | null
   basePoints: number
@@ -409,6 +416,7 @@ export type TaskWhereInput = {
   deadline?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   scheduledDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   repeatDays?: Prisma.StringNullableFilter<"Task"> | string | null
+  templateId?: Prisma.StringNullableFilter<"Task"> | string | null
   isCompleted?: Prisma.BoolFilter<"Task"> | boolean
   completedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   basePoints?: Prisma.IntFilter<"Task"> | number
@@ -441,6 +449,7 @@ export type TaskOrderByWithRelationInput = {
   deadline?: Prisma.SortOrderInput | Prisma.SortOrder
   scheduledDate?: Prisma.SortOrderInput | Prisma.SortOrder
   repeatDays?: Prisma.SortOrderInput | Prisma.SortOrder
+  templateId?: Prisma.SortOrderInput | Prisma.SortOrder
   isCompleted?: Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   basePoints?: Prisma.SortOrder
@@ -476,6 +485,7 @@ export type TaskWhereUniqueInput = Prisma.AtLeast<{
   deadline?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   scheduledDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   repeatDays?: Prisma.StringNullableFilter<"Task"> | string | null
+  templateId?: Prisma.StringNullableFilter<"Task"> | string | null
   isCompleted?: Prisma.BoolFilter<"Task"> | boolean
   completedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   basePoints?: Prisma.IntFilter<"Task"> | number
@@ -508,6 +518,7 @@ export type TaskOrderByWithAggregationInput = {
   deadline?: Prisma.SortOrderInput | Prisma.SortOrder
   scheduledDate?: Prisma.SortOrderInput | Prisma.SortOrder
   repeatDays?: Prisma.SortOrderInput | Prisma.SortOrder
+  templateId?: Prisma.SortOrderInput | Prisma.SortOrder
   isCompleted?: Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   basePoints?: Prisma.SortOrder
@@ -547,6 +558,7 @@ export type TaskScalarWhereWithAggregatesInput = {
   deadline?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
   scheduledDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
   repeatDays?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
+  templateId?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
   isCompleted?: Prisma.BoolWithAggregatesFilter<"Task"> | boolean
   completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
   basePoints?: Prisma.IntWithAggregatesFilter<"Task"> | number
@@ -577,6 +589,7 @@ export type TaskCreateInput = {
   deadline?: Date | string | null
   scheduledDate?: Date | string | null
   repeatDays?: string | null
+  templateId?: string | null
   isCompleted?: boolean
   completedAt?: Date | string | null
   basePoints?: number
@@ -609,6 +622,7 @@ export type TaskUncheckedCreateInput = {
   deadline?: Date | string | null
   scheduledDate?: Date | string | null
   repeatDays?: string | null
+  templateId?: string | null
   isCompleted?: boolean
   completedAt?: Date | string | null
   basePoints?: number
@@ -639,6 +653,7 @@ export type TaskUpdateInput = {
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repeatDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   basePoints?: Prisma.IntFieldUpdateOperationsInput | number
@@ -671,6 +686,7 @@ export type TaskUncheckedUpdateInput = {
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repeatDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   basePoints?: Prisma.IntFieldUpdateOperationsInput | number
@@ -702,6 +718,7 @@ export type TaskCreateManyInput = {
   deadline?: Date | string | null
   scheduledDate?: Date | string | null
   repeatDays?: string | null
+  templateId?: string | null
   isCompleted?: boolean
   completedAt?: Date | string | null
   basePoints?: number
@@ -732,6 +749,7 @@ export type TaskUpdateManyMutationInput = {
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repeatDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   basePoints?: Prisma.IntFieldUpdateOperationsInput | number
@@ -763,6 +781,7 @@ export type TaskUncheckedUpdateManyInput = {
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repeatDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   basePoints?: Prisma.IntFieldUpdateOperationsInput | number
@@ -804,6 +823,7 @@ export type TaskCountOrderByAggregateInput = {
   deadline?: Prisma.SortOrder
   scheduledDate?: Prisma.SortOrder
   repeatDays?: Prisma.SortOrder
+  templateId?: Prisma.SortOrder
   isCompleted?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
   basePoints?: Prisma.SortOrder
@@ -845,6 +865,7 @@ export type TaskMaxOrderByAggregateInput = {
   deadline?: Prisma.SortOrder
   scheduledDate?: Prisma.SortOrder
   repeatDays?: Prisma.SortOrder
+  templateId?: Prisma.SortOrder
   isCompleted?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
   basePoints?: Prisma.SortOrder
@@ -876,6 +897,7 @@ export type TaskMinOrderByAggregateInput = {
   deadline?: Prisma.SortOrder
   scheduledDate?: Prisma.SortOrder
   repeatDays?: Prisma.SortOrder
+  templateId?: Prisma.SortOrder
   isCompleted?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
   basePoints?: Prisma.SortOrder
@@ -982,6 +1004,7 @@ export type TaskCreateWithoutUserInput = {
   deadline?: Date | string | null
   scheduledDate?: Date | string | null
   repeatDays?: string | null
+  templateId?: string | null
   isCompleted?: boolean
   completedAt?: Date | string | null
   basePoints?: number
@@ -1012,6 +1035,7 @@ export type TaskUncheckedCreateWithoutUserInput = {
   deadline?: Date | string | null
   scheduledDate?: Date | string | null
   repeatDays?: string | null
+  templateId?: string | null
   isCompleted?: boolean
   completedAt?: Date | string | null
   basePoints?: number
@@ -1072,6 +1096,7 @@ export type TaskScalarWhereInput = {
   deadline?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   scheduledDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   repeatDays?: Prisma.StringNullableFilter<"Task"> | string | null
+  templateId?: Prisma.StringNullableFilter<"Task"> | string | null
   isCompleted?: Prisma.BoolFilter<"Task"> | boolean
   completedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   basePoints?: Prisma.IntFilter<"Task"> | number
@@ -1102,6 +1127,7 @@ export type TaskCreateManyUserInput = {
   deadline?: Date | string | null
   scheduledDate?: Date | string | null
   repeatDays?: string | null
+  templateId?: string | null
   isCompleted?: boolean
   completedAt?: Date | string | null
   basePoints?: number
@@ -1132,6 +1158,7 @@ export type TaskUpdateWithoutUserInput = {
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repeatDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   basePoints?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1162,6 +1189,7 @@ export type TaskUncheckedUpdateWithoutUserInput = {
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repeatDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   basePoints?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1192,6 +1220,7 @@ export type TaskUncheckedUpdateManyWithoutUserInput = {
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   scheduledDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   repeatDays?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  templateId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   basePoints?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1225,6 +1254,7 @@ export type TaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   deadline?: boolean
   scheduledDate?: boolean
   repeatDays?: boolean
+  templateId?: boolean
   isCompleted?: boolean
   completedAt?: boolean
   basePoints?: boolean
@@ -1257,6 +1287,7 @@ export type TaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   deadline?: boolean
   scheduledDate?: boolean
   repeatDays?: boolean
+  templateId?: boolean
   isCompleted?: boolean
   completedAt?: boolean
   basePoints?: boolean
@@ -1289,6 +1320,7 @@ export type TaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   deadline?: boolean
   scheduledDate?: boolean
   repeatDays?: boolean
+  templateId?: boolean
   isCompleted?: boolean
   completedAt?: boolean
   basePoints?: boolean
@@ -1321,6 +1353,7 @@ export type TaskSelectScalar = {
   deadline?: boolean
   scheduledDate?: boolean
   repeatDays?: boolean
+  templateId?: boolean
   isCompleted?: boolean
   completedAt?: boolean
   basePoints?: boolean
@@ -1338,7 +1371,7 @@ export type TaskSelectScalar = {
   updatedAt?: boolean
 }
 
-export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "title" | "description" | "type" | "tier" | "category" | "plannedDate" | "plannedStartTime" | "plannedEndTime" | "deadline" | "scheduledDate" | "repeatDays" | "isCompleted" | "completedAt" | "basePoints" | "xpWorth" | "isBonus" | "timeBonus" | "finalPoints" | "deadlineTime" | "allocatedDuration" | "durationMet" | "isExpired" | "frequency" | "completedFrequency" | "createdAt" | "updatedAt", ExtArgs["result"]["task"]>
+export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "title" | "description" | "type" | "tier" | "category" | "plannedDate" | "plannedStartTime" | "plannedEndTime" | "deadline" | "scheduledDate" | "repeatDays" | "templateId" | "isCompleted" | "completedAt" | "basePoints" | "xpWorth" | "isBonus" | "timeBonus" | "finalPoints" | "deadlineTime" | "allocatedDuration" | "durationMet" | "isExpired" | "frequency" | "completedFrequency" | "createdAt" | "updatedAt", ExtArgs["result"]["task"]>
 export type TaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -1368,6 +1401,7 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     deadline: Date | null
     scheduledDate: Date | null
     repeatDays: string | null
+    templateId: string | null
     isCompleted: boolean
     completedAt: Date | null
     basePoints: number
@@ -1820,6 +1854,7 @@ export interface TaskFieldRefs {
   readonly deadline: Prisma.FieldRef<"Task", 'DateTime'>
   readonly scheduledDate: Prisma.FieldRef<"Task", 'DateTime'>
   readonly repeatDays: Prisma.FieldRef<"Task", 'String'>
+  readonly templateId: Prisma.FieldRef<"Task", 'String'>
   readonly isCompleted: Prisma.FieldRef<"Task", 'Boolean'>
   readonly completedAt: Prisma.FieldRef<"Task", 'DateTime'>
   readonly basePoints: Prisma.FieldRef<"Task", 'Int'>

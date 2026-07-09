@@ -1,24 +1,19 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { tierBaseXP } from "@/lib/gamification";
+import { requireUser } from "@/lib/api";
+import { possibleXPForTask } from "@/lib/gamification";
+import { dayStart } from "@/lib/dates";
+import { TaskTier, Category, TaskType } from "../../../../../prisma/generated/enums";
+import type { Prisma } from "../../../../../prisma/generated/client";
+
+const TIERS = Object.values(TaskTier);
+const CATEGORIES = Object.values(Category);
+const TYPES = Object.values(TaskType);
 
 export async function PATCH(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
+    const { user, error } = await requireUser();
+    if (error) return error;
 
     const body = await request.json();
     const { taskId, type, scheduledDate, plannedDate, deadline, tier, category, deadlineTime, allocatedDuration } = body;
@@ -27,23 +22,21 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Task ID required" }, { status: 400 });
     }
 
-    // Get existing task to check if type is changing
-    const existingTask = await prisma.task.findUnique({
-      where: { id: taskId },
+    const existingTask = await prisma.task.findFirst({
+      where: { id: taskId, userId: user.id },
     });
-
     if (!existingTask) {
       return NextResponse.json({ error: "Task not found" }, { status: 404 });
     }
 
-    // Update the task
-    const updateData: any = {};
+    const updateData: Prisma.TaskUpdateInput = {};
 
-    if (type) updateData.type = type;
-    if (tier) updateData.tier = tier;
-    if (category) updateData.category = category;
-
-    // Handle deadline time and duration
+    if (type && TYPES.includes(type)) updateData.type = type;
+    if (tier && TIERS.includes(tier)) updateData.tier = tier;
+    if (category && CATEGORIES.includes(category)) updateData.category = category;
+    if (typeof body.title === "string" && body.title.trim()) {
+      updateData.title = body.title.trim().slice(0, 200);
+    }
     if (deadlineTime !== undefined) {
       updateData.deadlineTime = deadlineTime ? new Date(deadlineTime) : null;
     }
@@ -51,92 +44,51 @@ export async function PATCH(request: Request) {
       updateData.allocatedDuration = allocatedDuration;
     }
     if (body.frequency !== undefined) {
-      updateData.frequency = body.frequency;
+      updateData.frequency = Math.min(50, Math.max(1, parseInt(body.frequency) || 1));
     }
 
-    // Handle plannedDate (preferred) or scheduledDate (backward compatibility)
-    // IMPORTANT: Always set BOTH scheduledDate and plannedDate for daily tasks
+    // plannedDate and scheduledDate always move together for daily tasks.
     if (plannedDate !== undefined) {
       const dateValue = plannedDate ? new Date(plannedDate) : null;
-      updateData.plannedDate = dateValue;
-      updateData.scheduledDate = dateValue; // Always sync both
-      console.log('[Update API] Setting dates from plannedDate:', {
-        plannedDate: updateData.plannedDate,
-        scheduledDate: updateData.scheduledDate,
-      });
+      updateData.plannedDate = dateValue ?? new Date();
+      updateData.scheduledDate = dateValue;
     } else if (scheduledDate !== undefined) {
       const dateValue = scheduledDate ? new Date(scheduledDate) : null;
       updateData.scheduledDate = dateValue;
-      updateData.plannedDate = dateValue || new Date(); // Always sync both
-      console.log('[Update API] Setting dates from scheduledDate:', {
-        plannedDate: updateData.plannedDate,
-        scheduledDate: updateData.scheduledDate,
-      });
+      updateData.plannedDate = dateValue ?? new Date();
     }
 
     if (deadline !== undefined) {
       updateData.deadline = deadline ? new Date(deadline) : null;
     }
 
-    console.log('[Update API] Final update data:', updateData);
-
     const task = await prisma.task.update({
       where: { id: taskId },
       data: updateData,
     });
 
-    console.log('[Update API] Updated task:', {
-      id: task.id,
-      type: task.type,
-      scheduledDate: task.scheduledDate,
-      plannedDate: task.plannedDate,
-    });
-
-    // If task is being moved to DAILY (from BACKLOG), update DayLog possibleXP
+    // Moving into DAILY (e.g. from the backlog) adds to that day's possible XP.
     if (type === "DAILY" && existingTask.type !== "DAILY" && task.scheduledDate) {
-      const taskDate = new Date(task.scheduledDate);
-      taskDate.setHours(0, 0, 0, 0);
-      const baseXP = tierBaseXP(tier || task.tier || "C");
-      // Include duration bonus (25%) in possibleXP if task has allocated duration
       const taskDuration = allocatedDuration !== undefined ? allocatedDuration : task.allocatedDuration;
-      const durationBonus = taskDuration ? Math.round(baseXP * 0.25) : 0;
-      const totalPossibleXP = baseXP + durationBonus;
+      const possible = possibleXPForTask(task.tier, !!taskDuration);
+      const logDate = dayStart(new Date(task.scheduledDate));
 
       await prisma.dayLog.upsert({
-        where: {
-          userId_date: {
-            userId: user.id,
-            date: taskDate,
-          },
-        },
-        update: {
-          possibleXP: { increment: totalPossibleXP },
-        },
-        create: {
-          userId: user.id,
-          date: taskDate,
-          totalXP: 0,
-          tasksDone: 0,
-          possibleXP: totalPossibleXP,
-        },
+        where: { userId_date: { userId: user.id, date: logDate } },
+        update: { possibleXP: { increment: possible } },
+        create: { userId: user.id, date: logDate, totalXP: 0, tasksDone: 0, possibleXP: possible },
       });
     }
 
     return NextResponse.json({ success: true, task });
-  } catch (error: any) {
-    console.error("Update task error:", error);
-
-    // Handle Prisma P2025 error (record not found)
-    if (error.code === 'P2025') {
+  } catch (err) {
+    console.error("Update task error:", err);
+    if ((err as { code?: string }).code === "P2025") {
       return NextResponse.json(
-        { error: "Task not found. It may have been deleted or not yet saved." },
+        { error: "Task not found. It may have been deleted." },
         { status: 404 }
       );
     }
-
-    return NextResponse.json(
-      { error: "Failed to update task" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update task" }, { status: 500 });
   }
 }

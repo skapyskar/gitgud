@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // design-sync scratch output (gitignored, not part of the app)
+    "ds-bundle/**",
+    ".ds-sync/**",
   ]),
 ]);
 

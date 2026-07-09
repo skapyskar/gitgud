@@ -54,6 +54,7 @@ export type DayLogMinAggregateOutputType = {
   cTierCount: number | null
   sTierCount: number | null
   streakAtEnd: number | null
+  weeklySeeded: boolean | null
 }
 
 export type DayLogMaxAggregateOutputType = {
@@ -66,6 +67,7 @@ export type DayLogMaxAggregateOutputType = {
   cTierCount: number | null
   sTierCount: number | null
   streakAtEnd: number | null
+  weeklySeeded: boolean | null
 }
 
 export type DayLogCountAggregateOutputType = {
@@ -78,6 +80,7 @@ export type DayLogCountAggregateOutputType = {
   cTierCount: number
   sTierCount: number
   streakAtEnd: number
+  weeklySeeded: number
   _all: number
 }
 
@@ -110,6 +113,7 @@ export type DayLogMinAggregateInputType = {
   cTierCount?: true
   sTierCount?: true
   streakAtEnd?: true
+  weeklySeeded?: true
 }
 
 export type DayLogMaxAggregateInputType = {
@@ -122,6 +126,7 @@ export type DayLogMaxAggregateInputType = {
   cTierCount?: true
   sTierCount?: true
   streakAtEnd?: true
+  weeklySeeded?: true
 }
 
 export type DayLogCountAggregateInputType = {
@@ -134,6 +139,7 @@ export type DayLogCountAggregateInputType = {
   cTierCount?: true
   sTierCount?: true
   streakAtEnd?: true
+  weeklySeeded?: true
   _all?: true
 }
 
@@ -233,6 +239,7 @@ export type DayLogGroupByOutputType = {
   cTierCount: number
   sTierCount: number
   streakAtEnd: number
+  weeklySeeded: boolean
   _count: DayLogCountAggregateOutputType | null
   _avg: DayLogAvgAggregateOutputType | null
   _sum: DayLogSumAggregateOutputType | null
@@ -268,6 +275,7 @@ export type DayLogWhereInput = {
   cTierCount?: Prisma.IntFilter<"DayLog"> | number
   sTierCount?: Prisma.IntFilter<"DayLog"> | number
   streakAtEnd?: Prisma.IntFilter<"DayLog"> | number
+  weeklySeeded?: Prisma.BoolFilter<"DayLog"> | boolean
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }
 
@@ -281,6 +289,7 @@ export type DayLogOrderByWithRelationInput = {
   cTierCount?: Prisma.SortOrder
   sTierCount?: Prisma.SortOrder
   streakAtEnd?: Prisma.SortOrder
+  weeklySeeded?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
 }
 
@@ -298,6 +307,7 @@ export type DayLogWhereUniqueInput = Prisma.AtLeast<{
   cTierCount?: Prisma.IntFilter<"DayLog"> | number
   sTierCount?: Prisma.IntFilter<"DayLog"> | number
   streakAtEnd?: Prisma.IntFilter<"DayLog"> | number
+  weeklySeeded?: Prisma.BoolFilter<"DayLog"> | boolean
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
 }, "id" | "userId_date">
 
@@ -311,6 +321,7 @@ export type DayLogOrderByWithAggregationInput = {
   cTierCount?: Prisma.SortOrder
   sTierCount?: Prisma.SortOrder
   streakAtEnd?: Prisma.SortOrder
+  weeklySeeded?: Prisma.SortOrder
   _count?: Prisma.DayLogCountOrderByAggregateInput
   _avg?: Prisma.DayLogAvgOrderByAggregateInput
   _max?: Prisma.DayLogMaxOrderByAggregateInput
@@ -331,6 +342,7 @@ export type DayLogScalarWhereWithAggregatesInput = {
   cTierCount?: Prisma.IntWithAggregatesFilter<"DayLog"> | number
   sTierCount?: Prisma.IntWithAggregatesFilter<"DayLog"> | number
   streakAtEnd?: Prisma.IntWithAggregatesFilter<"DayLog"> | number
+  weeklySeeded?: Prisma.BoolWithAggregatesFilter<"DayLog"> | boolean
 }
 
 export type DayLogCreateInput = {
@@ -342,6 +354,7 @@ export type DayLogCreateInput = {
   cTierCount?: number
   sTierCount?: number
   streakAtEnd?: number
+  weeklySeeded?: boolean
   user: Prisma.UserCreateNestedOneWithoutDayLogsInput
 }
 
@@ -355,6 +368,7 @@ export type DayLogUncheckedCreateInput = {
   cTierCount?: number
   sTierCount?: number
   streakAtEnd?: number
+  weeklySeeded?: boolean
 }
 
 export type DayLogUpdateInput = {
@@ -366,6 +380,7 @@ export type DayLogUpdateInput = {
   cTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   sTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   streakAtEnd?: Prisma.IntFieldUpdateOperationsInput | number
+  weeklySeeded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   user?: Prisma.UserUpdateOneRequiredWithoutDayLogsNestedInput
 }
 
@@ -379,6 +394,7 @@ export type DayLogUncheckedUpdateInput = {
   cTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   sTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   streakAtEnd?: Prisma.IntFieldUpdateOperationsInput | number
+  weeklySeeded?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type DayLogCreateManyInput = {
@@ -391,6 +407,7 @@ export type DayLogCreateManyInput = {
   cTierCount?: number
   sTierCount?: number
   streakAtEnd?: number
+  weeklySeeded?: boolean
 }
 
 export type DayLogUpdateManyMutationInput = {
@@ -402,6 +419,7 @@ export type DayLogUpdateManyMutationInput = {
   cTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   sTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   streakAtEnd?: Prisma.IntFieldUpdateOperationsInput | number
+  weeklySeeded?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type DayLogUncheckedUpdateManyInput = {
@@ -414,6 +432,7 @@ export type DayLogUncheckedUpdateManyInput = {
   cTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   sTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   streakAtEnd?: Prisma.IntFieldUpdateOperationsInput | number
+  weeklySeeded?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type DayLogListRelationFilter = {
@@ -441,6 +460,7 @@ export type DayLogCountOrderByAggregateInput = {
   cTierCount?: Prisma.SortOrder
   sTierCount?: Prisma.SortOrder
   streakAtEnd?: Prisma.SortOrder
+  weeklySeeded?: Prisma.SortOrder
 }
 
 export type DayLogAvgOrderByAggregateInput = {
@@ -462,6 +482,7 @@ export type DayLogMaxOrderByAggregateInput = {
   cTierCount?: Prisma.SortOrder
   sTierCount?: Prisma.SortOrder
   streakAtEnd?: Prisma.SortOrder
+  weeklySeeded?: Prisma.SortOrder
 }
 
 export type DayLogMinOrderByAggregateInput = {
@@ -474,6 +495,7 @@ export type DayLogMinOrderByAggregateInput = {
   cTierCount?: Prisma.SortOrder
   sTierCount?: Prisma.SortOrder
   streakAtEnd?: Prisma.SortOrder
+  weeklySeeded?: Prisma.SortOrder
 }
 
 export type DayLogSumOrderByAggregateInput = {
@@ -536,6 +558,7 @@ export type DayLogCreateWithoutUserInput = {
   cTierCount?: number
   sTierCount?: number
   streakAtEnd?: number
+  weeklySeeded?: boolean
 }
 
 export type DayLogUncheckedCreateWithoutUserInput = {
@@ -547,6 +570,7 @@ export type DayLogUncheckedCreateWithoutUserInput = {
   cTierCount?: number
   sTierCount?: number
   streakAtEnd?: number
+  weeklySeeded?: boolean
 }
 
 export type DayLogCreateOrConnectWithoutUserInput = {
@@ -588,6 +612,7 @@ export type DayLogScalarWhereInput = {
   cTierCount?: Prisma.IntFilter<"DayLog"> | number
   sTierCount?: Prisma.IntFilter<"DayLog"> | number
   streakAtEnd?: Prisma.IntFilter<"DayLog"> | number
+  weeklySeeded?: Prisma.BoolFilter<"DayLog"> | boolean
 }
 
 export type DayLogCreateManyUserInput = {
@@ -599,6 +624,7 @@ export type DayLogCreateManyUserInput = {
   cTierCount?: number
   sTierCount?: number
   streakAtEnd?: number
+  weeklySeeded?: boolean
 }
 
 export type DayLogUpdateWithoutUserInput = {
@@ -610,6 +636,7 @@ export type DayLogUpdateWithoutUserInput = {
   cTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   sTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   streakAtEnd?: Prisma.IntFieldUpdateOperationsInput | number
+  weeklySeeded?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type DayLogUncheckedUpdateWithoutUserInput = {
@@ -621,6 +648,7 @@ export type DayLogUncheckedUpdateWithoutUserInput = {
   cTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   sTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   streakAtEnd?: Prisma.IntFieldUpdateOperationsInput | number
+  weeklySeeded?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type DayLogUncheckedUpdateManyWithoutUserInput = {
@@ -632,6 +660,7 @@ export type DayLogUncheckedUpdateManyWithoutUserInput = {
   cTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   sTierCount?: Prisma.IntFieldUpdateOperationsInput | number
   streakAtEnd?: Prisma.IntFieldUpdateOperationsInput | number
+  weeklySeeded?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -646,6 +675,7 @@ export type DayLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   cTierCount?: boolean
   sTierCount?: boolean
   streakAtEnd?: boolean
+  weeklySeeded?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["dayLog"]>
 
@@ -659,6 +689,7 @@ export type DayLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   cTierCount?: boolean
   sTierCount?: boolean
   streakAtEnd?: boolean
+  weeklySeeded?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["dayLog"]>
 
@@ -672,6 +703,7 @@ export type DayLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   cTierCount?: boolean
   sTierCount?: boolean
   streakAtEnd?: boolean
+  weeklySeeded?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["dayLog"]>
 
@@ -685,9 +717,10 @@ export type DayLogSelectScalar = {
   cTierCount?: boolean
   sTierCount?: boolean
   streakAtEnd?: boolean
+  weeklySeeded?: boolean
 }
 
-export type DayLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "date" | "totalXP" | "tasksDone" | "possibleXP" | "cTierCount" | "sTierCount" | "streakAtEnd", ExtArgs["result"]["dayLog"]>
+export type DayLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "date" | "totalXP" | "tasksDone" | "possibleXP" | "cTierCount" | "sTierCount" | "streakAtEnd" | "weeklySeeded", ExtArgs["result"]["dayLog"]>
 export type DayLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -713,6 +746,7 @@ export type $DayLogPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     cTierCount: number
     sTierCount: number
     streakAtEnd: number
+    weeklySeeded: boolean
   }, ExtArgs["result"]["dayLog"]>
   composites: {}
 }
@@ -1146,6 +1180,7 @@ export interface DayLogFieldRefs {
   readonly cTierCount: Prisma.FieldRef<"DayLog", 'Int'>
   readonly sTierCount: Prisma.FieldRef<"DayLog", 'Int'>
   readonly streakAtEnd: Prisma.FieldRef<"DayLog", 'Int'>
+  readonly weeklySeeded: Prisma.FieldRef<"DayLog", 'Boolean'>
 }
     
 
