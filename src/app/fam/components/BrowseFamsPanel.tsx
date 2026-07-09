@@ -5,9 +5,9 @@ import { Panel } from "../../components/ui";
 import { fetchRankings, RankingRow } from "../famApi";
 
 const SCOPES = [
-  { key: "global", label: "Global (7d)" },
-  { key: "monthly", label: "Monthly (30d)" },
-  { key: "all-time", label: "All-Time" },
+  { key: "global", label: "7d" },
+  { key: "monthly", label: "30d" },
+  { key: "all-time", label: "All-time" },
 ] as const;
 
 /**
@@ -29,12 +29,12 @@ export default function BrowseFamsPanel() {
       subtitle="weighted for consistent growth, not one-day spikes"
       accent="habit"
       right={
-        <div className="chip r-lg p-1 flex gap-1">
+        <div className="chip r-lg p-1 flex flex-wrap gap-1">
           {SCOPES.map((s) => (
             <button
               key={s.key}
               onClick={() => setScope(s.key)}
-              className={`px-2.5 py-1 r-md text-[11px] font-semibold transition-all ${
+              className={`px-2.5 py-1 r-md text-[11px] font-semibold whitespace-nowrap transition-all ${
                 scope === s.key ? "grad-primary text-white" : "text-ink3 hover:text-ink"
               }`}
             >

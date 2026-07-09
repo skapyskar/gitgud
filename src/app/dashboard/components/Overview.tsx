@@ -392,11 +392,23 @@ export default function Overview({
             </div>
           </Reveal>
 
-          {famSummary && (
-            <Reveal delay={150}>
+          <Reveal delay={150}>
+            {famSummary ? (
               <FamSummaryCard fam={famSummary} onOpen={onNavFam} />
-            </Reveal>
-          )}
+            ) : (
+              <button
+                onClick={onNavFam}
+                className="glass glass-hover r-xl p-4 flex items-center gap-3 text-left w-full"
+              >
+                <span className="text-base shrink-0">⚡</span>
+                <span className="flex-1 min-w-0">
+                  <span className="block text-[13px] font-semibold text-ink2">No Fam yet</span>
+                  <span className="block text-[11.5px] text-ink3">Create or join one to see your squad here</span>
+                </span>
+                <span className="text-[11px] font-bold text-acc shrink-0">Open →</span>
+              </button>
+            )}
+          </Reveal>
 
           <div className="flex flex-wrap gap-[18px] w-full flex-1 items-stretch">
             {/* Missions */}
@@ -569,9 +581,16 @@ export default function Overview({
             </div>
           </Reveal>
 
-          {famSummary && (
+          {famSummary ? (
             <Reveal delay={260}>
               <FamRankTile fam={famSummary} onOpen={onNavFam} />
+            </Reveal>
+          ) : (
+            <Reveal delay={260}>
+              <button onClick={onNavFam} className="glass glass-hover r-xl p-4 flex items-center gap-3 text-left w-full">
+                <span className="text-lg shrink-0">🏆</span>
+                <span className="flex-1 min-w-0 text-[12.5px] text-ink2">Join a Fam to see rankings</span>
+              </button>
             </Reveal>
           )}
 

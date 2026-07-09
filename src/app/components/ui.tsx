@@ -38,15 +38,15 @@ export function Panel({
 }) {
   return (
     <section className={`glass r-xl flex flex-col overflow-hidden ${className}`}>
-      <header className="flex items-center justify-between gap-3 px-5 pt-4 pb-3 border-b border-line/60">
-        <div className="min-w-0">
+      <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-5 pt-4 pb-3 border-b border-line/60">
+        <div className="min-w-[140px] flex-1">
           <div className="flex items-center gap-2.5">
             <span className={`w-2.5 h-2.5 rounded-full glow-shadow ${ACCENTS[accent]}`} />
             <h3 className="font-display font-semibold text-[15px] text-ink truncate">{title}</h3>
           </div>
           {subtitle && <p className="text-xs text-ink3 mt-0.5 ml-[22px]">{subtitle}</p>}
         </div>
-        {right && <div className="shrink-0">{right}</div>}
+        {right && <div className="shrink-0 ml-auto">{right}</div>}
       </header>
       <div className="flex-1 min-h-0 p-4">{children}</div>
     </section>
