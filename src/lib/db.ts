@@ -14,8 +14,19 @@ const prismaClientSingleton = () => {
   // project CA from the Supabase dashboard, PEM text) to verify the connection;
   // without it we fall back to encrypted-but-unverified, which is MITM-able.
   const ca = process.env.DATABASE_CA_CERT;
+
+  // Strip ssl-related query params from the URL: node-postgres lets a
+  // `?sslmode=...` in the connection string override the explicit `ssl`
+  // config object below (silently dropping the CA and failing verification),
+  // so the code must be the single authority on TLS settings. The param can
+  // stay in the env var for other consumers (psql, Prisma CLI).
+  const url = new URL(process.env.DATABASE_URL ?? "");
+  for (const param of ["sslmode", "sslcert", "sslkey", "sslrootcert"]) {
+    url.searchParams.delete(param);
+  }
+
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: url.toString(),
     ssl: ca ? { ca, rejectUnauthorized: true } : { rejectUnauthorized: false },
     // Keep the per-instance pool small — on serverless many instances each open
     // their own pool against the shared Supavisor pooler.
