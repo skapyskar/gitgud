@@ -19,11 +19,14 @@ export default function FamDetailView({
   members,
   currentUserId,
   onChanged,
+  onDeparted,
 }: {
   fam: FamSummary;
   members: FamMemberDetail[];
   currentUserId: string;
   onChanged: () => void;
+  /** Called after leaving or deleting this Fam — the caller should drop the selection. */
+  onDeparted: () => void;
 }) {
   const [compareTarget, setCompareTarget] = useState<FamMemberDetail | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -41,13 +44,13 @@ export default function FamDetailView({
   const onLeave = async () => {
     await leaveFam(fam.id);
     setConfirmLeave(false);
-    onChanged();
+    onDeparted();
   };
 
   const onDelete = async () => {
     await deleteFam(fam.id);
     setConfirmDelete(false);
-    onChanged();
+    onDeparted();
   };
 
   return (

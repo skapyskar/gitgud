@@ -64,6 +64,18 @@ export default function FamPageClient({
     if (selectedFamId) loadDetail(selectedFamId);
   };
 
+  // Leaving/deleting removes the fam you're currently looking at, so clear
+  // the selection instead of re-fetching detail for a fam you're no longer
+  // in — that fetch would 403/404 and, since loadDetail only calls setDetail
+  // on success, leave the stale detail view visible. Clearing selectedFamId
+  // resets detail immediately, then the auto-select effect below picks
+  // another fam once the refreshed membership list lands (or leaves the
+  // panel empty if none remain).
+  const handleDeparted = () => {
+    setSelectedFamId(null);
+    loadMine();
+  };
+
   const ownedCount = memberships.filter((m) => m.role === "OWNER").length;
 
   return (
@@ -92,6 +104,7 @@ export default function FamPageClient({
           members={detail.members}
           currentUserId={currentUserId}
           onChanged={refreshAll}
+          onDeparted={handleDeparted}
         />
       )}
 
