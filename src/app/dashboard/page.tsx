@@ -26,32 +26,35 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  // Seed today's log (adds active habits to today's possible XP, once per day).
-  await ensureTodayLog(baseUser.id);
-
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { id: baseUser.id },
-    include: {
-      tasks: { orderBy: { createdAt: "desc" } },
-      dayLogs: { orderBy: { date: "desc" }, take: 120 },
-    },
-  });
+  // Seed today's log (adds active habits to today's possible XP, once per day),
+  // then re-fetch the full user. githubAccount/myMemberships only need the id
+  // we already have, so they run concurrently with that chain instead of
+  // paying their own sequential round trips.
+  const [user, githubAccount, myMemberships] = await Promise.all([
+    ensureTodayLog(baseUser.id).then(() =>
+      prisma.user.findUniqueOrThrow({
+        where: { id: baseUser.id },
+        include: {
+          tasks: { orderBy: { createdAt: "desc" } },
+          dayLogs: { orderBy: { date: "desc" }, take: 120 },
+        },
+      })
+    ),
+    prisma.account.findFirst({
+      where: { userId: baseUser.id, provider: "github" },
+      select: { id: true },
+    }),
+    // Dashboard Fam summary card: prefer a Fam the user owns, else their earliest membership.
+    prisma.famMembership.findMany({
+      where: { userId: baseUser.id },
+      orderBy: { joinedAt: "asc" },
+      include: { fam: true },
+    }),
+  ]);
 
   if (!user.username) {
     redirect("/complete-profile");
   }
-
-  const githubAccount = await prisma.account.findFirst({
-    where: { userId: user.id, provider: "github" },
-    select: { id: true },
-  });
-
-  // Dashboard Fam summary card: prefer a Fam the user owns, else their earliest membership.
-  const myMemberships = await prisma.famMembership.findMany({
-    where: { userId: user.id },
-    orderBy: { joinedAt: "asc" },
-    include: { fam: true },
-  });
   const primaryMembership =
     myMemberships.find((m) => m.role === "OWNER") ?? myMemberships[0] ?? null;
 

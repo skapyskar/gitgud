@@ -28,20 +28,35 @@ export async function requireUser(): Promise<
  * Make sure today's DayLog exists and — once per day — add the XP that
  * today's active weekly templates make possible. Idempotent and race-safe:
  * the seeding update only fires while weeklySeeded is still false.
+ *
+ * The browser can fire two /dashboard requests back-to-back (e.g. right
+ * after the signup/login redirect), so this can run concurrently for the
+ * same user+day. With an empty `update: {}`, Prisma emits a plain INSERT
+ * instead of an atomic INSERT ... ON CONFLICT, so two concurrent calls can
+ * both attempt the insert and one loses with P2002 — that's fine, it just
+ * means the other call already created the row.
  */
 export async function ensureTodayLog(userId: string): Promise<void> {
   const today = dayStart();
 
-  await prisma.dayLog.upsert({
-    where: { userId_date: { userId, date: today } },
-    update: {},
-    create: { userId, date: today, totalXP: 0, tasksDone: 0, possibleXP: 0 },
-  });
-
-  const templates = await prisma.task.findMany({
-    where: { userId, type: "WEEKLY" },
-    select: { tier: true, allocatedDuration: true, repeatDays: true },
-  });
+  // Independent reads/writes — the upsert doesn't need the templates list (or
+  // vice versa), so run them concurrently instead of paying two round trips.
+  const [, templates] = await Promise.all([
+    prisma.dayLog
+      .upsert({
+        where: { userId_date: { userId, date: today } },
+        update: {},
+        create: { userId, date: today, totalXP: 0, tasksDone: 0, possibleXP: 0 },
+      })
+      .catch((e: unknown) => {
+        if (typeof e === "object" && e !== null && "code" in e && e.code === "P2002") return;
+        throw e;
+      }),
+    prisma.task.findMany({
+      where: { userId, type: "WEEKLY" },
+      select: { tier: true, allocatedDuration: true, repeatDays: true },
+    }),
+  ]);
 
   const dow = todayDayIndex();
   const weeklyPossible = templates

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Flame, Target, TrendingUp, ChevronDown, Plus, Sun, Moon, Upload, X, Droplets } from "lucide-react";
 import type { Task, DayLog } from "../../../../prisma/generated/client";
@@ -99,6 +99,17 @@ export default function Overview({
   const habitCount = weeklyTemplates.length;
   const clearedCount = useMemo(() => dayLogs.reduce((sum, l) => sum + l.tasksDone, 0), [dayLogs]);
 
+  // A task we just created shows here the instant the create call succeeds,
+  // rather than waiting for router.refresh()'s full server round trip (which
+  // can run several seconds against a remote DB). Self-clears once the real
+  // task shows up in the dailyTasks prop below.
+  const [pendingMissions, setPendingMissions] = useState<Mission[]>([]);
+  useEffect(() => {
+    if (pendingMissions.length === 0) return;
+    setPendingMissions((cur) => cur.filter((m) => !dailyTasks.some((t) => t.id === m.id)));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dailyTasks]);
+
   /* ── missions: today's pending daily tasks + due habits + open dump items ── */
   const missions = useMemo<Mission[]>(() => {
     const todays = dailyTasks.filter((t) => t.scheduledDate && dayKey(new Date(t.scheduledDate)) === todayK);
@@ -131,11 +142,14 @@ export default function Overview({
         badgeColor: `var(--t${t.tier.toLowerCase()})`,
       }));
 
+    const knownIds = new Set([...habitMissions, ...pendingTaskMissions, ...dumpMissions].map((m) => m.id));
+    const stillPending = pendingMissions.filter((m) => !knownIds.has(m.id));
+
     const tierRank: Record<string, number> = { S: 0, A: 1, B: 2, C: 3 };
-    return [...habitMissions, ...pendingTaskMissions, ...dumpMissions]
+    return [...habitMissions, ...pendingTaskMissions, ...dumpMissions, ...stillPending]
       .sort((a, b) => (tierRank[a.badgeLabel.slice(-1)] ?? 4) - (tierRank[b.badgeLabel.slice(-1)] ?? 4))
       .slice(0, 6);
-  }, [dailyTasks, weeklyTemplates, backlogTasks, todayK]);
+  }, [dailyTasks, weeklyTemplates, backlogTasks, todayK, pendingMissions]);
 
   const openCount = missions.length;
 
@@ -152,7 +166,7 @@ export default function Overview({
 
   const handleCreateQuest = async (values: ScheduleValues) => {
     setCreating(false);
-    await createTask({
+    const res = await createTask({
       title: values.title,
       type: "DAILY",
       tier: values.tier,
@@ -162,6 +176,18 @@ export default function Overview({
       allocatedDuration: values.duration,
       frequency: values.frequency,
     });
+    if (res?.task) {
+      setPendingMissions((cur) => [
+        ...cur,
+        {
+          id: res.task.id,
+          name: values.title,
+          xp: tierBaseXP(values.tier),
+          badgeLabel: `TIER ${values.tier}`,
+          badgeColor: `var(--t${values.tier.toLowerCase()})`,
+        },
+      ]);
+    }
     router.refresh();
   };
 
