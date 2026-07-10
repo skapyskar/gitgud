@@ -48,6 +48,9 @@ export default function FocusView({
 
   const [now, setNow] = useState<Date | null>(null);
   const [completingIds, setCompletingIds] = useState<string[]>([]);
+  // Hide a task from "up next" the instant its completion call succeeds,
+  // rather than waiting on router.refresh() to drop it from dailyTasks.
+  const [optimisticallyDone, setOptimisticallyDone] = useState<string[]>([]);
 
   useEffect(() => {
     // Clock starts after mount (server time ≠ client time, so no SSR value).
@@ -59,6 +62,13 @@ export default function FocusView({
 
   const progress = levelProgress(xp);
   const rank = rankForLevel(progress.level);
+
+  // Reset the optimistic-done overlay once fresh server data arrives.
+  const [prevDailyTasks, setPrevDailyTasks] = useState(dailyTasks);
+  if (prevDailyTasks !== dailyTasks) {
+    setPrevDailyTasks(dailyTasks);
+    setOptimisticallyDone([]);
+  }
 
   // Today's pending quests: real tasks + habits without an instance yet.
   const upNext = useMemo(() => {
@@ -74,6 +84,7 @@ export default function FocusView({
     });
 
     return [...todays.filter((t) => !t.isCompleted), ...habits]
+      .filter((t) => !optimisticallyDone.includes(t.id))
       .sort((a, b) => {
         const mins = (t: Task) => {
           if (!t.deadlineTime) return Infinity;
@@ -83,15 +94,18 @@ export default function FocusView({
         return mins(a) - mins(b);
       })
       .slice(0, 4);
-  }, [dailyTasks, weeklyTemplates]);
+  }, [dailyTasks, weeklyTemplates, optimisticallyDone]);
 
   const handleComplete = async (task: Task) => {
     if (completingIds.includes(task.id)) return;
     setCompletingIds((cur) => [...cur, task.id]);
+    setOptimisticallyDone((cur) => [...cur, task.id]);
     const res = await completeTask({ taskId: task.id });
     if (res?.success) {
       celebrate(res);
       router.refresh();
+    } else {
+      setOptimisticallyDone((cur) => cur.filter((id) => id !== task.id));
     }
     setCompletingIds((cur) => cur.filter((id) => id !== task.id));
   };

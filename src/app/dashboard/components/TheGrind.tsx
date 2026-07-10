@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Lightbulb, X, ChevronUp } from "lucide-react";
 import type { Task } from "../../../../prisma/generated/client";
@@ -9,7 +9,7 @@ import { ConfirmModal, HudButton, inputCls } from "../../components/ui";
 import { useRewards } from "../../components/RewardLayer";
 import { completeTask, createTask, deleteTask, uncompleteTask, updateTask } from "./taskApi";
 import { tierBaseXP } from "@/lib/gamification";
-import { dayKey } from "@/lib/dates";
+import { dayKey, dayStart } from "@/lib/dates";
 
 interface TheGrindProps {
   level: number;
@@ -41,27 +41,56 @@ export default function TheGrind({ level, weeklyTemplates, backlogTasks, dailyTa
   const [deletingHabit, setDeletingHabit] = useState<Task | null>(null);
   const [deletingDump, setDeletingDump] = useState<Task | null>(null);
   const [confirmingClearDone, setConfirmingClearDone] = useState(false);
+  const tempIdRef = useRef(0);
+
+  // Local copies that mutations patch immediately, instead of waiting on the
+  // next router.refresh() to reflect a change. Reset when fresh server props
+  // arrive (render-time reset, same pattern as DailyBoard/BacklogPanel).
+  const [templates, setTemplates] = useState<Task[]>(weeklyTemplates);
+  const [dumps, setDumps] = useState<Task[]>(backlogTasks);
+  const [instances, setInstances] = useState<Task[]>(dailyTasks);
+
+  const [prevTemplates, setPrevTemplates] = useState(weeklyTemplates);
+  if (prevTemplates !== weeklyTemplates) {
+    setPrevTemplates(weeklyTemplates);
+    setTemplates(weeklyTemplates);
+  }
+  const [prevDumps, setPrevDumps] = useState(backlogTasks);
+  if (prevDumps !== backlogTasks) {
+    setPrevDumps(backlogTasks);
+    setDumps(backlogTasks);
+  }
+  const [prevInstances, setPrevInstances] = useState(dailyTasks);
+  if (prevInstances !== dailyTasks) {
+    setPrevInstances(dailyTasks);
+    setInstances(dailyTasks);
+  }
 
   const todayK = dayKey();
   const week = useMemo(() => last7Days(), []);
 
+  // An optimistic item's id is a client-only placeholder until router.refresh()
+  // swaps in the real one — acting on it before then would send a fake id to
+  // the server and 404.
+  const isTemp = (id: string) => id.startsWith("temp-");
+
   // Completed-instance lookup: habitId -> Set of dayKeys with a completed instance.
   const completedDays = useMemo(() => {
     const map = new Map<string, Set<string>>();
-    for (const t of dailyTasks) {
+    for (const t of instances) {
       if (!t.templateId || !t.isCompleted || !t.scheduledDate) continue;
       const key = dayKey(new Date(t.scheduledDate));
       if (!map.has(t.templateId)) map.set(t.templateId, new Set());
       map.get(t.templateId)!.add(key);
     }
     return map;
-  }, [dailyTasks]);
+  }, [instances]);
 
   const todayInstanceOf = (habitId: string) =>
-    dailyTasks.find((t) => t.templateId === habitId && t.scheduledDate && dayKey(new Date(t.scheduledDate)) === todayK);
+    instances.find((t) => t.templateId === habitId && t.scheduledDate && dayKey(new Date(t.scheduledDate)) === todayK);
 
   const habitRows = useMemo(() => {
-    return weeklyTemplates.map((habit) => {
+    return templates.map((habit) => {
       const repeatDays = habit.repeatDays?.split(",").map(Number) ?? [];
       const done = completedDays.get(habit.id) ?? new Set<string>();
       const doneToday = done.has(todayK);
@@ -84,24 +113,42 @@ export default function TheGrind({ level, weeklyTemplates, backlogTasks, dailyTa
 
       return { habit, dots, doneToday, streak };
     });
-  }, [weeklyTemplates, completedDays, week, todayK]);
+  }, [templates, completedDays, week, todayK]);
 
   const habitsDoneToday = habitRows.filter((h) => h.doneToday).length;
 
   const toggleHabit = async (habit: Task, doneToday: boolean) => {
     if (busyIds.includes(habit.id)) return;
     setBusyIds((cur) => [...cur, habit.id]);
+    const prevInstances = instances;
+
     if (doneToday) {
       const instance = todayInstanceOf(habit.id);
       if (instance) {
+        setInstances((cur) =>
+          cur.map((t) => (t.id === instance.id ? { ...t, isCompleted: false, completedFrequency: 0 } : t))
+        );
         const res = await uncompleteTask(instance.id);
         if (res?.success) router.refresh();
+        else setInstances(prevInstances);
       }
     } else {
+      const optimistic = {
+        ...habit,
+        id: `temp-${++tempIdRef.current}`,
+        type: "DAILY",
+        templateId: habit.id,
+        scheduledDate: dayStart(),
+        isCompleted: true,
+        completedFrequency: 1,
+      } as Task;
+      setInstances((cur) => [optimistic, ...cur]);
       const res = await completeTask({ taskId: habit.id });
       if (res?.success) {
         celebrate(res);
         router.refresh();
+      } else {
+        setInstances(prevInstances);
       }
     }
     setBusyIds((cur) => cur.filter((id) => id !== habit.id));
@@ -111,8 +158,25 @@ export default function TheGrind({ level, weeklyTemplates, backlogTasks, dailyTa
     const title = habitText.trim();
     if (!title) return;
     setHabitText("");
+
+    const tempId = `temp-${++tempIdRef.current}`;
+    const now = new Date();
+    const optimistic = {
+      id: tempId,
+      title,
+      type: "WEEKLY",
+      tier: "C",
+      category: "LIFE",
+      repeatDays: "0,1,2,3,4,5,6",
+      isCompleted: false,
+      frequency: 1,
+      createdAt: now,
+      updatedAt: now,
+    } as Task;
+    setTemplates((cur) => [optimistic, ...cur]);
+
     const todayISO = new Date().toISOString().slice(0, 10);
-    await createTask({
+    const res = await createTask({
       title,
       type: "WEEKLY",
       tier: "C",
@@ -121,19 +185,23 @@ export default function TheGrind({ level, weeklyTemplates, backlogTasks, dailyTa
       deadlineTime: new Date(`${todayISO}T23:59:00`).toISOString(),
       frequency: 1,
     });
-    router.refresh();
+    if (res?.success) router.refresh();
+    else setTemplates((cur) => cur.filter((t) => t.id !== tempId));
   };
 
   const confirmDeleteHabit = async () => {
     if (!deletingHabit) return;
     const id = deletingHabit.id;
     setDeletingHabit(null);
+    const prev = templates;
+    setTemplates((cur) => cur.filter((t) => t.id !== id));
     const res = await deleteTask(id);
     if (res?.success) router.refresh();
+    else setTemplates(prev);
   };
 
-  const pendingDumps = backlogTasks.filter((t) => !t.isCompleted);
-  const doneDumps = backlogTasks.filter((t) => t.isCompleted);
+  const pendingDumps = dumps.filter((t) => !t.isCompleted);
+  const doneDumps = dumps.filter((t) => t.isCompleted);
   const sortedPendingDumps = [...pendingDumps].sort(
     (a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier)
   );
@@ -141,14 +209,20 @@ export default function TheGrind({ level, weeklyTemplates, backlogTasks, dailyTa
   const toggleDump = async (t: Task) => {
     if (busyIds.includes(t.id)) return;
     setBusyIds((cur) => [...cur, t.id]);
+    const prev = dumps;
     if (t.isCompleted) {
+      setDumps((cur) => cur.map((d) => (d.id === t.id ? { ...d, isCompleted: false, completedAt: null } : d)));
       const res = await uncompleteTask(t.id);
       if (res?.success) router.refresh();
+      else setDumps(prev);
     } else {
+      setDumps((cur) => cur.map((d) => (d.id === t.id ? { ...d, isCompleted: true, completedAt: new Date() } : d)));
       const res = await completeTask({ taskId: t.id });
       if (res?.success) {
         celebrate(res);
         router.refresh();
+      } else {
+        setDumps(prev);
       }
     }
     setBusyIds((cur) => cur.filter((id) => id !== t.id));
@@ -156,28 +230,52 @@ export default function TheGrind({ level, weeklyTemplates, backlogTasks, dailyTa
 
   const cycleTier = async (t: Task) => {
     const next = TIER_ORDER[(TIER_ORDER.indexOf(t.tier) + 1) % 4];
+    const prev = dumps;
+    setDumps((cur) => cur.map((d) => (d.id === t.id ? { ...d, tier: next } : d)));
     const res = await updateTask({ taskId: t.id, tier: next });
     if (res?.success) router.refresh();
+    else setDumps(prev);
   };
 
   const addDump = async () => {
     const title = dumpText.trim();
     if (!title) return;
     setDumpText("");
-    await createTask({ title, type: "BACKLOG" });
-    router.refresh();
+
+    const tempId = `temp-${++tempIdRef.current}`;
+    const now = new Date();
+    const optimistic = {
+      id: tempId,
+      title,
+      type: "BACKLOG",
+      tier: "C",
+      category: "LIFE",
+      isCompleted: false,
+      createdAt: now,
+      updatedAt: now,
+    } as Task;
+    setDumps((cur) => [optimistic, ...cur]);
+
+    const res = await createTask({ title, type: "BACKLOG" });
+    if (res?.success) router.refresh();
+    else setDumps((cur) => cur.filter((d) => d.id !== tempId));
   };
 
   const confirmDeleteDump = async () => {
     if (!deletingDump) return;
     const id = deletingDump.id;
     setDeletingDump(null);
+    const prev = dumps;
+    setDumps((cur) => cur.filter((d) => d.id !== id));
     const res = await deleteTask(id);
     if (res?.success) router.refresh();
+    else setDumps(prev);
   };
 
   const confirmClearDone = async () => {
     setConfirmingClearDone(false);
+    const ids = new Set(doneDumps.map((t) => t.id));
+    setDumps((cur) => cur.filter((d) => !ids.has(d.id)));
     await Promise.all(doneDumps.map((t) => deleteTask(t.id)));
     router.refresh();
   };
@@ -224,7 +322,7 @@ export default function TheGrind({ level, weeklyTemplates, backlogTasks, dailyTa
                 <div key={habit.id} className="chip chip-hover r-lg flex items-center gap-3.5 px-3.5 py-3">
                   <button
                     onClick={() => toggleHabit(habit, doneToday)}
-                    disabled={busyIds.includes(habit.id)}
+                    disabled={busyIds.includes(habit.id) || isTemp(habit.id)}
                     title="Mark today"
                     className="w-[26px] h-[26px] rounded-lg grid place-items-center shrink-0 transition-all disabled:opacity-40"
                     style={{
@@ -262,7 +360,12 @@ export default function TheGrind({ level, weeklyTemplates, backlogTasks, dailyTa
                       />
                     ))}
                   </div>
-                  <button onClick={() => setDeletingHabit(habit)} className="text-ink3 hover:text-rosy transition-colors p-1 shrink-0" title="Delete habit">
+                  <button
+                    onClick={() => setDeletingHabit(habit)}
+                    disabled={isTemp(habit.id)}
+                    className="text-ink3 hover:text-rosy transition-colors p-1 shrink-0 disabled:opacity-40"
+                    title="Delete habit"
+                  >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -314,15 +417,16 @@ export default function TheGrind({ level, weeklyTemplates, backlogTasks, dailyTa
               <div key={t.id} className="chip chip-hover r-lg flex items-center gap-3 px-3.5 py-2.5">
                 <button
                   onClick={() => toggleDump(t)}
-                  disabled={busyIds.includes(t.id)}
+                  disabled={busyIds.includes(t.id) || isTemp(t.id)}
                   className="w-[22px] h-[22px] rounded-lg grid place-items-center shrink-0 chip transition-all disabled:opacity-40"
                 />
                 <span className="flex-1 min-w-0 text-[13px] font-medium truncate">{t.title}</span>
                 <span className="text-[10px] text-ink3 font-semibold shrink-0">+{tierBaseXP(t.tier)}</span>
                 <button
                   onClick={() => cycleTier(t)}
+                  disabled={isTemp(t.id)}
                   title="Cycle tier"
-                  className="w-6 h-6 grid place-items-center text-[11px] font-extrabold font-display shrink-0 r-md"
+                  className="w-6 h-6 grid place-items-center text-[11px] font-extrabold font-display shrink-0 r-md disabled:opacity-40"
                   style={{
                     color: TIER_XP_COLOR[t.tier],
                     background: `color-mix(in srgb, ${TIER_XP_COLOR[t.tier]} 15%, transparent)`,
@@ -331,7 +435,12 @@ export default function TheGrind({ level, weeklyTemplates, backlogTasks, dailyTa
                 >
                   {t.tier}
                 </button>
-                <button onClick={() => setDeletingDump(t)} title="Delete" className="text-ink3 hover:text-rosy transition-colors p-0.5 shrink-0">
+                <button
+                  onClick={() => setDeletingDump(t)}
+                  disabled={isTemp(t.id)}
+                  title="Delete"
+                  className="text-ink3 hover:text-rosy transition-colors p-0.5 shrink-0 disabled:opacity-40"
+                >
                   <X className="w-3 h-3" />
                 </button>
               </div>
@@ -340,7 +449,7 @@ export default function TheGrind({ level, weeklyTemplates, backlogTasks, dailyTa
               <div key={t.id} className="chip r-lg flex items-center gap-3 px-3.5 py-2.5 opacity-60">
                 <button
                   onClick={() => toggleDump(t)}
-                  disabled={busyIds.includes(t.id)}
+                  disabled={busyIds.includes(t.id) || isTemp(t.id)}
                   className="w-[22px] h-[22px] rounded-lg grid place-items-center shrink-0 disabled:opacity-40"
                   style={{ background: "linear-gradient(92deg, var(--acc), var(--acc2))" }}
                 >
@@ -349,7 +458,12 @@ export default function TheGrind({ level, weeklyTemplates, backlogTasks, dailyTa
                   </svg>
                 </button>
                 <span className="flex-1 min-w-0 text-[13px] font-medium truncate line-through text-ink3">{t.title}</span>
-                <button onClick={() => setDeletingDump(t)} title="Delete" className="text-ink3 hover:text-rosy transition-colors p-0.5 shrink-0">
+                <button
+                  onClick={() => setDeletingDump(t)}
+                  disabled={isTemp(t.id)}
+                  title="Delete"
+                  className="text-ink3 hover:text-rosy transition-colors p-0.5 shrink-0 disabled:opacity-40"
+                >
                   <X className="w-3 h-3" />
                 </button>
               </div>

@@ -104,9 +104,14 @@ export default function Overview({
   // can run several seconds against a remote DB). Self-clears once the real
   // task shows up in the dailyTasks prop below.
   const [pendingMissions, setPendingMissions] = useState<Mission[]>([]);
+  // Same idea in reverse: hide a mission the instant its completion call
+  // succeeds, instead of leaving it visible until the page refetches.
+  const [optimisticallyDone, setOptimisticallyDone] = useState<string[]>([]);
   useEffect(() => {
-    if (pendingMissions.length === 0) return;
-    setPendingMissions((cur) => cur.filter((m) => !dailyTasks.some((t) => t.id === m.id)));
+    if (pendingMissions.length > 0) {
+      setPendingMissions((cur) => cur.filter((m) => !dailyTasks.some((t) => t.id === m.id)));
+    }
+    if (optimisticallyDone.length > 0) setOptimisticallyDone([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dailyTasks]);
 
@@ -147,19 +152,23 @@ export default function Overview({
 
     const tierRank: Record<string, number> = { S: 0, A: 1, B: 2, C: 3 };
     return [...habitMissions, ...pendingTaskMissions, ...dumpMissions, ...stillPending]
+      .filter((m) => !optimisticallyDone.includes(m.id))
       .sort((a, b) => (tierRank[a.badgeLabel.slice(-1)] ?? 4) - (tierRank[b.badgeLabel.slice(-1)] ?? 4))
       .slice(0, 6);
-  }, [dailyTasks, weeklyTemplates, backlogTasks, todayK, pendingMissions]);
+  }, [dailyTasks, weeklyTemplates, backlogTasks, todayK, pendingMissions, optimisticallyDone]);
 
   const openCount = missions.length;
 
   const handleCompleteMission = async (m: Mission) => {
     if (busyIds.includes(m.id)) return;
     setBusyIds((cur) => [...cur, m.id]);
+    setOptimisticallyDone((cur) => [...cur, m.id]);
     const res = await completeTask({ taskId: m.id });
     if (res?.success) {
       celebrate(res);
       router.refresh();
+    } else {
+      setOptimisticallyDone((cur) => cur.filter((id) => id !== m.id));
     }
     setBusyIds((cur) => cur.filter((id) => id !== m.id));
   };
