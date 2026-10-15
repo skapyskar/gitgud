@@ -375,17 +375,20 @@ export default function Overview({
           )}
         </div>
 
-        <div className="chip r-lg hidden sm:flex items-center gap-2 py-1.5 px-2.5" title="Board transparency">
+        <div className="chip r-lg hidden sm:flex items-center gap-2 py-1.5 px-2.5" title="Panel opacity: clear to solid">
           <Droplets className="w-3.5 h-3.5 text-ink3 shrink-0" />
           <input
             type="range"
-            min={0.15}
+            min={0}
             max={1}
             step={0.01}
             value={glassOpacity}
+            aria-label="Panel opacity"
+            aria-valuetext={`${Math.round(glassOpacity * 100)}% opaque`}
             onChange={(e) => update({ glassOpacity: Number(e.target.value) })}
             className="w-20 accent-[var(--acc)]"
           />
+          <span className="w-8 text-right text-[10px] text-ink3 tabular-nums">{Math.round(glassOpacity * 100)}%</span>
         </div>
 
         <button

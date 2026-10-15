@@ -43,6 +43,13 @@
   --blur: 24px;
   --glass-opacity: 1;
 
+  /* The slider controls actual surface opacity, rather than multiplying the
+     skin's already faint alpha. At 100%, every skin has solid panel fills. */
+  --surface-solid: color-mix(in srgb, var(--base) 92%, var(--ink) 8%);
+  --surface-chip: color-mix(in srgb, var(--base) 85%, var(--ink) 15%);
+  --surface-border: color-mix(in srgb, var(--card-border), var(--ink) calc(var(--glass-opacity) * 24%));
+  --surface-line: color-mix(in srgb, var(--line), var(--ink) calc(var(--glass-opacity) * 18%));
+
   --font-body-active: var(--font-inter);
   --font-head-active: var(--font-sora);
 }
@@ -223,7 +230,7 @@ html[data-skin="zen"][data-mode="light"] {
   --color-ta: var(--ta);
   --color-tb: var(--tb);
   --color-tc: var(--tc);
-  --color-line: var(--line);
+  --color-line: var(--surface-line);
 }
 
 @theme {
@@ -342,13 +349,13 @@ html[data-mode="light"] .noise {
 /* ═══ 5. Component primitives ═══ */
 
 @layer utilities {
-  /* Card surface — the skin decides how "glassy" it is.
+  /* Card surface — the skin supplies its color and decorative layers.
      Background lives in a ::before layer so the opacity slider (--glass-opacity)
      fades only the backdrop, never the text/icons sitting on top of it. */
   .glass {
     position: relative;
     isolation: isolate;
-    border: 1px solid var(--card-border);
+    border: 1px solid var(--surface-border);
     box-shadow: var(--card-shadow);
     transition: border-color 0.4s ease;
   }
@@ -359,6 +366,7 @@ html[data-mode="light"] .noise {
     z-index: -1;
     border-radius: inherit;
     background: var(--card-bg);
+    background-color: var(--surface-solid);
     backdrop-filter: blur(var(--blur));
     -webkit-backdrop-filter: blur(var(--blur));
     opacity: var(--glass-opacity);
@@ -369,7 +377,7 @@ html[data-mode="light"] .noise {
     transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
   }
   .glass-hover:hover {
-    border-color: color-mix(in srgb, var(--acc) 35%, var(--card-border));
+    border-color: color-mix(in srgb, var(--acc) 35%, var(--surface-border));
     transform: translateY(-2px);
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25), 0 0 32px var(--glow);
   }
@@ -378,7 +386,7 @@ html[data-mode="light"] .noise {
   .chip {
     position: relative;
     isolation: isolate;
-    border: 1px solid var(--line);
+    border: 1px solid var(--surface-line);
   }
   .chip::before {
     content: "";
@@ -386,12 +394,12 @@ html[data-mode="light"] .noise {
     inset: 0;
     z-index: -1;
     border-radius: inherit;
-    background: var(--chip);
+    background: var(--surface-chip);
     opacity: var(--glass-opacity);
     transition: opacity 0.25s ease, background 0.4s ease;
   }
   .chip-hover:hover::before {
-    background: var(--chip-hover);
+    background: color-mix(in srgb, var(--surface-chip) 85%, var(--ink) 15%);
   }
 
   /* Radius scale follows the skin (terminal = sharp, aurora = soft) */
