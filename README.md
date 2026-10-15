@@ -25,6 +25,32 @@ The navbar toggles between **Board** (the three panels) and **Focus** — a full
 2. **Today's Ops** — today's missions with deadlines, time limits, and rep counters. Overdue tasks nag until rescheduled or dumped.
 3. **Habits** — recurring weekly templates.
 
+## Focus audio
+
+The audio dock includes a 24-song playlist, with song selection, previous/next,
+seeking, and automatic advance. Music streams one track at a time. Rain,
+fireplace, snow wind, and ocean use bundled stereo recordings; each has its own
+on/off button and volume slider, alongside a shared ambience mix slider.
+
+**Upload MP3** plays a file from the listener's device without sending it to the
+server. That file repeats until another song is selected. **Default playlist**
+returns to the bundled music. The selected file and mixer settings last until
+the audio dock is unmounted or the page is refreshed.
+
+Recording attribution and license links are in the dock's **Sound credits** and
+[public/audio/CREDITS.md](public/audio/CREDITS.md). The media manifest is
+`src/lib/audio-library.json`. To regenerate the music from the supplied
+compilation, install `ffmpeg` / `ffprobe` and run:
+
+```bash
+python3 scripts/prepare-focus-music.py /path/to/music.mp4
+```
+
+This preserves the AAC stream and splits it at the manifest's timestamps.
+`scripts/prepare-focus-ambience.py` prepares the credited source recordings with
+balanced loudness and crossfaded loop boundaries; its argument format is in the
+script's opening docstring.
+
 ## Stack
 
 Next.js 16 (App Router) · React 19 · Tailwind v4 · Prisma 7 + PostgreSQL · NextAuth (GitHub / Google)
@@ -38,6 +64,45 @@ npx prisma migrate deploy   # or `migrate dev` while developing
 npx prisma generate
 npm run dev
 ```
+
+## Vercel database and login setup
+
+In Supabase, open the intended project's **Connect** dialog and copy the full
+**Transaction pooler** URI into Vercel's **Production** `DATABASE_URL`. Use the
+**Session pooler** URI for `DIRECT_URL` (Prisma migrations). Replace only the
+password placeholder with the database password, percent-encoding reserved
+characters such as `@`, `:`, `/`, `#`, and `%`.
+In Vercel's value field, paste the URI alone, without `DATABASE_URL=` or
+surrounding quotes.
+
+Copy the host exactly, including its `aws-0` / `aws-1` cluster index and region;
+the region alone does not determine the host. The shared-pooler username must
+include the project's reference, usually `postgres.<project-ref>`. Confirm that
+the project is running; resume it in Supabase if it is paused.
+
+An OAuth callback error containing `(ENOTFOUND) tenant/user ... not found` means
+the shared pooler cannot match the host and username to a project, so NextAuth
+cannot look up the account or create a session. Fix the connection URI first.
+The `url.parse()` deprecation warning is separate from this database error.
+See [Supabase's troubleshooting guide](https://supabase.com/docs/guides/troubleshooting/tenant-or-user-not-found).
+
+Also set `NEXTAUTH_URL` to the canonical production HTTPS origin and keep a
+stable `NEXTAUTH_SECRET`. OAuth provider callback URLs must use that origin:
+`https://<your-domain>/api/auth/callback/github` and
+`https://<your-domain>/api/auth/callback/google`. Vercel environment changes
+apply to new deployments, so redeploy Production after updating them.
+
+To check the connection and the auth tables without changing data, run this
+with the same environment values as the deployment (do not commit secrets):
+
+```bash
+npm run db:check
+```
+
+The command uses Next.js environment-file precedence, prints no credentials,
+and returns a nonzero exit status on failure. `DIRECT_URL` is only used by the
+Prisma CLI; changing it alone will not fix the deployed app's `DATABASE_URL`.
+Run `npm test` for connection configuration and login error regression checks.
 
 Key layout:
 

@@ -201,7 +201,7 @@ function CreateAccountPanel() {
   );
 }
 
-export default function AuthGate() {
+export default function AuthGate({ errorMessage }: { errorMessage?: string | null }) {
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [tab, setTab] = useState<"login" | "signup">("login");
 
@@ -225,6 +225,12 @@ export default function AuthGate() {
           </p>
         </div>
       </div>
+
+      {errorMessage && (
+        <div role="alert" className="text-sm text-rose-400 mb-6">
+          {errorMessage}
+        </div>
+      )}
 
       <div className="chip r-lg p-1 flex mb-6">
         {(["login", "signup"] as const).map((t) => (

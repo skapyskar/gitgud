@@ -1,0 +1,34 @@
+{
+  "tracks": [
+    { "name": "Hiding In The Blue", "artist": "TheFatRat & RIELL", "start": 0, "end": 182, "src": "/audio/music/01-hiding-in-the-blue.m4a" },
+    { "name": "Vision pt. II", "artist": "Lost Sky feat. She Is Jules", "start": 182, "end": 353, "src": "/audio/music/02-vision-pt-ii.m4a" },
+    { "name": "A Sky Full of Stars", "artist": "Marin Hoxha & Seum Dero feat. Rachel Philipp", "start": 353, "end": 521, "src": "/audio/music/03-a-sky-full-of-stars.m4a" },
+    { "name": "Invincible Part II", "artist": "Deaf Kev feat. Sendi Hoxha", "start": 521, "end": 688, "src": "/audio/music/04-invincible-part-ii.m4a" },
+    { "name": "Lost Control", "artist": "2nd Life, Svniivan & Drunken Bunny", "start": 688, "end": 806, "src": "/audio/music/05-lost-control.m4a" },
+    { "name": "Stereo Love", "artist": "UMAII feat. Faithroze", "start": 806, "end": 926, "src": "/audio/music/06-stereo-love.m4a" },
+    { "name": "Oceans & Galaxies", "artist": "Jauz & HALIENE", "start": 926, "end": 1093, "src": "/audio/music/07-oceans-and-galaxies.m4a" },
+    { "name": "Start Again", "artist": "Kujah", "start": 1093, "end": 1223, "src": "/audio/music/08-start-again.m4a" },
+    { "name": "Last Summer", "artist": "Tokyo Machine & Weird Genius feat. Lights", "start": 1223, "end": 1368, "src": "/audio/music/09-last-summer.m4a" },
+    { "name": "Royalty", "artist": "Egzod & Maestro Chives feat. Neoni", "start": 1368, "end": 1553, "src": "/audio/music/10-royalty.m4a" },
+    { "name": "MAYHEM", "artist": "Neoni & Easy McCoy", "start": 1553, "end": 1728, "src": "/audio/music/11-mayhem.m4a" },
+    { "name": "Waiting", "artist": "KUURO feat. Bianca", "start": 1728, "end": 1906, "src": "/audio/music/12-waiting.m4a" },
+    { "name": "Paranoia", "artist": "Neoni", "start": 1906, "end": 2061, "src": "/audio/music/13-paranoia.m4a" },
+    { "name": "Around Me", "artist": "Kløn & Theodor Rosenberg", "start": 2061, "end": 2169, "src": "/audio/music/14-around-me.m4a" },
+    { "name": "Habits (Stay High)", "artist": "Ascence", "start": 2169, "end": 2305, "src": "/audio/music/15-habits-stay-high.m4a" },
+    { "name": "Go", "artist": "Ascence", "start": 2305, "end": 2430, "src": "/audio/music/16-go.m4a" },
+    { "name": "Made It", "artist": "Severman & Firaz feat. Annamarie Rosanio", "start": 2430, "end": 2604, "src": "/audio/music/17-made-it.m4a" },
+    { "name": "Ghost in the Machine", "artist": "Trivecta", "start": 2604, "end": 2832, "src": "/audio/music/18-ghost-in-the-machine.m4a" },
+    { "name": "Don't", "artist": "ECSTASY, Turbo, Calibur & Alice May", "start": 2832, "end": 2992, "src": "/audio/music/19-dont.m4a" },
+    { "name": "Once Upon A Time", "artist": "Fakti feat. Ane Flem", "start": 2992, "end": 3110, "src": "/audio/music/20-once-upon-a-time.m4a" },
+    { "name": "High", "artist": "JPB feat. Aleesia", "start": 3110, "end": 3238, "src": "/audio/music/21-high.m4a" },
+    { "name": "Forget", "artist": "Ericovich & IAN SIZE feat. Azurah", "start": 3238, "end": 3357, "src": "/audio/music/22-forget.m4a" },
+    { "name": "Hold My Wings", "artist": "Murdbrain & Savrokks feat. Aloma Steele", "start": 3357, "end": 3492, "src": "/audio/music/23-hold-my-wings.m4a" },
+    { "name": "Colors", "artist": "UMAII & GNIX feat. Faithroze", "start": 3492, "end": 3678.466667, "src": "/audio/music/24-colors.m4a" }
+  ],
+  "ambience": {
+    "rain": { "name": "Rain", "src": "/audio/ambience/rain.mp3", "title": "Rain Background", "author": "Mike Koenig", "source": "https://soundbible.com/2011-Rain-Background.html", "license": "CC BY 3.0", "licenseUrl": "https://creativecommons.org/licenses/by/3.0/" },
+    "fire": { "name": "Fireplace", "src": "/audio/ambience/fireplace.mp3", "title": "fire_crackling.wav", "author": "ceich93", "source": "https://freesound.org/people/ceich93/sounds/263864/", "license": "CC0", "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/" },
+    "wind": { "name": "Snow wind", "src": "/audio/ambience/snow-wind.mp3", "title": "winter wind 01b.aiff", "author": "klangfabrik", "source": "https://freesound.org/people/klangfabrik/sounds/117507/", "license": "CC0", "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/" },
+    "ocean": { "name": "Ocean", "src": "/audio/ambience/ocean.mp3", "title": "Beach Waves", "author": "Mike Koenig", "source": "https://soundbible.com/338-Beach-Waves.html", "license": "CC BY 3.0", "licenseUrl": "https://creativecommons.org/licenses/by/3.0/" }
+  }
+}
